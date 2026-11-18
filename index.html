@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Reeserio Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: ember command center — sticky top bar with section tabs; 12-col bento grid per section (Overview, Leads, Payments, Quality, Catering, Network) */
+:root{
+  --bg:#130f0d; --bg-2:#181310; --card:#1c1613; --card-2:#231c18; --line:#2e2520; --line-2:#3d322b;
+  --fg:#f5ede6; --muted:#ab9d92; --faint:#7a6c62;
+  --ember:#ff6a1f; --ember-2:#ffb03a; --ember-soft:rgba(255,106,31,.14); --ember-glow:rgba(255,106,31,.35);
+  --c1:#ec6326; --c2:#25a08b; --c3:#8a76f0; --c4:#b98a20; --c5:#3f86dc; --c-other:#5d514a;
+  --good:#3fbf86; --good-soft:rgba(63,191,134,.14); --bad:#ff5d5d; --bad-soft:rgba(255,93,93,.14); --warn:#f0b445; --warn-soft:rgba(240,180,69,.14);
+  --grid:#2a221d;
+  --f-display:"Unbounded",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"Manrope",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  --bg:#f6f1ec; --bg-2:#efe8e1; --card:#ffffff; --card-2:#faf6f2; --line:#ebe2da; --line-2:#dcd0c5;
+  --fg:#1e1714; --muted:#6e6158; --faint:#9c8f85;
+  --ember:#e0561a; --ember-2:#d98a10; --ember-soft:rgba(224,86,26,.10); --ember-glow:rgba(224,86,26,.22);
+  --c1:#e0611f; --c2:#13917c; --c3:#6c57e0; --c4:#b8860b; --c5:#2f76d2; --c-other:#b5a89e;
+  --good:#17895a; --good-soft:rgba(23,137,90,.10); --bad:#d43c3c; --bad-soft:rgba(212,60,60,.09); --warn:#b07a12; --warn-soft:rgba(176,122,18,.10);
+  --grid:#efe7df; color-scheme:light}}
+:root[data-theme="light"]{
+  --bg:#f6f1ec; --bg-2:#efe8e1; --card:#ffffff; --card-2:#faf6f2; --line:#ebe2da; --line-2:#dcd0c5;
+  --fg:#1e1714; --muted:#6e6158; --faint:#9c8f85;
+  --ember:#e0561a; --ember-2:#d98a10; --ember-soft:rgba(224,86,26,.10); --ember-glow:rgba(224,86,26,.22);
+  --c1:#e0611f; --c2:#13917c; --c3:#6c57e0; --c4:#b8860b; --c5:#2f76d2; --c-other:#b5a89e;
+  --good:#17895a; --good-soft:rgba(23,137,90,.10); --bad:#d43c3c; --bad-soft:rgba(212,60,60,.09); --warn:#b07a12; --warn-soft:rgba(176,122,18,.10);
+  --grid:#efe7df; color-scheme:light}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;line-height:1.45;
+  background-image:radial-gradient(900px 420px at 12% -8%,var(--ember-glow),transparent 60%),radial-gradient(700px 380px at 100% 0%,rgba(255,176,58,.08),transparent 60%);background-repeat:no-repeat}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ember);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:1480px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:8;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:18px;padding-block:12px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:700;font-size:16px;letter-spacing:-.01em;white-space:nowrap}
+.flame{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(150deg,var(--ember-2),var(--ember));box-shadow:0 6px 20px var(--ember-glow)}
+.flame svg{width:18px;height:18px}
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;min-width:0;flex:1}
+.tabs::-webkit-scrollbar{display:none}
+.tabs a{padding:7px 12px;border-radius:99px;color:var(--muted);text-decoration:none;font-weight:600;font-size:13px;white-space:nowrap}
+.tabs a:hover{color:var(--fg);background:var(--card-2)}
+.tabs a.on{color:var(--fg);background:var(--card-2);box-shadow:inset 0 0 0 1px var(--line-2)}
+.snap{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);white-space:nowrap}
+.snap i{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 4px var(--good-soft)}
+.cta{height:38px;padding:0 16px;border-radius:11px;border:0;background:linear-gradient(150deg,var(--ember-2),var(--ember));color:#fff;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;box-shadow:0 6px 18px var(--ember-glow);cursor:pointer}
+
+/* sections */
+section.sec{padding-block:28px 6px;scroll-margin-top:70px}
+.sec-h{display:flex;align-items:baseline;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+.sec-h h2{font-family:var(--f-display);font-size:19px;font-weight:600;margin:0;letter-spacing:-.01em}
+.sec-h p{margin:0;color:var(--muted);font-size:13px}
+.sec-h .tag{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ember)}
+.bento{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;min-width:0;position:relative;overflow:hidden}
+.card h3{margin:0;font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.01em;display:flex;align-items:center;gap:8px}
+.card .h-sub{font-size:12px;color:var(--faint);margin-top:2px}
+.card-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.s3{grid-column:span 3}.s4{grid-column:span 4}.s5{grid-column:span 5}.s6{grid-column:span 6}.s7{grid-column:span 7}.s8{grid-column:span 8}.s12{grid-column:span 12}.s2{grid-column:span 2}
+.big{font-family:var(--f-display);font-weight:600;letter-spacing:-.03em;line-height:1}
+.ember-text{background:linear-gradient(120deg,var(--ember-2),var(--ember) 60%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.pill.good{background:var(--good-soft);color:var(--good)} .pill.bad{background:var(--bad-soft);color:var(--bad)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.em{background:var(--ember-soft);color:var(--ember)}
+.sw{width:9px;height:9px;border-radius:3px;display:inline-block;flex:none}
+.muted{color:var(--muted)} .faint{color:var(--faint)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:6px}
+
+/* hero */
+.hero{grid-column:span 5;grid-row:span 2;display:flex;flex-direction:column;gap:16px;background:linear-gradient(160deg,color-mix(in srgb,var(--ember) 16%,var(--card)),var(--card) 55%);border-color:color-mix(in srgb,var(--ember) 30%,var(--line))}
+.hero .big{font-size:clamp(52px,7vw,84px)}
+.hero-row{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-end}
+.hero-meta{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)}
+.hero-meta b{color:var(--fg)}
+.spark{display:flex;align-items:flex-end;gap:6px;height:96px;margin-top:auto}
+.spark div{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;min-width:0}
+.spark i{display:block;width:100%;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,var(--ember-2),var(--ember));opacity:.45;min-height:3px}
+.spark div.today i{opacity:1;background:repeating-linear-gradient(135deg,var(--ember) 0 5px,color-mix(in srgb,var(--ember) 55%,transparent) 5px 9px)}
+.spark span{font-size:10.5px;color:var(--faint);white-space:nowrap}
+.spark div.today span{color:var(--fg);font-weight:700}
+.ring{position:relative;width:118px;height:118px;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-family:var(--f-display);font-size:22px;font-weight:600}
+.ring b small{display:block;font-family:var(--f-body);font-size:10.5px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+
+.stat .big{font-size:34px;margin-top:10px}
+.stat .foot{margin-top:10px;font-size:12.5px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.stat .foot b{color:var(--fg)}
+.stat.alert{border-color:color-mix(in srgb,var(--bad) 35%,var(--line));background:linear-gradient(160deg,var(--bad-soft),var(--card) 60%)}
+.stat.alert .big{color:var(--bad)}
+.mini .big{font-size:26px;margin-top:8px}
+.mini .foot{font-size:12px;color:var(--muted);margin-top:6px}
+.ico{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--card-2);border:1px solid var(--line);color:var(--ember)}
+.ico svg{width:16px;height:16px}
+
+/* bars */
+.hbars{display:grid;gap:9px}
+.hb{display:grid;grid-template-columns:minmax(0,130px) minmax(0,1fr) auto;gap:10px;align-items:center;font-size:12.5px}
+.hb .l{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--fg)}
+.hb .t{height:10px;border-radius:99px;background:var(--grid);overflow:hidden}
+.hb .t i{display:block;height:100%;border-radius:99px}
+.hb .v{font-weight:700;text-align:right;min-width:44px}
+.stackbar{display:flex;gap:2px;height:14px;border-radius:5px;overflow:hidden}
+.stackbar i{display:block;height:100%}
+
+/* chart */
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart text{fill:var(--muted);font-size:11px;font-family:var(--f-body)}
+#tip{position:fixed;pointer-events:none;z-index:50;background:var(--fg);color:var(--bg);padding:9px 12px;border-radius:10px;font-size:12px;line-height:1.5;max-width:260px;opacity:0;transition:opacity .12s;box-shadow:0 10px 30px rgba(0,0,0,.35);white-space:pre-line}
+#tip.show{opacity:1}
+
+/* donut */
+.donut-wrap{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.donut{width:150px;height:150px;flex:none;position:relative}
+.donut svg{width:100%;height:100%;transform:rotate(-90deg)}
+.donut b{position:absolute;inset:0;display:grid;place-items:center;align-content:center;text-align:center;font-family:var(--f-display);font-size:15px;font-weight:600}
+.donut b small{display:block;font-family:var(--f-body);font-size:10.5px;color:var(--muted);font-weight:600}
+.dl{display:grid;gap:7px;flex:1;min-width:160px;font-size:12.5px}
+.dl div{display:flex;align-items:center;gap:8px}
+.dl div span:nth-child(2){flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dl div b{font-variant-numeric:tabular-nums}
+
+/* pipeline */
+.pipe{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.stage{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--card-2);position:relative}
+.stage:not(:last-child)::after{content:"";position:absolute;right:-9px;top:50%;width:8px;height:8px;border-top:2px solid var(--faint);border-right:2px solid var(--faint);transform:translateY(-50%) rotate(45deg)}
+.stage span{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.stage b{display:block;font-family:var(--f-display);font-size:24px;font-weight:600;margin-top:6px}
+.stage em{font-style:normal;font-size:12px;color:var(--muted)}
+.ch-row{display:grid;grid-template-columns:110px minmax(0,1fr) 70px 80px;gap:10px;align-items:center;font-size:12.5px;padding:7px 0;border-top:1px dashed var(--line)}
+.ch-row:first-of-type{border-top:0}
+.ch-row .t{height:10px;border-radius:99px;background:var(--grid);overflow:hidden}
+.ch-row .t i{display:block;height:100%;background:linear-gradient(90deg,var(--ember-2),var(--ember));border-radius:99px}
+.ch-row .r{text-align:right;font-weight:700}
+
+/* gauge */
+.gauge{position:relative;width:220px;max-width:100%;margin:6px auto 0}
+.gauge svg{width:100%;height:auto;display:block}
+.gauge b{position:absolute;left:0;right:0;bottom:4px;text-align:center;font-family:var(--f-display);font-size:34px;font-weight:600}
+.gauge b small{font-size:14px;color:var(--muted)}
+.qgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}
+.qgrid div{border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center;background:var(--card-2)}
+.qgrid b{display:block;font-family:var(--f-display);font-size:19px;font-weight:600}
+.qgrid span{font-size:11px;color:var(--muted);font-weight:600}
+
+/* tables */
+.tbl{overflow:auto;border-radius:12px;border:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:12.5px;min-width:560px}
+th{text-align:right;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);font-weight:700;padding:10px 12px;background:var(--card-2);border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:var(--card-2)}
+.cbar{display:inline-flex;align-items:center;gap:8px}
+.cbar i{display:block;width:60px;height:6px;border-radius:99px;background:var(--grid);overflow:hidden}
+.cbar i em{display:block;height:100%;border-radius:99px}
+
+/* podium */
+.podium{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.ag{border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--card-2);display:grid;gap:6px;min-width:0}
+.ag .rk{font-family:var(--f-display);font-size:12px;font-weight:700;color:var(--faint)}
+.ag:nth-child(1) .rk{color:var(--ember-2)} .ag:nth-child(1){border-color:color-mix(in srgb,var(--ember) 40%,var(--line))}
+.ag .n{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag .c{font-family:var(--f-display);font-size:22px;font-weight:600}
+.ag .m{font-size:11.5px;color:var(--muted)}
+
+/* list */
+.list{display:grid;gap:8px}
+.it{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card-2)}
+.it .d{font-family:var(--f-display);font-size:11px;font-weight:600;text-align:center;line-height:1.2;color:var(--muted);width:42px}
+.it .d b{display:block;font-size:17px;color:var(--fg)}
+.it .x b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.it .x span{font-size:12px;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.netnums{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.netnums div{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--card-2)}
+.netnums b{display:block;font-family:var(--f-display);font-size:24px;font-weight:600}
+.netnums span{font-size:11.5px;color:var(--muted);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:11.5px;padding:4px 9px;border-radius:99px;border:1px solid var(--line-2);color:var(--muted)}
+
+.note{margin-block:26px 40px;font-size:12px;color:var(--faint);border-top:1px solid var(--line);padding-top:16px;display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
+
+/* ---------- polish: one type scale, one spacing rhythm ---------- */
+:root{--pad:clamp(16px,1.5vw,22px);--gap:clamp(12px,1.2vw,16px);--fs-label:11px;--fs-sm:12.5px;--fs-title:14.5px}
+body{font-size:14px;-webkit-font-smoothing:antialiased}
+.bento{gap:var(--gap)}
+.card{padding:var(--pad);border-radius:20px;display:flex;flex-direction:column}
+.card-h{margin-bottom:16px;align-items:flex-start}
+.card-h>div{min-width:0}
+.card h3{font-size:var(--fs-title);color:var(--fg);letter-spacing:-.005em;line-height:1.3}
+.card .h-sub{font-size:var(--fs-sm);color:var(--muted);margin-top:3px;line-height:1.4}
+.stat h3,.mini h3{font-size:13px;color:var(--muted);font-weight:600}
+.stat .big{font-size:clamp(28px,2.4vw,36px);margin-top:12px}
+.stat .foot{margin-top:auto;padding-top:12px}
+.mini{gap:0}
+.mini .card-h{align-items:center;flex-wrap:nowrap}
+.mini h3{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .big{font-size:clamp(22px,1.8vw,27px);margin-top:14px}
+.mini .foot{font-size:12px;margin-top:6px;line-height:1.4}
+.hero .big{font-size:clamp(56px,6.2vw,92px)}
+.ring{width:122px;height:122px}
+.ring b{font-size:19px;align-content:center}
+.netnums b{font-size:clamp(19px,1.7vw,24px)}
+section.sec{padding-block:clamp(26px,3vw,40px) 0}
+.sec-h{display:grid;gap:4px;margin-bottom:18px}
+.sec-h h2{font-size:clamp(18px,1.6vw,22px);line-height:1.25;text-wrap:balance}
+.sec-h p{font-size:13px}
+.hb{font-size:13px;grid-template-columns:minmax(0,150px) minmax(0,1fr) 52px}
+.hb .v{min-width:0}
+.legend{font-size:12.5px}
+.chart{margin-top:auto}
+.gwrap{display:flex;flex-direction:column;flex:1;justify-content:center}
+.tbl table{min-width:540px}
+.note{font-size:12.5px;line-height:1.5}
+
+/* 12 cols desktop · 6 cols tablet · 4 cols phone */
+@media (max-width:1199px){
+  .bento{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .card,.hero{grid-column:span 6!important;grid-row:auto!important}
+  .t2{grid-column:span 2!important}.t3{grid-column:span 3!important}
+  .podium{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .gwrap{flex-direction:row;align-items:center;gap:28px}
+  .gwrap .gauge{margin:0;flex:none}
+  .gwrap .qgrid{flex:1;margin:0}
+  .snap{display:none}
+}
+@media (max-width:719px){
+  .bento{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .card,.hero{grid-column:span 4!important}
+  .m2{grid-column:span 2!important}
+  .card{border-radius:16px}
+  .top .wrap{gap:10px;padding-block:10px}
+  .brand span{display:none}
+  .tabs a{padding:6px 10px;font-size:12.5px}
+  .hero .big{font-size:60px}
+  .hero-row{gap:16px}
+  .ring{width:96px;height:96px}
+  .ring b{font-size:18px}
+  .spark{height:80px;gap:4px}
+  .stat .big{font-size:26px}
+  .mini .big{font-size:22px}
+  .mini .ico{display:none}
+  .hb{grid-template-columns:minmax(0,1fr) auto;row-gap:6px}
+  .hb .l{white-space:normal}
+  .hb .t{grid-column:1/-1;grid-row:2}
+  .ch-row{grid-template-columns:minmax(0,1fr) auto auto;row-gap:6px;column-gap:14px}
+  .ch-row .t{grid-column:1/-1;grid-row:2}
+  .chh{display:none!important}
+  .pipe{grid-template-columns:1fr;gap:8px}
+  .stage{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:12px;row-gap:2px;padding:12px 14px}
+  .stage span{grid-column:1;grid-row:1}
+  .stage em{grid-column:1;grid-row:2}
+  .stage b{grid-column:2;grid-row:1/3;margin:0;font-size:22px}
+  #payNums{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #payNums>div:last-child{grid-column:1/-1}
+  .ring b{font-size:16px}
+  .stage::after{display:none}
+  .netnums{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .netnums b{font-size:20px}
+  .podium{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .gwrap{flex-direction:column;gap:0}
+  .gwrap .qgrid{width:100%;margin-top:14px}
+  .donut{width:120px!important;height:120px!important}
+  .dl{min-width:0}
+  .it{grid-template-columns:auto minmax(0,1fr);row-gap:8px}
+  .it .pill{grid-column:2;justify-self:start}
+  .it .x b,.it .x span{white-space:normal}
+  .card-h .chips{width:100%}
+}
+@media (max-width:420px){.cta .lbl{display:none}.cta{padding:0 12px}.stat .big{font-size:24px}.qgrid b{font-size:17px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><div class="flame"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2s5 4.6 5 10.2A5 5 0 0112 17a5 5 0 01-5-4.8c0-2.4 1.4-4 2.4-5 .1 1.6.9 2.8 2 3.3C11 7.6 12 2 12 2zm0 15.5a7.7 7.7 0 006.6-3.7A7 7 0 0112 22a7 7 0 01-6.6-8.2A7.7 7.7 0 0012 17.5z"/></svg></div><span>Reeserio</span></div>
+    <nav class="tabs" id="tabs" aria-label="Sections">
+      <a href="#overview" class="on">Overview</a><a href="#leads">Leads</a><a href="#payments">Payments</a><a href="#quality">Call quality</a><a href="#catering">Catering</a><a href="#network">Outlets &amp; ops</a>
+    </nav>
+    <div class="snap"><i></i>Snapshot · 18 Nov 2026, 12:30 IST</div>
+    <button class="cta" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg><span class="lbl">Create booking</span></button>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- OVERVIEW -->
+  <section class="sec" id="overview">
+    <div class="sec-h"><span class="tag">Today</span><h2>Wednesday, 18 November</h2><p>Every Reeserio module at a glance</p></div>
+    <div class="bento" id="ov"></div>
+  </section>
+
+  <!-- LEADS -->
+  <section class="sec" id="leads">
+    <div class="sec-h"><span class="tag">Leads</span><h2>Where leads come from and how they close</h2></div>
+    <div class="bento">
+      <div class="card s8">
+        <div class="card-h"><div><h3>Domestic leads per day</h3><div class="h-sub">By outcome, 11 – 18 Nov · today is partial</div></div>
+          <div class="legend"><span><i class="sw" style="background:var(--c2)"></i>Converted</span><span><i class="sw" style="background:var(--c1)"></i>Not converted</span><span><i class="sw" style="background:var(--c5)"></i>New &amp; active</span></div></div>
+        <div class="chart" id="trend"></div>
+      </div>
+      <div class="card s4 t3">
+        <div class="card-h"><div><h3>Lead pipeline (LMS)</h3><div class="h-sub" id="lmsSub"></div></div></div>
+        <div class="hbars" id="lmsStatus"></div>
+      </div>
+      <div class="card s4 t3">
+        <div class="card-h"><div><h3>Lead sources (LMS)</h3><div class="h-sub">Share of all open-period leads</div></div></div>
+        <div class="donut-wrap" id="srcDonut"></div>
+      </div>
+      <div class="card s4 t3">
+        <div class="card-h"><div><h3>Conversion by source · today</h3><div class="h-sub">Booked ÷ total leads</div></div></div>
+        <div class="hbars" id="srcConv"></div>
+      </div>
+      <div class="card s4 t3">
+        <div class="card-h"><div><h3>Domestic vs International · today</h3></div></div>
+        <div id="split" style="display:grid;gap:16px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAYMENTS -->
+  <section class="sec" id="payments">
+    <div class="sec-h"><span class="tag">Payments</span><h2>Advance collection, payment links and coupons</h2></div>
+    <div class="bento">
+      <div class="card s7">
+        <div class="card-h"><div><h3>Advance collection pipeline</h3><div class="h-sub" id="advSub"></div></div><span class="pill warn" id="advPill"></span></div>
+        <div class="pipe" id="advPipe"></div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:6px;display:grid;grid-template-columns:110px minmax(0,1fr) 70px 80px;gap:10px" class="chh"><span>Channel</span><span>Bookings</span><span style="text-align:right">Count</span><span style="text-align:right">Unpaid</span></div>
+        <div id="advCh"></div>
+      </div>
+      <div class="card s5" style="display:grid;gap:14px;align-content:start">
+        <div class="card-h" style="margin:0"><div><h3>Payment links</h3><div class="h-sub">Razorpay links issued from Reeserio</div></div></div>
+        <div class="netnums" style="grid-template-columns:repeat(3,minmax(0,1fr));margin:0" id="payNums"></div>
+        <div class="card-h" style="margin:8px 0 0"><div><h3>Coupon issue requests</h3><div class="h-sub" id="coupSub"></div></div></div>
+        <div id="coup"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUALITY -->
+  <section class="sec" id="quality">
+    <div class="sec-h"><span class="tag">Call quality</span><h2>How calls are being handled</h2></div>
+    <div class="bento">
+      <div class="card s4">
+        <div class="card-h"><div><h3>Overall call rating</h3><div class="h-sub" id="qSub"></div></div></div>
+        <div class="gwrap"><div class="gauge" id="gauge"></div>
+        <div class="qgrid" id="qgrid"></div></div>
+      </div>
+      <div class="card s8">
+        <div class="card-h"><div><h3>Team leads</h3><div class="h-sub">Calls reviewed, bad-call share and average agent rating, 16 – 18 Nov</div></div></div>
+        <div class="tbl"><table><thead><tr><th>Team lead</th><th>Agents</th><th>Calls</th><th>Bad calls</th><th>Avg rating</th><th>Training pending</th></tr></thead><tbody id="tl"></tbody></table></div>
+      </div>
+      <div class="card s12">
+        <div class="card-h"><div><h3>Top agents today</h3><div class="h-sub" id="agSub"></div></div></div>
+        <div class="podium" id="podium"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATERING -->
+  <section class="sec" id="catering">
+    <div class="sec-h"><span class="tag">ODC · Catering</span><h2>Outdoor catering leads</h2><p id="odcP"></p></div>
+    <div class="bento" id="odc"></div>
+  </section>
+
+  <!-- NETWORK -->
+  <section class="sec" id="network">
+    <div class="sec-h"><span class="tag">Outlets &amp; ops</span><h2>Network, outlet instructions, offers and phone lines</h2></div>
+    <div class="bento">
+      <div class="card s5">
+        <div class="card-h"><div><h3>Outlet network</h3><div class="h-sub">Barbeque Nation, international, Toscano and Salt</div></div></div>
+        <div class="netnums" id="netNums"></div>
+        <div class="hbars" id="cities"></div>
+      </div>
+      <div class="card s7">
+        <div class="card-h"><div><h3>Outlet instructions from today</h3><div class="h-sub" id="insSub"></div></div><div class="chips" id="insChips"></div></div>
+        <div class="list" id="ins"></div>
+      </div>
+      <div class="card s4 t3">
+        <div class="card-h"><div><h3>International calls · today</h3><div class="h-sub">Knowlarity calls routed to CRS</div></div></div>
+        <div id="intl"></div>
+      </div>
+      <div class="card s4 t3">
+        <div class="card-h"><div><h3>Offer matrix</h3><div class="h-sub">Active coupon offers</div></div></div>
+        <div id="offers"></div>
+      </div>
+      <div class="card s4">
+        <div class="card-h"><div><h3>DID phone lines</h3><div class="h-sub">Numbers mapped by process</div></div></div>
+        <div id="did"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="note"><span>Snapshot taken from the live Reeserio APIs on 18 Nov 2026 at 12:30 IST. It does not refresh.</span><span>Catering and coupon breakdowns use the latest 500 and 300 records; all other figures are full totals.</span></div>
+</main>
+<div id="tip" role="tooltip"></div>
+
+<script>
+const D={"lead":{"asOf":"2026-11-18 12:30 IST","daily":[{"date":"2026-11-11","dom":{"newLeads":4238,"active":1,"converted":2537,"nonConverted":2159},"domTotal":8935,"intl":424,"intlP":{"newLeads":31,"active":0,"converted":36,"nonConverted":83}},{"date":"2026-11-12","dom":{"newLeads":3207,"active":1,"converted":2236,"nonConverted":2190},"domTotal":7634,"intl":435,"intlP":{"newLeads":16,"active":0,"converted":21,"nonConverted":121}},{"date":"2026-11-13","dom":{"newLeads":3686,"active":1,"converted":2445,"nonConverted":2202},"domTotal":8334,"intl":540,"intlP":{"newLeads":76,"active":0,"converted":30,"nonConverted":128}},{"date":"2026-11-14","dom":{"newLeads":3987,"active":0,"converted":2858,"nonConverted":2551},"domTotal":9396,"intl":534,"intlP":{"newLeads":98,"active":0,"converted":22,"nonConverted":151}},{"date":"2026-11-15","dom":{"newLeads":3616,"active":0,"converted":2463,"nonConverted":2098},"domTotal":8177,"intl":422,"intlP":{"newLeads":39,"active":0,"converted":18,"nonConverted":102}},{"date":"2026-11-16","dom":{"newLeads":2899,"active":0,"converted":2314,"nonConverted":2389},"domTotal":7602,"intl":326,"intlP":{"newLeads":12,"active":0,"converted":19,"nonConverted":113}},{"date":"2026-11-17","dom":{"newLeads":3532,"active":8,"converted":2439,"nonConverted":2468},"domTotal":8447,"intl":419,"intlP":{"newLeads":18,"active":0,"converted":26,"nonConverted":140}},{"date":"2026-11-18","dom":{"newLeads":1315,"active":22,"converted":536,"nonConverted":607},"domTotal":2480,"intl":29,"intlP":{"newLeads":9,"active":1,"converted":1,"nonConverted":8}}],"lead7":{"domestic":{"total":52070,"progress":{"count":475.42,"order":"inc"},"leadsProgress":{"newLeads":22242,"active":32,"converted":15291,"nonConverted":14505}},"international":{"total":2705,"progress":{"count":26.69,"order":"dec"},"leadsProgress":{"newLeads":268,"active":1,"converted":137,"nonConverted":763}}},"followup":{"upcomingFollowUps":13,"overdueFollowUps":436},"srcTotalsToday":{"t":2681,"n":1315,"o":96,"b":674,"nc":533},"srcTotals7":{"t":57510,"n":22242,"o":1432,"b":18657,"nc":13105},"sourcesToday":[{"source":"Reservation Drop","total":1057,"new":787,"ongoing":20,"booked":47,"notConverted":178,"subs":1},{"source":"Sales Lead","total":374,"new":130,"ongoing":43,"booked":53,"notConverted":124,"subs":9},{"source":"Technical Issue","total":305,"new":204,"ongoing":5,"booked":37,"notConverted":57,"subs":41},{"source":"Coupon Payment API","total":271,"new":0,"ongoing":0,"booked":265,"notConverted":6,"subs":1},{"source":"Post Cancellation","total":226,"new":113,"ongoing":8,"booked":30,"notConverted":71,"subs":1},{"source":"Viewoffer Enquiries","total":176,"new":0,"ongoing":0,"booked":176,"notConverted":0,"subs":1},{"source":"CRS_CNPR","total":169,"new":77,"ongoing":16,"booked":15,"notConverted":59,"subs":15},{"source":"WhatsApp lead","total":56,"new":0,"ongoing":2,"booked":14,"notConverted":34,"subs":1},{"source":"(blank)","total":34,"new":0,"ongoing":0,"booked":34,"notConverted":0,"subs":1},{"source":"Mobile & Web","total":11,"new":4,"ongoing":1,"booked":2,"notConverted":4,"subs":1},{"source":"CRS_Enquiry","total":2,"new":0,"ongoing":1,"booked":1,"notConverted":0,"subs":1}],"sources7":[{"source":"Reservation Drop","total":15484,"new":10659,"ongoing":214,"booked":824,"notConverted":3441,"subs":1},{"source":"Sales Lead","total":12110,"new":4273,"ongoing":810,"booked":1448,"notConverted":4572,"subs":80},{"source":"Coupon Payment API","total":8820,"new":0,"ongoing":0,"booked":8742,"notConverted":78,"subs":1},{"source":"Technical Issue","total":6394,"new":4249,"ongoing":53,"booked":993,"notConverted":978,"subs":1016},{"source":"Viewoffer Enquiries","total":4226,"new":0,"ongoing":0,"booked":4210,"notConverted":16,"subs":1},{"source":"Post Cancellation","total":4132,"new":1274,"ongoing":162,"booked":511,"notConverted":2002,"subs":2},{"source":"CRS_CNPR","total":3931,"new":1437,"ongoing":154,"booked":533,"notConverted":1543,"subs":25},{"source":"(blank)","total":966,"new":0,"ongoing":0,"booked":960,"notConverted":6,"subs":1},{"source":"WhatsApp lead","total":737,"new":0,"ongoing":30,"booked":233,"notConverted":335,"subs":1},{"source":"Mobile & Web","total":617,"new":342,"ongoing":2,"booked":191,"notConverted":73,"subs":3},{"source":"CRS_Enquiry","total":69,"new":0,"ongoing":7,"booked":8,"notConverted":50,"subs":1},{"source":"WhatsApp Template","total":19,"new":8,"ongoing":0,"booked":4,"notConverted":7,"subs":2},{"source":"ODC Dining Related","total":4,"new":0,"ongoing":0,"booked":0,"notConverted":4,"subs":1},{"source":"Enquiry","total":1,"new":0,"ongoing":0,"booked":0,"notConverted":0,"subs":1}],"agentsToday":[{"agentName":"RachiyataA","domestic":11,"international":0,"total":11,"confirmed":7,"pending":1,"notConfirmed":0},{"agentName":"Rahmat","domestic":34,"international":0,"total":34,"confirmed":6,"pending":2,"notConfirmed":8},{"agentName":"FazilathU","domestic":6,"international":0,"total":6,"confirmed":6,"pending":0,"notConfirmed":0},{"agentName":"Roqaiyat","domestic":6,"international":0,"total":6,"confirmed":6,"pending":0,"notConfirmed":0},{"agentName":"TahseenN","domestic":6,"international":0,"total":6,"confirmed":5,"pending":0,"notConfirmed":0},{"agentName":"Druvan","domestic":5,"international":0,"total":5,"confirmed":5,"pending":0,"notConfirmed":0},{"agentName":"KusumC","domestic":5,"international":0,"total":5,"confirmed":5,"pending":0,"notConfirmed":0},{"agentName":"SaniyaA","domestic":5,"international":0,"total":5,"confirmed":5,"pending":0,"notConfirmed":0},{"agentName":"KumariS","domestic":48,"international":0,"total":48,"confirmed":4,"pending":1,"notConfirmed":1},{"agentName":"RohitS","domestic":35,"international":0,"total":35,"confirmed":4,"pending":3,"notConfirmed":6},{"agentName":"SavithaMD","domestic":30,"international":0,"total":30,"confirmed":4,"pending":2,"notConfirmed":5},{"agentName":"Dankita","domestic":6,"international":0,"total":6,"confirmed":4,"pending":0,"notConfirmed":0},{"agentName":"EakanshJ","domestic":5,"international":0,"total":5,"confirmed":4,"pending":0,"notConfirmed":0},{"agentName":"SufiyanA","domestic":5,"international":0,"total":5,"confirmed":4,"pending":0,"notConfirmed":0},{"agentName":"AbidR","domestic":4,"international":0,"total":4,"confirmed":4,"pending":0,"notConfirmed":0},{"agentName":"SadiyaN","domestic":34,"international":0,"total":34,"confirmed":3,"pending":1,"notConfirmed":9},{"agentName":"SagarB","domestic":28,"international":0,"total":28,"confirmed":3,"pending":0,"notConfirmed":13},{"agentName":"PreetiK","domestic":22,"international":0,"total":22,"confirmed":3,"pending":6,"notConfirmed":0},{"agentName":"ChaithanyaD","domestic":4,"international":0,"total":4,"confirmed":3,"pending":0,"notConfirmed":0},{"agentName":"EramH","domestic":3,"international":0,"total":3,"confirmed":3,"pending":0,"notConfirmed":0},{"agentName":"SkJasim","domestic":3,"international":0,"total":3,"confirmed":3,"pending":0,"notConfirmed":0},{"agentName":"ZaibaN","domestic":3,"international":0,"total":3,"confirmed":3,"pending":0,"notConfirmed":0},{"agentName":"ZoyaH","domestic":3,"international":0,"total":3,"confirmed":3,"pending":0,"notConfirmed":0},{"agentName":"ArbazA","domestic":28,"international":0,"total":28,"confirmed":2,"pending":0,"notConfirmed":0},{"agentName":"ShabnamB","domestic":24,"international":0,"total":24,"confirmed":2,"pending":1,"notConfirmed":6},{"agentName":"ShubhamP","domestic":11,"international":0,"total":11,"confirmed":2,"pending":0,"notConfirmed":6},{"agentName":"AkibAK","domestic":3,"international":0,"total":3,"confirmed":2,"pending":0,"notConfirmed":0},{"agentName":"AkshayKD","domestic":3,"international":0,"total":3,"confirmed":2,"pending":0,"notConfirmed":0},{"agentName":"Bsaira","domestic":3,"international":0,"total":3,"confirmed":2,"pending":0,"notConfirmed":0},{"agentName":"Ksagar","domestic":3,"international":0,"total":3,"confirmed":2,"pending":0,"notConfirmed":0},{"agentName":"Noorjahan","domestic":3,"international":0,"total":3,"confirmed":2,"pending":0,"notConfirmed":0},{"agentName":"AkshithaT","domestic":2,"international":0,"total":2,"confirmed":2,"pending":0,"notConfirmed":0},{"agentName":"Deepty","domestic":2,"international":0,"total":2,"confirmed":2,"pending":0,"notConfirmed":0},{"agentName":"FariyaF","domestic":2,"international":0,"total":2,"confirmed":2,"pending":0,"notConfirmed":0},{"agentName":"GhousiyaB","domestic":2,"international":0,"total":2,"confirmed":2,"pending":0,"notConfirmed":0},{"agentName":"Irfanab","domestic":2,"international":0,"total":2,"confirmed":2,"pending":0,"notConfirmed":0},{"agentName":"JoydeepM","domestic":2,"international":0,"total":2,"confirmed":2,"pending":0,"notConfirmed":0},{"agentName":"MariyaR","domestic":2,"international":0,"total":2,"confirmed":2,"pending":0,"notConfirmed":0},{"agentName":"MDShahidA","domestic":2,"international":0,"total":2,"confirmed":2,"pending":0,"notConfirmed":0},{"agentName":"NehaP","domestic":2,"international":0,"total":2,"confirmed":2,"pending":0,"notConfirmed":0}],"agents7":[{"agentName":"Suchismitasahu","domestic":0,"international":903,"total":903,"confirmed":86,"pending":69,"notConfirmed":817},{"agentName":"SuhanaS","domestic":68,"international":0,"total":68,"confirmed":59,"pending":0,"notConfirmed":0},{"agentName":"ShamaP","domestic":201,"international":0,"total":201,"confirmed":52,"pending":1,"notConfirmed":0},{"agentName":"SufiyanA","domestic":62,"international":0,"total":62,"confirmed":51,"pending":0,"notConfirmed":0},{"agentName":"Irfanab","domestic":51,"international":0,"total":51,"confirmed":47,"pending":0,"notConfirmed":0},{"agentName":"PreetiK","domestic":374,"international":0,"total":374,"confirmed":46,"pending":32,"notConfirmed":0},{"agentName":"RoohiB","domestic":52,"international":0,"total":52,"confirmed":46,"pending":0,"notConfirmed":0},{"agentName":"ZainabF","domestic":46,"international":0,"total":46,"confirmed":44,"pending":0,"notConfirmed":0},{"agentName":"SumaiyaK","domestic":49,"international":0,"total":49,"confirmed":43,"pending":0,"notConfirmed":0},{"agentName":"Noorjahan","domestic":48,"international":0,"total":48,"confirmed":42,"pending":0,"notConfirmed":0},{"agentName":"ZaibaN","domestic":46,"international":0,"total":46,"confirmed":42,"pending":0,"notConfirmed":0},{"agentName":"RohitS","domestic":271,"international":0,"total":271,"confirmed":41,"pending":24,"notConfirmed":35},{"agentName":"EshuV","domestic":45,"international":0,"total":45,"confirmed":41,"pending":0,"notConfirmed":0},{"agentName":"GhosiyaT","domestic":409,"international":0,"total":409,"confirmed":40,"pending":23,"notConfirmed":100},{"agentName":"AsmaB","domestic":44,"international":0,"total":44,"confirmed":38,"pending":0,"notConfirmed":0},{"agentName":"AkshayKD","domestic":40,"international":0,"total":40,"confirmed":37,"pending":0,"notConfirmed":0},{"agentName":"NafiyaF","domestic":43,"international":0,"total":43,"confirmed":34,"pending":0,"notConfirmed":0},{"agentName":"MariyamK","domestic":39,"international":0,"total":39,"confirmed":34,"pending":0,"notConfirmed":0},{"agentName":"FariyaF","domestic":38,"international":0,"total":38,"confirmed":34,"pending":0,"notConfirmed":0},{"agentName":"JuhiM","domestic":222,"international":0,"total":222,"confirmed":33,"pending":1,"notConfirmed":22},{"agentName":"ChennurS","domestic":37,"international":0,"total":37,"confirmed":32,"pending":0,"notConfirmed":0},{"agentName":"SaibalSh","domestic":37,"international":0,"total":37,"confirmed":32,"pending":0,"notConfirmed":0},{"agentName":"SaniyaA","domestic":37,"international":0,"total":37,"confirmed":32,"pending":0,"notConfirmed":0},{"agentName":"RohitG","domestic":133,"international":0,"total":133,"confirmed":31,"pending":6,"notConfirmed":9},{"agentName":"GhousiyaB","domestic":36,"international":0,"total":36,"confirmed":31,"pending":0,"notConfirmed":0},{"agentName":"Roqaiyat","domestic":34,"international":0,"total":34,"confirmed":30,"pending":0,"notConfirmed":0},{"agentName":"Rajaguru","domestic":0,"international":602,"total":602,"confirmed":29,"pending":15,"notConfirmed":573},{"agentName":"SanaB","domestic":34,"international":0,"total":34,"confirmed":29,"pending":0,"notConfirmed":0},{"agentName":"FazilathU","domestic":30,"international":0,"total":30,"confirmed":29,"pending":0,"notConfirmed":0},{"agentName":"ArbazA","domestic":383,"international":0,"total":383,"confirmed":28,"pending":0,"notConfirmed":0},{"agentName":"ShaziyaS","domestic":31,"international":0,"total":31,"confirmed":28,"pending":0,"notConfirmed":0},{"agentName":"TahseenN","domestic":30,"international":0,"total":30,"confirmed":28,"pending":0,"notConfirmed":0},{"agentName":"AkshithaT","domestic":31,"international":0,"total":31,"confirmed":27,"pending":0,"notConfirmed":0},{"agentName":"MdFaizan","domestic":30,"international":0,"total":30,"confirmed":27,"pending":0,"notConfirmed":0},{"agentName":"KusumC","domestic":29,"international":0,"total":29,"confirmed":27,"pending":0,"notConfirmed":0},{"agentName":"RichardA","domestic":29,"international":0,"total":29,"confirmed":27,"pending":0,"notConfirmed":0},{"agentName":"Akshay","domestic":27,"international":0,"total":27,"confirmed":27,"pending":0,"notConfirmed":0},{"agentName":"AlishaA","domestic":373,"international":0,"total":373,"confirmed":26,"pending":16,"notConfirmed":58},{"agentName":"SunitaP","domestic":216,"international":0,"total":216,"confirmed":26,"pending":32,"notConfirmed":40},{"agentName":"RupaliD","domestic":209,"international":0,"total":209,"confirmed":26,"pending":54,"notConfirmed":13}],"agentsActiveToday":106,"agentsActive7":264,"agentsTotal":617},"adv":{"total":4039,"ch":{"reeserio":{"count":497,"unpaidAmount":146775},"mobile_app":{"count":326,"unpaidAmount":31875},"website":{"count":163,"unpaidAmount":18550},"aggregator":{"count":281,"unpaidAmount":37925}},"st":{"new":{"count":2772,"unpaidAmount":0},"acknowledged":{"count":1146,"unpaidAmount":223400},"collected":{"count":121,"unpaidAmount":11725},"dropped":{"count":0,"unpaidAmount":0},"waived":{"count":0,"unpaidAmount":0},"all":{"count":4039,"unpaidAmount":235125}}},"pay":{"today":760,"last30":93107,"all":181534},"coupons":{"total":17181,"sample":300,"byStatus":[["[object Object]",300]],"byPay":[["paid",182],["created",110],["Payment link resent",7],["cancelled",1]],"bySource":[["Coupon Payment API",159],["Viewoffer Enquiries",93],["Unspecified",35],["Sales Lead",6],["Post Cancellation",1],["CRS_CNPR",1]],"value":109161,"byType":[["coupon",300]]},"quotes":{"total":1031},"quality":{"dash":{"toAcknowledge":153,"toReview":7,"trainingPending":20,"overallRating":2.2},"total":373,"review":[["Completed",103],["Pending",86],["Training pending",9],["Acknowledged",2]],"tl":[{"n":"Aryan Team","agents":1,"calls":13,"bad":53.8,"rating":3.1,"tp":3,"td":1},{"n":"BanashreeH","agents":0,"calls":3,"bad":100,"rating":1.9,"tp":0,"td":0},{"n":"BiswajitM","agents":37,"calls":634,"bad":100,"rating":2.3,"tp":0,"td":33},{"n":"GollaV","agents":60,"calls":1809,"bad":100,"rating":2.2,"tp":0,"td":8},{"n":"KDeepak","agents":13,"calls":177,"bad":100,"rating":2.3,"tp":2,"td":5},{"n":"NAkshay","agents":37,"calls":731,"bad":100,"rating":2.3,"tp":0,"td":25},{"n":"SandhyaR","agents":27,"calls":612,"bad":100,"rating":2.3,"tp":1,"td":6},{"n":"ShaistaF","agents":42,"calls":652,"bad":100,"rating":2.3,"tp":5,"td":24},{"n":"Shamshad","agents":33,"calls":633,"bad":100,"rating":2.3,"tp":2,"td":20},{"n":"ShobhaP","agents":29,"calls":1182,"bad":100,"rating":2.1,"tp":3,"td":10},{"n":"SolomonG","agents":38,"calls":649,"bad":100,"rating":2.3,"tp":0,"td":33},{"n":"ThaginaR","agents":0,"calls":5,"bad":100,"rating":2.4,"tp":0,"td":0}]},"lms":{"sourceCounts":[{"sourceId":null,"sourceName":"All","totalCount":12277},{"sourceId":47,"sourceName":"Reservation Drop","totalCount":3635},{"sourceId":52,"sourceName":"Sales Lead","totalCount":2426},{"sourceId":41,"sourceName":"Viewoffer Enquiries","totalCount":2399},{"sourceId":54,"sourceName":"Technical Issue","totalCount":1508},{"sourceId":36,"sourceName":"Post Cancellation","totalCount":943},{"sourceId":22,"sourceName":"CRS_CNPR","totalCount":685},{"sourceId":-1,"sourceName":"Unknown","totalCount":349},{"sourceId":10,"sourceName":"WhatsApp lead","totalCount":240},{"sourceId":12,"sourceName":"Mobile & Web","totalCount":58},{"sourceId":21,"sourceName":"CRS_Enquiry","totalCount":32},{"sourceId":39,"sourceName":"WhatsApp Template","totalCount":2}],"statusCounts":[{"statusId":null,"statusName":"All","totalCount":12277},{"statusId":1,"statusName":"New","totalCount":4929},{"statusId":8,"statusName":"Table Booked","totalCount":3051},{"statusId":6,"statusName":"No Response","totalCount":2089},{"statusId":20,"statusName":"Already Booked ","totalCount":721},{"statusId":7,"statusName":"Not Interested","totalCount":675},{"statusId":5,"statusName":"Call back","totalCount":324},{"statusId":23,"statusName":"Enquiry","totalCount":302},{"statusId":14,"statusName":"Booking Cancelled","totalCount":39},{"statusId":21,"statusName":"Invalid Details ","totalCount":32},{"statusId":2,"statusName":"Acknowledged","totalCount":27},{"statusId":22,"statusName":"New Reservation","totalCount":18},{"statusId":53,"statusName":"Language barrier","totalCount":16},{"statusId":11,"statusName":"Lead Converted","totalCount":14},{"statusId":13,"statusName":"CNPR","totalCount":14},{"statusId":59,"statusName":"Atmosfire Enquiry","totalCount":5},{"statusId":9,"statusName":"No Show","totalCount":5},{"statusId":52,"statusName":"Blacklisted Number","totalCount":3},{"statusId":32,"statusName":"Online Reservation","totalCount":3},{"statusId":43,"statusName":"Delivery Enquiry","totalCount":3},{"statusId":12,"statusName":"Table Booking Failure","totalCount":2},{"statusId":36,"statusName":"Inbound CNPR","totalCount":1},{"statusId":10,"statusName":"Awaiting for POS","totalCount":1},{"statusId":38,"statusName":"Outlet Reservation","totalCount":1},{"statusId":18,"statusName":"Multiple Leads","totalCount":1},{"statusId":34,"statusName":"Inbound Enquiry","totalCount":1}],"acknowledgedCount":27,"allAssignedToMeCount":0},"intl":{"calls":22,"agent":[["Connected",17],["Not Connected",3],["Missed",2]],"crs":[["Unspecified",8],["No Response",5],["Not Interested",3],["Multiple Leads",2],["Acknowledged",1],["Lead Converted",1],["Table Booked",1],["Delivery Enquiry",1]]},"odc":{"total":2475,"sample":500,"byStatus":[["New",191],["Follow up",90],["Dining Related Inquiry",59],["Duplicate",58],["Under discussion",23],["Not Interested",22],["No Response",18],["Assigned to Spoc",14]],"byType":[["Unspecified",419],["Get together",22],["Wedding function",16],["BIRTHDAY",11],["Others",10],["Corporate event",7]],"bySrc":[["Catering_APP",222],["Catering_website",190],["Unspecified",71],["Catering_CRS",17]],"upcoming":359,"pax":74602,"paid":250680},"instr":{"total":323,"byType":[["Stop Booking",275],["Alcohol not available",34],["Non-Veg menu is not availabe",12],["Dry Day",2]],"upcoming":[{"b":"Malad Inorbit Mall","d":"2026-11-18","s":"Dinner","t":"Stop Booking","r":"Mon to Sun stop 1pax,1+1pax,2pax & 2+1 paxs for lunch and dinner both section"},{"b":"Phoenix Centaurus, Gachibowli","d":"2026-11-18","s":"Lunch","t":"Stop Booking","r":"Stop 2 pax , 2+1 pax & 3 pax in lunch and dinner in both slot"},{"b":"Whitefield ITPL","d":"2026-11-18","s":"Dinner","t":"Alcohol not available","r":"Alcohol not available"},{"b":"Whitefield ITPL","d":"2026-11-18","s":"Lunch","t":"Alcohol not available","r":"Alcohol not available"},{"b":"Malad Inorbit Mall","d":"2026-11-19","s":"Dinner","t":"Stop Booking","r":"Mon to Sun stop 1pax,1+1pax,2pax & 2+1 paxs for lunch and dinner both section"},{"b":"Phoenix Centaurus, Gachibowli","d":"2026-11-19","s":"Dinner","t":"Stop Booking","r":"Stop 2 pax , 2+1 pax & 3 pax in lunch and dinner in both slot"},{"b":"Whitefield ITPL","d":"2026-11-19","s":"Dinner","t":"Alcohol not available","r":"Alcohol not available"},{"b":"Whitefield ITPL","d":"2026-11-19","s":"Lunch","t":"Alcohol not available","r":"Alcohol not available"}],"upcomingCount":60},"offers":{"total":25,"byType":[["OB",13],["IB",12]],"maxDisc":150},"did":{"total":230,"byProc":[["Dine-In",204],["Fiesta",9],["Atmosfire",7],["Outbound",7],["Delivery",3]],"inb":220},"net":{"dom":215,"cities":88,"topCities":[["Bangalore",23],["Mumbai",17],["Hyderabad",14],["Kolkata",14],["Chennai",10],["New Delhi",10],["Pune",10],["Lucknow",6]],"intl":13,"intlNames":["Al Ghurair Centre","SHARJAH","AL BARSHA","AL KARAMA","AL WAHDA MALL","DALMA MALL","Silicon Central Mall","SAHARA","Dana Mall","KUALALUMPUR-NU SENTRAL","KUALALUMPUR-PAVILION MALL","IOI City Mall","BB PARK"],"toscano":27,"salt":17}};
+const $=s=>document.querySelector(s);
+const fmt=n=>Math.round(n).toLocaleString("en-IN");
+const inr=n=>"₹"+fmt(n);
+const lakh=n=>n>=100000?"₹"+(n/100000).toFixed(2)+"L":inr(n);
+const pct=(a,b)=>b?(a/b*100):0;
+const P=["var(--c1)","var(--c2)","var(--c3)","var(--c4)","var(--c5)"];
+const L=D.lead, today=L.daily[L.daily.length-1], yday=L.daily[L.daily.length-2];
+const icon=p=>`<span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg></span>`;
+const I={link:'<path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7l1.7-1.7"/>',ticket:'<path d="M3 9a3 3 0 000 6v3h18v-3a3 3 0 010-6V6H3z"/><path d="M13 6v12"/>',doc:'<path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/>',chef:'<path d="M6 13a4 4 0 01-.5-8 5 5 0 019 0A4 4 0 0118 13v7H6z"/><path d="M6 17h12"/>',globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/>',star:'<path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1 6.2L12 17.4 6.5 20.3l1-6.2L3 9.7l6.2-.9z"/>'};
+
+/* tooltips */
+const tip=$("#tip");
+document.addEventListener("pointerover",e=>{const t=e.target.closest("[data-tip]");if(!t)return;tip.textContent=t.dataset.tip;tip.classList.add("show")});
+document.addEventListener("pointermove",e=>{if(!tip.classList.contains("show"))return;let x=e.clientX+14,y=e.clientY+14;if(x+270>innerWidth)x=e.clientX-270;if(y+90>innerHeight)y=e.clientY-90;tip.style.left=x+"px";tip.style.top=y+"px"});
+document.addEventListener("pointerout",e=>{if(e.target.closest("[data-tip]"))tip.classList.remove("show")});
+
+/* ===== OVERVIEW ===== */
+(function(){
+  const tot=today.domTotal+today.intl, conv=today.dom.converted+today.intlP.converted, cr=pct(conv,tot);
+  const yTot=yday.domTotal+yday.intl;
+  const mx=Math.max(...L.daily.map(d=>d.domTotal+d.intl));
+  const spark=L.daily.map((d,i)=>{const t=d.domTotal+d.intl,isT=i===L.daily.length-1,dt=new Date(d.date+"T12:00");
+    return `<div class="${isT?"today":""}" data-tip="${dt.toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"})}${isT?" (so far)":""}\n${fmt(t)} leads · ${fmt(d.dom.converted+d.intlP.converted)} converted"><i style="height:${t/mx*100}%"></i><span>${isT?"Today":dt.getDate()}</span></div>`}).join("");
+  const R=2*Math.PI*48;
+  const A=D.adv.st;
+  const ov=$("#ov");
+  ov.innerHTML=`
+  <div class="card hero">
+    <div class="card-h" style="margin:0"><div><h3>Leads today</h3><div class="h-sub">Domestic + international, as of 12:30</div></div><span class="pill em">Live day</span></div>
+    <div class="hero-row">
+      <div><div class="big ember-text num">${fmt(tot)}</div>
+      <div class="hero-meta" style="margin-top:12px"><span>Yesterday's full day: <b class="num">${fmt(yTot)}</b></span><span>Domestic <b class="num">${fmt(today.domTotal)}</b> · International <b class="num">${fmt(today.intl)}</b></span></div></div>
+      <div class="ring" data-tip="${fmt(conv)} of ${fmt(tot)} leads converted today"><svg viewBox="0 0 110 110"><circle cx="55" cy="55" r="48" fill="none" stroke="var(--grid)" stroke-width="10"/><circle cx="55" cy="55" r="48" fill="none" stroke="var(--good)" stroke-width="10" stroke-linecap="round" stroke-dasharray="${R*cr/100} ${R}"/></svg><b>${cr.toFixed(1)}%<small>converted</small></b></div>
+    </div>
+    <div class="spark" aria-label="Leads per day, 11 to 18 November">${spark}</div>
+  </div>
+  <div class="card stat alert s4 t3 m2"><h3>Overdue follow-ups</h3><div class="big num">${fmt(D.lead.followup.overdueFollowUps)}</div>
+    <div class="foot"><span class="pill bad">Needs action</span><span><b class="num">${D.lead.followup.upcomingFollowUps}</b> upcoming next</span></div></div>
+  <div class="card stat s3 t3 m2"><h3>Advance unpaid</h3><div class="big num">${lakh(A.all.unpaidAmount)}</div>
+    <div class="foot"><span><b class="num">${fmt(A.acknowledged.count)}</b> acknowledged · <b class="num">${fmt(A.collected.count)}</b> collected</span></div></div>
+  <div class="card stat s4 t3 m2"><h3>Converted today</h3><div class="big num" style="color:var(--good)">${fmt(conv)}</div>
+    <div class="foot"><span><b class="num">${D.lead.agentsActiveToday}</b> agents active of ${fmt(D.lead.agentsTotal)}</span></div></div>
+  <div class="card stat s3 t3 m2"><h3>Open in LMS</h3><div class="big num">${fmt(D.lms.statusCounts.find(s=>s.statusName.trim()==="New").totalCount)}</div>
+    <div class="foot"><span>New leads not yet worked, of <b class="num">${fmt(D.lms.statusCounts[0].totalCount)}</b></span></div></div>
+  ${[
+    ["Payment links today",fmt(D.pay.today),`${fmt(D.pay.last30)} in last 30 days`,I.link],
+    ["Coupon requests",fmt(D.coupons.total),"All time",I.ticket],
+    ["Quotations sent",fmt(D.quotes.total),"All time",I.doc],
+    ["Catering leads",fmt(D.odc.total),"ODC, all time",I.chef],
+    ["International calls",fmt(D.intl.calls),`${D.intl.agent.find(a=>a[0]==="Connected")?.[1]||0} connected today`,I.globe],
+    ["Call rating",D.quality.dash.overallRating.toFixed(1)+" / 5",`${D.quality.dash.toAcknowledge} awaiting acknowledgement`,I.star]
+  ].map(([t,v,f,ic])=>`<div class="card mini s2 t2 m2"><div class="card-h" style="margin:0"><h3>${t}</h3>${icon(ic)}</div><div class="big num">${v}</div><div class="foot">${f}</div></div>`).join("")}`;
+})();
+
+/* ===== LEADS ===== */
+/* drawn at the container's real width so labels stay 11px on every screen */
+function drawTrend(){
+  const el=$("#trend"),W=Math.max(300,Math.round(el.clientWidth||760)),narrow=W<560;
+  const H=narrow?250:310,m={t:24,r:4,b:28,l:narrow?32:40},iw=W-m.l-m.r,ih=H-m.t-m.b,rows=L.daily;
+  const max=Math.ceil(Math.max(...rows.map(r=>r.domTotal))/2000)*2000,y=v=>m.t+ih-v/max*ih,bw=iw/rows.length,bar=Math.min(54,bw*.62);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Domestic leads per day by outcome"><defs><pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="var(--card)" stroke-width="2.5" opacity=".6"/></pattern></defs>`;
+  for(let v=0;v<=max;v+=2000)s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)"/><text x="${m.l-8}" y="${y(v)+4}" text-anchor="end">${v?v/1000+"k":"0"}</text>`;
+  rows.forEach((r,i)=>{const cx=m.l+bw*i+bw/2,x=cx-bar/2,isT=i===rows.length-1;
+    const segs=[[r.dom.converted,"var(--c2)"],[r.dom.nonConverted,"var(--c1)"],[r.dom.newLeads+r.dom.active,"var(--c5)"]];let acc=0;
+    segs.forEach(([v,c],k)=>{const y0=y(acc),y1=y(acc+v),h=Math.max(0,y0-y1-(k<2?2:0));
+      s+=k===2?`<path d="M${x},${y0} V${y1+5} Q${x},${y1} ${x+5},${y1} H${x+bar-5} Q${x+bar},${y1} ${x+bar},${y1+5} V${y0} Z" fill="${c}"/>`:`<rect x="${x}" y="${y0-h}" width="${bar}" height="${h}" fill="${c}"/>`;
+      if(isT)s+=`<rect x="${x}" y="${y0-h}" width="${bar}" height="${h}" fill="url(#hatch)"/>`;acc+=v});
+    const dt=new Date(r.date+"T12:00");
+    s+=`<text x="${cx}" y="${H-8}" text-anchor="middle" style="${isT?"fill:var(--fg);font-weight:700":""}">${isT?(narrow?"Now":"Today"):narrow?dt.getDate():dt.toLocaleDateString("en-IN",{day:"numeric",month:"short"})}</text>`;
+    s+=`<text x="${cx}" y="${y(r.domTotal)-7}" text-anchor="middle" style="fill:var(--fg);font-weight:700;font-size:${narrow?10:11.5}px">${(r.domTotal/1000).toFixed(1)}k</text>`;
+    s+=`<rect x="${m.l+bw*i}" y="${m.t}" width="${bw}" height="${ih}" fill="transparent" data-tip="${dt.toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"})}${isT?" (so far)":""}\nConverted ${fmt(r.dom.converted)}\nNot converted ${fmt(r.dom.nonConverted)}\nNew & active ${fmt(r.dom.newLeads+r.dom.active)}\nTotal ${fmt(r.domTotal)} · ${pct(r.dom.converted,r.domTotal).toFixed(1)}% converted"/>`;
+  });
+  el.innerHTML=s+"</svg>";
+}
+drawTrend();
+{let lastW=0,raf;new ResizeObserver(es=>{const w=Math.round(es[0].contentRect.width);if(w===lastW)return;lastW=w;cancelAnimationFrame(raf);raf=requestAnimationFrame(drawTrend)}).observe($("#trend"));}
+(function(){
+  const sc=D.lms.statusCounts.filter(s=>s.statusId!==null).slice(0,8),all=D.lms.statusCounts[0].totalCount,mx=sc[0].totalCount;
+  $("#lmsSub").textContent=`${fmt(all)} leads by current status`;
+  const col=n=>/Booked|Converted|New Reservation/i.test(n)?"var(--good)":/Not Interested|Cancel|Invalid/i.test(n)?"var(--bad)":/New/.test(n)?"var(--ember)":"var(--muted)";
+  $("#lmsStatus").innerHTML=sc.map(s=>`<div class="hb" data-tip="${s.statusName.trim()}: ${fmt(s.totalCount)} (${pct(s.totalCount,all).toFixed(1)}%)"><span class="l">${s.statusName.trim()}</span><span class="t"><i style="width:${s.totalCount/mx*100}%;background:${col(s.statusName)}"></i></span><span class="v num">${fmt(s.totalCount)}</span></div>`).join("");
+
+  const src=D.lms.sourceCounts.filter(s=>s.sourceId!==null),tot=D.lms.sourceCounts[0].totalCount;
+  const top=src.slice(0,5),other=tot-top.reduce((a,b)=>a+b.totalCount,0);
+  const parts=[...top.map((s,i)=>[s.sourceName,s.totalCount,P[i]]),["Other",other,"var(--c-other)"]];
+  const C=2*Math.PI*40;let off=0;
+  const arcs=parts.map(([n,v,c])=>{const len=v/tot*C,g=1.6;const a=`<circle cx="50" cy="50" r="40" fill="none" stroke="${c}" stroke-width="16" stroke-dasharray="${Math.max(0,len-g)} ${C}" stroke-dashoffset="${-off}" data-tip="${n}: ${fmt(v)} (${pct(v,tot).toFixed(1)}%)"/>`;off+=len;return a}).join("");
+  $("#srcDonut").innerHTML=`<div class="donut"><svg viewBox="0 0 100 100">${arcs}</svg><b class="num">${fmt(tot)}<small>leads</small></b></div>
+   <div class="dl">${parts.map(([n,v,c])=>`<div><i class="sw" style="background:${c}"></i><span>${n}</span><b>${pct(v,tot).toFixed(0)}%</b></div>`).join("")}</div>`;
+
+  const st=L.sourcesToday.filter(s=>s.total>=20).map(s=>({...s,cr:pct(s.booked,s.total)})).sort((a,b)=>b.cr-a.cr).slice(0,8);
+  $("#srcConv").innerHTML=st.map(s=>`<div class="hb" data-tip="${s.source==="(blank)"?"No source":s.source}\n${fmt(s.booked)} booked of ${fmt(s.total)}"><span class="l">${s.source==="(blank)"?"No source":s.source}</span><span class="t"><i style="width:${s.cr}%;background:${s.cr>=50?"var(--good)":s.cr>=15?"var(--warn)":"var(--bad)"}"></i></span><span class="v num">${s.cr.toFixed(0)}%</span></div>`).join("");
+
+  const mk=(n,tot,p)=>{const nw=p.newLeads+p.active,t=tot||1;return `<div><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px"><span style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">${n}</span><span class="big num" style="font-size:24px">${fmt(tot)}</span></div>
+    <div class="stackbar"><i style="width:${p.converted/t*100}%;background:var(--c2)" data-tip="Converted ${fmt(p.converted)}"></i><i style="width:${p.nonConverted/t*100}%;background:var(--c1)" data-tip="Not converted ${fmt(p.nonConverted)}"></i><i style="width:${nw/t*100}%;background:var(--c5)" data-tip="New & active ${fmt(nw)}"></i></div>
+    <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12.5px;color:var(--muted)"><span>Conversion</span><b style="color:var(--fg)" class="num">${pct(p.converted,tot).toFixed(1)}%</b></div></div>`};
+  $("#split").innerHTML=mk("Domestic",today.domTotal,today.dom)+mk("International",today.intl,today.intlP)+`<div class="legend"><span><i class="sw" style="background:var(--c2)"></i>Converted</span><span><i class="sw" style="background:var(--c1)"></i>Not converted</span><span><i class="sw" style="background:var(--c5)"></i>New &amp; active</span></div>`;
+})();
+
+/* ===== PAYMENTS ===== */
+(function(){
+  const A=D.adv.st;
+  $("#advSub").textContent=`${fmt(D.adv.total)} bookings that need an advance`;
+  $("#advPill").textContent=`${lakh(A.all.unpaidAmount)} unpaid`;
+  $("#advPipe").innerHTML=[["New",A.new,"Waiting for outlet"],["Acknowledged",A.acknowledged,"Outlet has seen it"],["Collected",A.collected,"Advance received"]].map(([n,o,h])=>`<div class="stage"><span>${n}</span><b class="num">${fmt(o.count)}</b><em>${h}${o.unpaidAmount?` · ${lakh(o.unpaidAmount)}`:""}</em></div>`).join("");
+  const ch=Object.entries(D.adv.ch).sort((a,b)=>b[1].count-a[1].count),mx=ch[0][1].count;
+  const name={reeserio:"Reeserio",mobile_app:"Mobile app",website:"Website",aggregator:"Aggregator"};
+  $("#advCh").innerHTML=ch.map(([k,v])=>`<div class="ch-row" data-tip="${name[k]||k}: ${fmt(v.count)} bookings, ${inr(v.unpaidAmount)} unpaid"><span>${name[k]||k}</span><span class="t"><i style="width:${v.count/mx*100}%"></i></span><span class="r num">${fmt(v.count)}</span><span class="r num">${lakh(v.unpaidAmount)}</span></div>`).join("");
+
+  $("#payNums").innerHTML=[["Today",D.pay.today],["Last 30 days",D.pay.last30],["All time",D.pay.all]].map(([l,v])=>`<div><b class="num">${fmt(v)}</b><span>${l}</span></div>`).join("");
+  const c=D.coupons,pc=Object.fromEntries(c.byPay);
+  $("#coupSub").textContent=`${fmt(c.total)} all time · latest ${c.sample} broken down below`;
+  const seg=[["Paid",pc.paid||0,"var(--c2)"],["Link created",pc.created||0,"var(--c4)"],["Link resent",pc["Payment link resent"]||0,"var(--c3)"],["Cancelled",pc.cancelled||0,"var(--c1)"]];
+  $("#coup").innerHTML=`<div class="stackbar" style="height:16px">${seg.map(([n,v,col])=>`<i style="flex:${v} 1 0;background:${col}" data-tip="${n}: ${v} of ${c.sample}"></i>`).join("")}</div>
+   <div class="legend" style="margin-top:10px">${seg.map(([n,v,col])=>`<span><i class="sw" style="background:${col}"></i>${n} <b style="color:var(--fg)" class="num">${v}</b></span>`).join("")}</div>
+   <div style="margin-top:14px;display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px"><span>Coupon value in latest ${c.sample}</span><b style="color:var(--fg)" class="num">${inr(c.value)}</b></div>
+   <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-top:6px"><span>Top source</span><b style="color:var(--fg)">${c.bySource[0][0]} (${c.bySource[0][1]})</b></div>`;
+})();
+
+/* ===== QUALITY ===== */
+(function(){
+  const q=D.quality,r=q.dash.overallRating,ang=Math.PI*(1-r/5);
+  const cx=110,cy=110,R=90,px=cx+R*Math.cos(ang),py=cy-R*Math.sin(ang);
+  $("#qSub").textContent=`${fmt(q.total)} calls reviewed by the QA scorer`;
+  $("#gauge").innerHTML=`<svg viewBox="0 0 220 124" role="img" aria-label="Rating ${r} out of 5"><path d="M20 110 A90 90 0 0 1 200 110" fill="none" stroke="var(--grid)" stroke-width="16" stroke-linecap="round"/><path d="M20 110 A90 90 0 0 1 ${px.toFixed(1)} ${py.toFixed(1)}" fill="none" stroke="${r<2.5?"var(--bad)":r<3.5?"var(--warn)":"var(--good)"}" stroke-width="16" stroke-linecap="round"/><text x="20" y="123" text-anchor="middle" style="fill:var(--faint);font-size:10px">0</text><text x="200" y="123" text-anchor="middle" style="fill:var(--faint);font-size:10px">5</text></svg><b class="num">${r.toFixed(1)}<small> / 5</small></b>`;
+  $("#qgrid").innerHTML=[["To acknowledge",q.dash.toAcknowledge],["To review",q.dash.toReview],["Training pending",q.dash.trainingPending]].map(([l,v])=>`<div><b class="num">${v}</b><span>${l}</span></div>`).join("");
+  const tl=[...q.tl].sort((a,b)=>b.calls-a.calls),mx=tl[0].calls;
+  $("#tl").innerHTML=tl.map(t=>`<tr><td><b>${t.n}</b></td><td class="num">${t.agents}</td><td><span class="cbar"><i><em style="width:${t.calls/mx*100}%;background:var(--ember)"></em></i><span class="num">${fmt(t.calls)}</span></span></td>
+    <td><span class="pill ${t.bad>=90?"bad":t.bad>=50?"warn":"good"} num">${t.bad}%</span></td><td class="num" style="font-weight:700;color:${t.rating<2.5?"var(--bad)":t.rating<3.5?"var(--warn)":"var(--good)"}">${t.rating.toFixed(1)}</td><td class="num">${t.tp}</td></tr>`).join("");
+  const ag=L.agentsToday.slice(0,10);
+  $("#agSub").textContent=`Ranked by confirmed bookings · ${L.agentsActiveToday} of ${fmt(L.agentsTotal)} agents had leads today`;
+  $("#podium").innerHTML=ag.map((a,i)=>`<div class="ag"><span class="rk">#${i+1}</span><span class="n">${a.agentName}</span><span class="c num">${a.confirmed}</span><span class="m">confirmed of ${a.total} · ${Math.round(pct(a.confirmed,a.total))}%</span></div>`).join("");
+})();
+
+/* ===== CATERING ===== */
+(function(){
+  const o=D.odc;
+  $("#odcP").textContent=`${fmt(o.total)} leads all time · breakdowns use the latest ${o.sample}`;
+  const st=o.byStatus,mx=st[0][1];
+  const srcName={Catering_APP:"Catering app",Catering_website:"Catering website",Catering_CRS:"Catering CRS",Unspecified:"Reeserio / manual"};
+  const sp=o.bySrc,ts=sp.reduce((a,b)=>a+b[1],0);
+  const C=2*Math.PI*40;let off=0;
+  const arcs=sp.map(([n,v],i)=>{const len=v/ts*C;const a=`<circle cx="50" cy="50" r="40" fill="none" stroke="${P[i]}" stroke-width="16" stroke-dasharray="${Math.max(0,len-1.6)} ${C}" stroke-dashoffset="${-off}" data-tip="${srcName[n]||n}: ${v}"/>`;off+=len;return a}).join("");
+  const ev=o.byType.filter(t=>t[0]!=="Unspecified");
+  $("#odc").innerHTML=`
+   <div class="card s3 stat t3 m2"><h3>Upcoming events</h3><div class="big num">${fmt(o.upcoming)}</div><div class="foot">From today, in the latest ${o.sample} leads</div></div>
+   <div class="card s3 stat t3 m2"><h3>Amount paid</h3><div class="big num">${lakh(o.paid)}</div><div class="foot">Across the latest ${o.sample} leads</div></div>
+   <div class="card s6"><div class="card-h"><div><h3>Where catering leads come from</h3></div></div>
+     <div class="donut-wrap"><div class="donut" style="width:128px;height:128px"><svg viewBox="0 0 100 100">${arcs}</svg><b class="num" style="font-size:17px">${ts}<small>leads</small></b></div>
+     <div class="dl">${sp.map(([n,v],i)=>`<div><i class="sw" style="background:${P[i]}"></i><span>${srcName[n]||n}</span><b>${Math.round(pct(v,ts))}%</b></div>`).join("")}</div></div></div>
+   <div class="card s8 t3"><div class="card-h"><div><h3>Lead status</h3><div class="h-sub">Latest ${o.sample} catering leads</div></div></div>
+     <div class="hbars">${st.map(([n,v])=>`<div class="hb" data-tip="${n}: ${v}"><span class="l">${n}</span><span class="t"><i style="width:${v/mx*100}%;background:${/Not Interested|Duplicate/.test(n)?"var(--c-other)":/New/.test(n)?"var(--ember)":"var(--c5)"}"></i></span><span class="v num">${v}</span></div>`).join("")}</div></div>
+   <div class="card s4 t3"><div class="card-h"><div><h3>Event types</h3><div class="h-sub">Where the guest told us</div></div></div>
+     <div class="hbars">${ev.map(([n,v])=>`<div class="hb"><span class="l">${n.charAt(0)+n.slice(1).toLowerCase()}</span><span class="t"><i style="width:${v/ev[0][1]*100}%;background:var(--c3)"></i></span><span class="v num">${v}</span></div>`).join("")}</div></div>`;
+})();
+
+/* ===== NETWORK ===== */
+(function(){
+  const n=D.net;
+  $("#netNums").innerHTML=[["Barbeque Nation",n.dom,`in ${n.cities} cities`],["International",n.intl,"UAE & abroad"],["Toscano",n.toscano,"outlets"],["Salt",n.salt,"outlets"]].map(([l,v,s])=>`<div><b class="num">${v}</b><span>${l}</span><div class="faint" style="font-size:11px">${s}</div></div>`).join("");
+  const mx=n.topCities[0][1];
+  $("#cities").innerHTML=n.topCities.map(([c,v])=>`<div class="hb"><span class="l">${c}</span><span class="t"><i style="width:${v/mx*100}%;background:linear-gradient(90deg,var(--ember-2),var(--ember))"></i></span><span class="v num">${v}</span></div>`).join("");
+
+  const ins=D.instr;
+  $("#insSub").textContent=`${ins.upcomingCount} instructions apply from today · ${ins.total} on record`;
+  $("#insChips").innerHTML=ins.byType.map(([t,v])=>`<span class="chip">${t.trim()} · ${v}</span>`).join("");
+  $("#ins").innerHTML=ins.upcoming.map(x=>{const d=new Date(x.d+"T12:00");const stop=/Stop/.test(x.t);
+    return `<div class="it" data-tip="${x.r}"><span class="d">${d.toLocaleDateString("en-IN",{month:"short"})}<b>${d.getDate()}</b></span><span class="x"><b>${x.b} · ${x.s}</b><span>${x.r}</span></span><span class="pill ${stop?"bad":"warn"}">${x.t}</span></div>`}).join("");
+
+  const ia=D.intl.agent,it=D.intl.calls;
+  const col={"Connected":"var(--c2)","Not Connected":"var(--c1)","Missed":"var(--c3)"};
+  const crs=D.intl.crs.filter(c=>c[0]!=="Unspecified");
+  $("#intl").innerHTML=`<div style="display:flex;align-items:baseline;gap:10px"><span class="big num" style="font-size:40px">${it}</span><span class="muted">calls today</span></div>
+   <div class="stackbar" style="margin-top:14px">${ia.map(([k,v])=>`<i style="flex:${v} 1 0;background:${col[k]||"var(--c-other)"}" data-tip="${k}: ${v}"></i>`).join("")}</div>
+   <div class="legend" style="margin-top:10px">${ia.map(([k,v])=>`<span><i class="sw" style="background:${col[k]||"var(--c-other)"}"></i>${k} <b style="color:var(--fg)">${v}</b></span>`).join("")}</div>
+   <div style="margin-top:14px;border-top:1px dashed var(--line);padding-top:10px;display:grid;gap:6px;font-size:12.5px">${crs.slice(0,5).map(([k,v])=>`<div style="display:flex;justify-content:space-between"><span class="muted">${k}</span><b class="num">${v}</b></div>`).join("")}</div>`;
+
+  const of=D.offers,ob=Object.fromEntries(of.byType);
+  $("#offers").innerHTML=`<div style="display:flex;align-items:baseline;gap:10px"><span class="big num" style="font-size:40px">${of.total}</span><span class="muted">offers configured</span></div>
+   <div class="netnums" style="grid-template-columns:1fr 1fr;margin:14px 0 0"><div><b class="num">${ob.IB||0}</b><span>Inbound (IB)</span></div><div><b class="num">${ob.OB||0}</b><span>Outbound (OB)</span></div></div>
+   <div style="margin-top:12px;font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between"><span>Biggest discount</span><b style="color:var(--fg)">₹${of.maxDisc} off per person</b></div>`;
+
+  const dd=D.did,dm=dd.byProc[0][1];
+  $("#did").innerHTML=`<div style="display:flex;align-items:baseline;gap:10px"><span class="big num" style="font-size:40px">${dd.total}</span><span class="muted">numbers · ${dd.inb} inbound</span></div>
+   <div class="hbars" style="margin-top:14px">${dd.byProc.map(([k,v],i)=>`<div class="hb"><span class="l">${k}</span><span class="t"><i style="width:${v/dm*100}%;background:${P[i%5]}"></i></span><span class="v num">${v}</span></div>`).join("")}</div>`;
+})();
+
+/* tabs follow scroll */
+const secs=[...document.querySelectorAll("section.sec")],tabs=[...document.querySelectorAll("#tabs a")];
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){tabs.forEach(t=>t.classList.toggle("on",t.getAttribute("href")==="#"+e.target.id))}})},{rootMargin:"-40% 0px -55% 0px"});
+secs.forEach(s=>io.observe(s));
+</script>
+
+</html>
