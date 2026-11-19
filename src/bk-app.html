@@ -1,0 +1,355 @@
+<style>
+/* Reeserio app prototype: every menu page as a hash route, one list-page pattern, one popup pattern.
+   Data is a read-only snapshot of the live app with customer contact details masked. Nothing is saved. */
+main.wrap{max-width:1320px;padding-top:18px;padding-bottom:40px}
+.crumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);flex:1;min-width:0}
+.crumb b{color:var(--fg);font-weight:600}
+.crumb a{color:var(--muted);text-decoration:none}
+.crumb a:hover{color:var(--ember)}
+.crumb svg{width:14px;height:14px;color:var(--faint)}
+.mi.on2{color:var(--ember);font-weight:600;background:var(--ember-soft);border-radius:8px}
+.sub a.on2{color:var(--ember);background:var(--ember-soft);font-weight:600}
+
+/* page ticket */
+.ph{display:grid;grid-template-columns:minmax(0,1fr) 260px;filter:drop-shadow(0 8px 20px rgba(16,24,40,.08));margin-bottom:18px}
+.ph .l{background:#fff;border-radius:18px 0 0 18px;padding:18px 24px;
+  -webkit-mask:radial-gradient(circle 11px at 100% 0,#0000 98%,#000) top right/100% 51% no-repeat,radial-gradient(circle 11px at 100% 100%,#0000 98%,#000) bottom right/100% 51% no-repeat;
+          mask:radial-gradient(circle 11px at 100% 0,#0000 98%,#000) top right/100% 51% no-repeat,radial-gradient(circle 11px at 100% 100%,#0000 98%,#000) bottom right/100% 51% no-repeat}
+.ph .r{background:linear-gradient(160deg,#ff7a1f,#ff5a00);color:#fff;border-radius:0 18px 18px 0;padding:18px 20px;border-left:2.5px dashed rgba(255,255,255,.55);display:flex;flex-direction:column;gap:10px;justify-content:center;
+  -webkit-mask:radial-gradient(circle 11px at 0 0,#0000 98%,#000) top left/100% 51% no-repeat,radial-gradient(circle 11px at 0 100%,#0000 98%,#000) bottom left/100% 51% no-repeat;
+          mask:radial-gradient(circle 11px at 0 0,#0000 98%,#000) top left/100% 51% no-repeat,radial-gradient(circle 11px at 0 100%,#0000 98%,#000) bottom left/100% 51% no-repeat}
+.ph h1{margin:0;font-size:22px;font-weight:800;display:flex;align-items:center;gap:10px}
+.ph h1 i{font-style:normal;font-size:22px}
+.ph p{margin:4px 0 0;color:var(--muted);font-size:13.5px}
+.kps{display:flex;flex-wrap:wrap;gap:8px 26px;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line-2)}
+.kps div small{display:block;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.kps div b{font-size:20px;font-variant-numeric:tabular-nums}
+.kps div b.r{color:var(--red)}
+.ph .r small{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.85}
+.ph .r b{font-size:30px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.ph .r button,.ph .r a{height:42px;border:0;border-radius:12px;background:#1f2328;color:#fff;font:inherit;font-weight:800;font-size:14px;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px}
+.ph .r button:hover,.ph .r a:hover{background:#000}
+
+/* toolbar + table */
+.tb{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.srch{position:relative;flex:0 1 300px;min-width:200px}
+.srch svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--faint)}
+.srch input{width:100%;height:40px;border:1.5px solid var(--line-2);border-radius:11px;padding:0 12px 0 33px;font:inherit;font-size:14px;background:#fff}
+.srch input:focus{outline:none;border-color:var(--ember);box-shadow:0 0 0 3px var(--ember-glow)}
+.tabs2{display:flex;gap:6px;flex-wrap:wrap}
+.tabs2 button{border:1.5px solid var(--line-2);background:#fff;border-radius:99px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:700;color:#495057;cursor:pointer}
+.tabs2 button b{font-weight:700;color:var(--muted);margin-left:4px}
+.tabs2 button.on{background:var(--fg);border-color:var(--fg);color:#fff}
+.tabs2 button.on b{color:rgba(255,255,255,.7)}
+.tb .cnt{margin-left:auto;font-size:12.5px;color:var(--muted)}
+.tb .ex{border:1.5px solid var(--line-2);background:#fff;border-radius:11px;height:40px;padding:0 14px;font:inherit;font-size:13px;font-weight:700;color:#495057;cursor:pointer}
+.tb .ex:hover{border-color:var(--ember);color:var(--ember)}
+.tcard{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.tw{overflow-x:auto}
+table.t{width:100%;border-collapse:collapse;font-size:13.5px}
+.t th{font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--card-2);white-space:nowrap}
+.t td{padding:12px 14px;border-bottom:1px dashed var(--line);vertical-align:top}
+.t tr:last-child td{border-bottom:0}
+.t tbody tr{cursor:pointer}
+.t tbody tr:hover td{background:#fffaf6}
+.t td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.t th.n{text-align:right}
+.t td.nw{white-space:nowrap}
+.t td .mut{display:block;font-size:12px;color:var(--muted)}
+.t td .clip{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-width:340px;color:#495057}
+.t td.act{white-space:nowrap;text-align:right}
+.t td.act button{border:1.5px solid var(--line-2);background:#fff;border-radius:9px;padding:5px 10px;font:inherit;font-size:12px;font-weight:700;color:#495057;cursor:pointer;margin-left:4px}
+.t td.act button:hover{border-color:var(--ember);color:var(--ember)}
+.t td.act button.pri{border-color:var(--ember);color:var(--ember)}
+.pill{display:inline-block;font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:99px;white-space:nowrap;background:var(--bg-2);color:#495057}
+.pill.g{background:var(--good-soft);color:#1f7a4d}.pill.o{background:var(--ember-soft);color:#b8480a}.pill.b{background:#eef5ff;color:#1d4f91}.pill.r{background:var(--bad-soft);color:#b42335}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chips span{font-size:11.5px;font-weight:700;background:#fff1e6;color:#b8480a;border-radius:6px;padding:2px 6px}
+.stars{color:#e8a317;letter-spacing:1px;white-space:nowrap}
+.pg{display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:10px 14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.pg button{min-width:32px;height:32px;border:1.5px solid var(--line-2);background:#fff;border-radius:9px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+.pg button.on{background:var(--ember);border-color:var(--ember);color:#fff}
+.pg button:disabled{opacity:.4;cursor:not-allowed}
+.note{margin:0 0 12px;padding:10px 14px;border-radius:12px;background:#eef5ff;color:#1d4f91;font-size:12.5px}
+.empty{padding:50px 20px;text-align:center;color:var(--muted)}
+.empty b{display:block;font-size:16px;color:var(--fg);margin-bottom:4px}
+.empty .i{font-size:34px;margin-bottom:8px}
+.fl{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.fl select,.fl input{height:40px;border:1.5px solid var(--line-2);border-radius:11px;padding:0 12px;font:inherit;font-size:14px;background:#fff;min-width:200px}
+
+/* home grid + branch grid */
+.hg{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.hgrp{margin:22px 0 10px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.hgrp:first-child{margin-top:0}
+.hc{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;text-decoration:none;color:inherit;transition:border-color .12s,transform .12s}
+.hc:hover{border-color:#ffc29a;transform:translateY(-2px)}
+.hc i{width:40px;height:40px;border-radius:12px;background:var(--ember-soft);display:grid;place-items:center;font-style:normal;font-size:19px;flex:none}
+.hc b{display:block;font-size:14px}
+.hc small{display:block;font-size:12px;color:var(--muted)}
+.hc em{margin-left:auto;font-style:normal;font-size:11px;font-weight:800;color:var(--ember);white-space:nowrap}
+.bg{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.bc{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.bc b{display:block;font-size:13.5px}
+.bc small{display:block;font-size:12px;color:var(--muted)}
+.bc a{margin-left:auto;font-size:12px;font-weight:800;color:var(--ember);text-decoration:none;white-space:nowrap}
+
+/* popup */
+dialog.dlg{border:0;border-radius:18px;padding:0;width:min(760px,94vw);max-height:90vh;box-shadow:0 24px 70px rgba(0,0,0,.28)}
+dialog.dlg.sm{width:min(460px,94vw)}
+dialog.dlg::backdrop{background:rgba(20,22,26,.45);backdrop-filter:blur(2px)}
+.dh{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px dashed var(--line-2);position:sticky;top:0;background:#fff;z-index:1}
+.dh i{width:34px;height:34px;border-radius:10px;background:var(--ember-soft);display:grid;place-items:center;font-style:normal;font-size:17px;flex:none}
+.dh b{font-size:17px}
+.dh small{display:block;font-size:12px;color:var(--muted);font-weight:500}
+.dh .x{margin-left:auto;border:0;background:var(--bg-2);width:34px;height:34px;border-radius:10px;cursor:pointer;font-size:18px;color:#495057}
+.db{padding:18px 20px}
+.fg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 16px}
+.fg.two{grid-template-columns:1fr 1fr}
+.fg.one{grid-template-columns:1fr}
+.ff{display:flex;flex-direction:column;gap:5px;min-width:0}
+.ff.w{grid-column:1/-1}
+.ff label{font-size:12.5px;font-weight:700;color:#495057}
+.ff label em{color:var(--red);font-style:normal}
+.ff input,.ff select,.ff textarea{height:42px;border:1.5px solid var(--line-2);border-radius:11px;padding:0 12px;font:inherit;font-size:14px;background:#fff;width:100%}
+.ff textarea{height:80px;padding:10px 12px;resize:vertical}
+.ff input:focus,.ff select:focus,.ff textarea:focus{outline:none;border-color:var(--ember);box-shadow:0 0 0 3px var(--ember-glow)}
+.ff input.bad,.ff select.bad{border-color:var(--red)}
+.or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;font-weight:800;grid-column:1/-1}
+.or::before,.or::after{content:"";flex:1;border-top:1px solid var(--line)}
+.yn{display:flex;border:1.5px solid var(--line-2);border-radius:11px;overflow:hidden;height:42px}
+.yn button{flex:1;border:0;background:#fff;font:inherit;font-weight:700;cursor:pointer;color:var(--muted)}
+.yn button.on{background:var(--fg);color:#fff}
+.df{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--line);position:sticky;bottom:0;background:#fff}
+.df .err{margin-right:auto;align-self:center;font-size:12.5px;color:var(--red);font-weight:600}
+.df button{height:44px;border-radius:12px;padding:0 20px;font:inherit;font-weight:800;font-size:14px;cursor:pointer}
+.df .c{border:1.5px solid var(--line-2);background:#fff;color:#495057}
+.df .s{border:0;background:var(--ember);color:#fff}
+.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 22px}
+.kv div{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.kv div span{color:var(--muted);flex:none}
+.kv div b{text-align:right;font-weight:600;overflow-wrap:anywhere}
+.kv .w{grid-column:1/-1;flex-direction:column;gap:4px}
+.kv .w b{text-align:left;font-weight:500;color:#343a40;line-height:1.5}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:#1f2328;color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:all .25s;z-index:100;max-width:calc(100vw - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.foot{font-size:11.5px;color:var(--faint);text-align:center;margin-top:20px}
+
+@media (max-width:860px){.ph{grid-template-columns:1fr}.ph .l{border-radius:18px 18px 0 0;-webkit-mask:none;mask:none}.ph .r{border-radius:0 0 18px 18px;border-left:0;border-top:2.5px dashed rgba(255,255,255,.55);-webkit-mask:none;mask:none}.fg{grid-template-columns:1fr 1fr}.kv{grid-template-columns:1fr}}
+@media (max-width:640px){.hbtn.fill .plus{display:block!important}.crumb{display:none}main.wrap{padding-left:12px;padding-right:12px}.fg,.fg.two{grid-template-columns:1fr}.srch{flex:1 1 100%}.tb .cnt{margin-left:0}}
+</style>
+
+<div id="view"></div>
+<p class="foot">Prototype built from a read-only snapshot of reeserio.bnhl.in (19 Nov 2026). Customer mobile numbers, emails and surnames are masked. Buttons and forms do not save anything.</p>
+</main>
+</div></div>
+<dialog class="dlg" id="dlg"></dialog>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const A=/*APP*/null, D=/*DASH*/null;
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const n=v=>v===null||v===undefined||v===""?"—":isNaN(v)?v:Math.round(+v).toLocaleString("en-IN");
+const inr=v=>"₹"+n(v);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("show"),2800)};
+const tone=s=>{s=String(s||"").toLowerCase();return /paid|collect|complet|booked|convert|confirm|acknowledg|success|issued|connected|active/.test(s)&&!/not|un/.test(s)?"g":/fail|cancel|expire|drop|not|reject|missed|stop|bad/.test(s)?"r":/new|created|pending|follow|issue|progress|open|resent/.test(s)?"o":"b"};
+const pill=s=>s?`<span class="pill ${tone(s)}">${esc(s)}</span>`:"";
+const stars=r=>{const v=Math.round(+r||0);return `<span class="stars">${"★".repeat(v)}${"☆".repeat(Math.max(0,5-v))}</span> <b>${r??"—"}</b>`};
+const L=D.lead, OUTLETS=[...new Set(A.instr.map(x=>x.branch))].sort();
+
+/* ---------- popups (fields mirror the live app) ---------- */
+const F={
+  createLead:{t:"Create Lead",i:"➕",s:"Lead is added to LMS",ok:"Create Lead",f:[["Guest Name","text",1],["Booking Id"],["Contact Number","tel",1],["Number of Adult Pax","number",1],["Alternate Contact Number","tel"],["Number of Child Pax","number"],["Email Id","email"],["Dining Date","date"],["Company"],["Dining Time","time"],["Lead Source","sel",1,()=>A.dropdown],["Occasion Type","sel",0,()=>["Birthday","Anniversary","Kitty party","Office celebration","Other"]],["City","sel",1,()=>D.net.topCities.map(c=>c[0])],["Outlet Name","sel",1,()=>OUTLETS],["Date Of Birth","date"],["Lead Status","sel",0,()=>["New","Follow up","Booked","Not converted"]],["Lead Type","sel",0,()=>["Domestic","International","Catering"]],["Lead Assign To","sel",0,()=>L.agentsToday.map(a=>a.agentName)],["Comment","area"]]},
+  newCater:{t:"New Catering Leads",i:"🍽️",s:"Outdoor catering enquiry",ok:"Add Caters",f:[["Guest Name","text",1],["Contact Number","tel",1],["Guest Email Address","email"],["Number of Pax","number",1],["City"],["Event Date","date"],["Instructions"],["Event Type","sel",0,()=>D.odc.byType.map(x=>x[0]).filter(x=>x!=="Unspecified")]]},
+  logBooking:{t:"Log Booking",i:"📝",s:"Log a call and its follow-up",ok:"Log booking",f:[["Phone Number","tel",1],["Guest Name","text",1],["Select Outlet","sel",1,()=>OUTLETS],["Dine Date","date",1],["Time","sel",1,()=>["12:00","12:30","13:00","19:00","19:30","20:00","21:00"]],["Pax","number",1],["Child Pax","number"],["Call Type","sel",1,()=>["Inbound","Outbound"]],["Reason","sel",1,()=>["Slot not available","Price enquiry","Will call back","Booked elsewhere","Other"]],["Add Follow Up","yn",1],["Follow up Date","datetime-local",1],["Notes","area",1]]},
+  searchBooking:{t:"Search Booking Details",i:"🔎",s:"Find a booking by mobile or booking ID",ok:"Search",sm:1,one:1,f:[["Mobile Number","tel"],["__or"],["Booking ID"]],any:["Mobile Number","Booking ID"]},
+  createPayLink:{t:"Create Payment Link",i:"🔗",s:"Send an advance payment link to the guest",ok:"Create link",two:1,f:[["Booking ID","text",1],["Customer Name","text",1],["Mobile Number","tel",1],["Email","email"],["Amount (₹)","number",1],["Comment","area"]]},
+  createCoupon:{t:"Create Coupon",i:"🎟️",s:"Raise a coupon issue request",ok:"Request coupon",two:1,f:[["Booking ID","text",1],["Guest Name","text",1],["Contact Number","tel",1],["Coupon","sel",1,()=>A.couponOptions.map(c=>c.name)],["Number of Pax","number",1],["Comment","area"]]},
+  sendQuote:{t:"Send New Email",i:"✉️",s:"Send a quotation to the guest",ok:"Send email",two:1,f:[["Lead ID","text",1],["To Email","email",1],["Quotation Title","text",1],["Email Title","text",1],["Email Body","area",1]]},
+  createDID:{t:"Create DID",i:"☎️",s:"Map a DID number to a flow",ok:"Create DID",two:1,f:[["DID Name","text",1],["DID Number","tel",1],["Flow Type","sel",1,()=>[...new Set(A.did.map(d=>d.flow))]],["Process","sel",1,()=>A.didProc]]},
+  createOffer:{t:"Create Offer",i:"🏷️",s:"Add a row to the offer matrix",ok:"Create offer",f:[["Voucher Head Id","text",1],["Offer Name","text",1],["Offer Type","sel",1,()=>["IB","OB"]],["From Date","date",1],["To Date","date",1],["Days","sel",0,()=>["All days","Weekdays","Weekend"]],["From Time","time"],["To Time","time"],["Last Entry","time"],["Min Price","number"],["Max Price","number"],["Discount Per Pax","number",1],["Min Pax","number"],["Max Pax","number"],["Priority","number"],["Description","area"]]},
+  createSlot:{t:"Create Slot Definition",i:"🕒",s:"Set the bookable slot times for a branch",ok:"Create",two:1,f:[["Branch","sel",1,()=>OUTLETS],["Week Day","sel",1,()=>["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]],["Start Date","date",1],["End Date","date",1],["Slot Times","text",1,null,"e.g. 12:00, 12:30, 13:00"]]},
+  addInstr:{t:"Add Branch Instruction",i:"📌",s:"Shown to agents while booking",ok:"Add instruction",two:1,f:[["Branch","sel",1,()=>OUTLETS],["Date","date",1],["Session","sel",1,()=>["Lunch","Dinner","Both"]],["Instruction Type","sel",1,()=>D.instr.byType.map(x=>x[0])],["Instruction","area",1]]},
+};
+function openForm(key){
+  const C=F[key],dl=$("#dlg");dl.className="dlg"+(C.sm?" sm":"");
+  const field=([l,t="text",req,opts,ph],i)=>l==="__or"?`<div class="or">OR</div>`:`<div class="ff ${t==="area"?"w":""}"><label for="f${i}">${esc(l)}${req?" <em>*</em>":""}</label>${
+    t==="sel"?`<select id="f${i}" data-l="${esc(l)}" ${req?"required":""}><option value="">Select ${esc(l)}</option>${(opts?opts():[]).map(o=>`<option>${esc(o)}</option>`).join("")}</select>`:
+    t==="area"?`<textarea id="f${i}" data-l="${esc(l)}" ${req?"required":""} placeholder="${esc(ph||"Enter "+l.toLowerCase())}"></textarea>`:
+    t==="yn"?`<div class="yn" data-l="${esc(l)}"><button type="button" class="on">Yes</button><button type="button">No</button></div>`:
+    `<input id="f${i}" data-l="${esc(l)}" type="${t==="tel"?"tel":t}" ${t==="tel"?'inputmode="numeric" maxlength="10"':""} ${req?"required":""} placeholder="${esc(ph||(t==="tel"?"10-digit number":"Enter "+l.toLowerCase()))}">`}</div>`;
+  dl.innerHTML=`<div class="dh"><i>${C.i}</i><div><b>${esc(C.t)}</b><small>${esc(C.s)}</small></div><button class="x" type="button" aria-label="Close">×</button></div>
+    <div class="db"><div class="fg ${C.one?"one":C.two?"two":""}">${C.f.map(field).join("")}</div></div>
+    <div class="df"><span class="err"></span><button class="c" type="button">Cancel</button><button class="s" type="button">${esc(C.ok)}</button></div>`;
+  dl.querySelectorAll(".yn").forEach(y=>y.onclick=e=>{const b=e.target.closest("button");if(!b)return;y.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b))});
+  dl.querySelectorAll('input[type=tel]').forEach(x=>x.oninput=()=>x.value=x.value.replace(/\D/g,"").slice(0,10));
+  dl.querySelector(".x").onclick=dl.querySelector(".c").onclick=()=>dl.close();
+  dl.querySelector(".s").onclick=()=>{
+    let bad=[...dl.querySelectorAll("[required]")].filter(x=>!x.value.trim());
+    dl.querySelectorAll("input,select,textarea").forEach(x=>x.classList.toggle("bad",bad.includes(x)));
+    if(C.any&&!C.any.some(l=>dl.querySelector(`[data-l="${l}"]`).value.trim())){dl.querySelector(".err").textContent="Enter a mobile number or a booking ID";return}
+    if(bad.length){dl.querySelector(".err").textContent=`Fill ${bad.length} required field${bad.length>1?"s":""}`;bad[0].focus();return}
+    dl.close();toast(`${C.t}: preview only, nothing was saved.`)};
+  dl.showModal();dl.querySelector("input,select")?.focus();
+}
+function openDetail(title,icon,pairs){
+  const dl=$("#dlg");dl.className="dlg";
+  dl.innerHTML=`<div class="dh"><i>${icon}</i><div><b>${esc(title)}</b><small>Details</small></div><button class="x" type="button" aria-label="Close">×</button></div>
+    <div class="db"><div class="kv">${pairs.filter(p=>p[1]!==undefined&&p[1]!==null&&p[1]!=="").map(([k,v,w])=>`<div class="${w?"w":""}"><span>${esc(k)}</span><b>${w?esc(v):v}</b></div>`).join("")}</div></div>
+    <div class="df"><button class="c" type="button">Close</button></div>`;
+  dl.querySelector(".x").onclick=dl.querySelector(".c").onclick=()=>dl.close();dl.showModal();
+}
+function confirmAct(title,msg,ok){
+  const dl=$("#dlg");dl.className="dlg sm";
+  dl.innerHTML=`<div class="dh"><i>✅</i><div><b>${esc(title)}</b></div><button class="x" type="button" aria-label="Close">×</button></div><div class="db" style="font-size:14px;color:#495057">${msg}</div><div class="df"><button class="c" type="button">Cancel</button><button class="s" type="button">${esc(ok)}</button></div>`;
+  dl.querySelector(".x").onclick=dl.querySelector(".c").onclick=()=>dl.close();
+  dl.querySelector(".s").onclick=()=>{dl.close();toast(`${title}: preview only, nothing was changed.`)};dl.showModal();
+}
+
+/* ---------- list pages ---------- */
+const P={
+  "payment-links":{g:"Reservations",t:"Manage Payment Links",i:"🔗",d:"Advance payment links sent to guests",total:A.paylinks.total,btn:["+ Create Payment Link","createPayLink"],
+    kp:()=>[["Today",n(D.pay.today)],["Last 30 days",n(D.pay.last30)]],rows:()=>A.paylinks.rows,tab:"status",q:["booking","customer","mobile","by"],
+    cols:[["Booking-ID",r=>`<b>${esc(r.booking)}</b>`],["Customer",r=>`${esc(r.customer)}<span class="mut">${esc(r.mobile)}</span>`],["Amount",r=>inr(r.amount),"n"],["Status",r=>pill(r.status)],["Issued By",r=>esc(r.by)],["Created",r=>esc(r.created),"nw"]],
+    acts:r=>[["Resend",()=>confirmAct("Resend payment link",`Send the ₹${n(r.amount)} link for <b>${esc(r.booking)}</b> to ${esc(r.mobile)} again?`,"Resend")]],
+    det:r=>["Payment link",[["Booking-ID",r.booking],["Customer Name",r.customer],["Mobile",r.mobile],["Email",r.email],["Amount",inr(r.amount)],["Status",pill(r.status)],["Payment Link Id",r.linkId],["Issued By",r.by],["Created",r.created],["Updated",r.updated],["Comment",r.comment,1]]]},
+  "coupons":{g:"Reservations",t:"Coupon Issue Request",i:"🎟️",d:"Coupons requested for guests and their approval",total:A.coupons.total,btn:["+ Create Coupon","createCoupon"],
+    kp:()=>[["Coupon types",A.couponOptions.length],["Value on latest 300",inr(D.coupons.value)]],rows:()=>A.coupons.rows,tab:"status",q:["booking","guest","coupon","contact","outlet"],
+    cols:[["Booking-ID",r=>`<b>${esc(r.booking)}</b>`],["Guest",r=>`${esc(r.guest)}<span class="mut">${esc(r.contact)}</span>`],["Coupon",r=>`${esc(r.coupon)}<span class="mut">${esc(r.outlet)}</span>`],["Value",r=>inr(r.value),"n"],["Requested",r=>`${esc(r.reqAt)}<span class="mut">${esc(r.reqBy)}</span>`,"nw"],["Payment",r=>pill(r.pay)],["Coupon Status",r=>pill(r.status)]],
+    acts:r=>[["Approve",()=>confirmAct("Approve coupon",`Approve <b>${esc(r.coupon)}</b> for ${esc(r.guest)} (${esc(r.booking)})?`,"Approve")]],
+    det:r=>["Coupon request",[["Booking-ID",r.booking],["Guest",r.guest],["Contact",r.contact],["Coupon",r.coupon],["Coupon Type",r.type],["Coupon Value",inr(r.value)],["Outlet",r.outlet],["City",r.city],["Pax",r.pax],["Dining",r.din],["Requested at",r.reqAt],["Requested by",r.reqBy],["Approved by",r.apprBy],["Approved at",r.apprAt],["Payment Status",pill(r.pay)],["Coupon Status",pill(r.status)]]]},
+  "quotations":{g:"Reservations",t:"Quotation List",i:"🧾",d:"Quotation emails sent to leads",total:A.quotes.total,btn:["+ Send New Email","sendQuote"],rows:()=>A.quotes.rows,q:["lead","email","title","by"],
+    cols:[["Lead ID",r=>`<b>${esc(r.lead)}</b>`],["Email ID",r=>esc(r.email)],["Email Title",r=>`<span class="clip">${esc(r.title)}</span>`],["Created By",r=>esc(r.by)],["Created Date",r=>esc(r.at),"nw"]],
+    acts:r=>[["Preview",()=>openDetail(r.title||"Quotation","✉️",[["Lead ID",r.lead],["To",r.email],["Quotation",r.qtitle],["Created By",r.by],["Created",r.at],["Email body",r.body,1]])]],
+    det:r=>[r.title||"Quotation",[["Lead ID",r.lead],["To",r.email],["Quotation",r.qtitle],["Created By",r.by],["Created",r.at],["Email body",r.body,1]]]},
+  "advance":{g:"Reservations",t:"Advance Collection",i:"💳",d:"Bookings waiting for an advance payment",total:A.advance.total,
+    kp:()=>[["Unpaid",inr(D.adv.st.all.unpaidAmount)],["Acknowledged",n(D.adv.st.acknowledged.count)],["Collected",n(D.adv.st.collected.count)]],rows:()=>A.advance.rows,tab:"channel",q:["booking","guest","mobile","branch","agent"],
+    cols:[["Booking",r=>`<b>${esc(r.booking)}</b><span class="mut">${esc(r.source)} · ${esc(r.channel)}</span>`],["Guest",r=>`${esc(r.guest)}<span class="mut">${esc(r.mobile)}</span>`],["Reservation",r=>`${esc(r.branch)}<span class="mut">${esc(r.resAt)} · ${n(r.pax)} pax</span>`],["Advance",r=>inr(r.amount),"n"],["Status",r=>pill(r.status)]],
+    acts:r=>[["Acknowledge",()=>confirmAct("Acknowledge advance",`Mark the ₹${n(r.amount)} advance for <b>${esc(r.booking)}</b> as acknowledged? The guest gets a payment link.`,"Acknowledge"),"pri"]],
+    det:r=>["Advance collection",[["Booking",r.booking],["Brand",r.brand],["Channel",r.channel],["Source",r.source],["Branch",r.branch],["Guest",r.guest],["Mobile",r.mobile],["Pax",r.pax],["Reservation",r.resAt],["Booked at",r.createdAt],["Booked by",r.agent],["Advance",inr(r.amount)],["Payment",r.pay],["Status",pill(r.status)],["Resent",r.resend]]]},
+  "call-review":{g:"Reservations",t:"Agent Call Review",i:"🎧",d:"AI-rated calls that need review",total:A.calls.total,
+    kp:()=>[["To acknowledge",n(D.quality.dash.toAcknowledge),"r"],["To review",n(D.quality.dash.toReview)],["Training pending",n(D.quality.dash.trainingPending)],["Overall rating",D.quality.dash.overallRating+" / 5"]],rows:()=>A.calls.rows,tab:"status",q:["agent","guest","outcome","summary"],
+    cols:[["Agent",r=>`<b>${esc(r.agent)}</b>`],["Call",r=>`${esc(r.guest)}<span class="mut">${esc(r.at)} · ${Math.round(r.dur/60)}m ${r.dur%60}s</span>`,"nw"],["Outcome",r=>pill(r.outcome)],["Summary",r=>`<span class="clip">${esc(r.summary)}</span>`],["Rating",r=>stars(r.rating),"nw"],["Status",r=>pill(r.status)]],
+    acts:r=>[["Acknowledge",()=>confirmAct("Acknowledge call review",`Acknowledge the review of <b>${esc(r.agent)}</b>'s call on ${esc(r.at)}?`,"Acknowledge")]],
+    det:r=>[`Call by ${r.agent}`,[["Agent",r.agent],["Guest",r.guest],["Call at",r.at],["Duration",`${Math.round(r.dur/60)}m ${r.dur%60}s`],["Outcome",pill(r.outcome)],["Calls with guest",r.withGuest],["Bad calls",r.bad],["Repeat",r.repeat],["Rating",stars(r.rating)],["Status",pill(r.status)],["Call summary",r.summary,1],["Agent remarks",r.remarks,1]]]},
+  "tl-review":{g:"Reservations",t:"Team Lead Call Review",i:"👥",d:"Call quality by team leader",total:A.tls.total,rows:()=>A.tls.rows,q:["name"],
+    kp:()=>[["Calls reviewed",n(D.quality.total)],["Team leaders",n(A.tls.total)]],
+    cols:[["Team Leader",r=>`<b>${esc(r.name)}</b><span class="mut">${n(r.agents)} agents</span>`],["Calls / Bad",r=>`${n(r.calls)} / <b style="color:var(--red)">${n(r.bad)}</b><span class="mut">${r.badPct??"—"}% bad</span>`,"n"],["Acknowledged",r=>n(r.ack),"n"],["Avg rating",r=>stars(r.rating),"nw"],["Training",r=>`${n(r.tDone)} done<span class="mut">${n(r.tPend)} pending</span>`,"n"],["Improved",r=>n(r.improved),"n"]],
+    det:r=>[r.name,[["Agents",r.agents],["Total calls",r.calls],["Bad calls",r.bad],["Bad %",r.badPct+"%"],["Acknowledged",r.ack],["Avg agent rating",stars(r.rating)],["Training done",r.tDone],["Training pending",r.tPend],["Trained agents",r.trained],["Improved after training",r.improved]]]},
+  "leads":{g:"Leads",t:"Domestic View Leads",i:"📋",d:"Domestic leads created in the last 2 days",total:L.lead7.domestic.total,totalL:"leads in 7 days",btn:["+ Create Lead","createLead"],rows:()=>A.leads.rows,tab:"status",q:["customer","contact","source","outlet","agent","city"],
+    kp:()=>[["Today",n(L.daily.at(-1).domTotal)],["Converted today",n(L.daily.at(-1).dom.converted)]],
+    cols:[["Customer",r=>`<b>${esc(r.customer)}</b><span class="mut">${esc(r.contact)}</span>`],["Source",r=>`${esc(r.source)}<span class="mut">${esc(r.stype)}</span>`],["Slot",r=>esc(r.slot),"nw"],["Outlet",r=>`${esc(r.outlet)}<span class="mut">${esc(r.city)}</span>`],["Pax",r=>n(r.pax),"n"],["Acquired By",r=>esc(r.agent)],["Status",r=>pill(r.status)],["Created",r=>esc(r.created),"nw"]],
+    acts:r=>[["Follow up",()=>openForm("logBooking")]],
+    det:r=>[`Lead ${r.id}`,[["Lead ID",r.id],["Booking ID",r.booking],["Customer",r.customer],["Contact",r.contact],["Source",r.source],["Source Type",r.stype],["Slot",r.slot],["Outlet",r.outlet],["City",r.city],["Pax",r.pax],["Acquired By",r.agent],["Status",pill(r.status)],["Priority",r.priority],["Created",r.created]]]},
+  "intl-leads":{g:"Leads",t:"International View Leads",i:"🌍",d:"Calls to international outlets",total:A.intl.total,totalL:"calls today",rows:()=>A.intl.rows,tab:"status",q:["caller","outlet","category","by"],
+    kp:()=>D.intl.agent.map(([k,v])=>[k,n(v)]),
+    cols:[["Caller",r=>`<b>${esc(r.caller)}</b><span class="mut">${esc(r.at)}</span>`,"nw"],["Outlet",r=>esc(r.outlet)],["Call Status",r=>pill(r.status)],["Duration",r=>`${n(r.dur)}s`,"n"],["Category",r=>esc(r.category||"—")],["CRS Status",r=>pill(r.bstatus)],["Booking-ID",r=>esc(r.booking||"—")]],
+    det:r=>[`Call from ${r.caller}`,[["Caller",r.caller],["Call at",r.at],["Outlet",r.outlet],["Call status",pill(r.status)],["Duration",r.dur+"s"],["Times called",r.times],["Category",r.category],["CRS actionable",r.crs],["CRS remark",r.crsRemark,1],["Booking status",pill(r.bstatus)],["Booking remark",r.bremark,1],["Updated by",r.by],["Booking-ID",r.booking],["AI transcript",r.ai,1]]]},
+  "cater":{g:"ODC",t:"Manage Cater Leads",i:"🍽️",d:"Outdoor catering enquiries",total:D.odc.total,btn:["+ New Catering Lead","newCater"],rows:()=>A.odc.rows,tab:"status",q:["id","guest","contact","loc","assigned"],
+    kp:()=>[["Upcoming events",n(D.odc.upcoming)],["Total pax",n(D.odc.pax)]],
+    cols:[["ID",r=>`<b>${esc(r.id)}</b>`],["Event Date",r=>esc(r.event),"nw"],["Guest",r=>`${esc(r.guest)}<span class="mut">${esc(r.contact)}</span>`],["Pax",r=>n(r.pax),"n"],["Status",r=>pill(r.status)],["Assigned To",r=>esc(r.assigned||"—")],["Location",r=>esc(r.loc)]],
+    acts:r=>[["Assign",()=>confirmAct("Assign to SPOC",`Assign catering lead <b>${esc(r.id)}</b> (${n(r.pax)} pax, ${esc(r.loc)}) to a SPOC?`,"Assign")]],
+    det:r=>[r.id,[["ID",r.id],["Event Date",r.event],["Query Date",r.query],["Guest",r.guest],["Contact",r.contact],["Pax",r.pax],["Status",pill(r.status)],["Assigned To",r.assigned],["Acknowledged By",r.ack],["Event Location",r.loc]]]},
+  "instructions":{g:"Admin",t:"Branch Instruction",i:"📌",d:"Instructions agents see while booking",total:A.instr.length,btn:["+ Add Instruction","addInstr"],rows:()=>A.instr,tab:"type",q:["branch","text","type"],page:12,
+    kp:()=>[["Upcoming",n(D.instr.upcomingCount)],["Stop booking",n(D.instr.byType[0][1]),"r"]],
+    cols:[["Branch",r=>`<b>${esc(r.branch)}</b>`],["Day",r=>`${esc(r.day)}<span class="mut">${esc(r.date)}</span>`,"nw"],["Type",r=>pill(r.type)],["Instruction",r=>`<span class="clip">${esc(r.text)}</span>`],["Session",r=>esc(r.session)]],
+    det:r=>[r.branch,[["Branch",r.branch],["Day",r.day],["Date",r.date],["Session",r.session],["Type",pill(r.type)],["Instruction",r.text,1]]]},
+  "offers":{g:"Admin",t:"Offer Matrix",i:"🏷️",d:"CRS coupons applied by price band",total:A.offers.total,btn:["+ Create New","createOffer"],rows:()=>A.offers.rows,tab:"type",q:["name","vh","desc"],
+    kp:()=>D.offers.byType.map(([k,v])=>[k,n(v)]).concat([["Max discount","₹"+D.offers.maxDisc]]),
+    cols:[["V. HeadId",r=>`<b>${esc(r.vh)}</b>`],["Offer Name",r=>`${esc(r.name)}<span class="mut">${esc(r.desc)}</span>`],["Date Range",r=>`${esc(r.from)}<span class="mut">to ${esc(r.to)}</span>`,"nw"],["Price Range",r=>"₹"+esc(r.price),"nw"],["Pax",r=>esc(r.pax),"nw"],["Discount / Pax",r=>"₹"+n(r.disc),"n"],["Type",r=>pill(r.type)],["Priority",r=>n(r.prio),"n"]],
+    det:r=>[r.name,[["Voucher Head Id",r.vh],["Offer Name",r.name],["Offer Type",r.type],["Date Range",`${r.from} to ${r.to}`],["Days",r.days],["Time Range",r.time],["Last Entry",r.last],["Price Range","₹"+r.price],["Pax Range",r.pax],["Booking Gap (min)",r.gap],["Threshold (%)",r.thr],["Discount per pax","₹"+r.disc],["Outlet filter",r.filter],["Priority",r.prio],["Description",r.desc,1]]]},
+  "slots":{g:"Admin",t:"Branch Slot Management",i:"🕒",d:"Bookable slot times per branch and weekday",total:A.slots.length,btn:["+ Create New","createSlot"],rows:()=>A.slots,q:["branch","day"],
+    cols:[["Branch",r=>`<b>${esc(r.branch)}</b>`],["Week Day",r=>esc(r.day)],["Slot Times",r=>`<div class="chips">${r.times.slice(0,6).map(t=>`<span>${esc(t)}</span>`).join("")}${r.times.length>6?`<span>+${r.times.length-6}</span>`:""}</div>`],["Dates",r=>`${esc(r.from)}<span class="mut">to ${esc(r.to)}</span>`,"nw"],["Created",r=>`${esc(r.createdAt)}<span class="mut">${esc(r.by)}</span>`,"nw"]],
+    det:r=>[r.branch,[["Branch",r.branch],["Week Day",r.day],["Start",r.from],["End",r.to],["Created",r.createdAt],["Created by",r.by],["Updated",r.updatedAt],["Updated by",r.updBy],["Slot times",r.times.join(", "),1]]]},
+  "did":{g:"",t:"DID Mapping",i:"☎️",d:"Phone numbers and the call flow they route to",total:A.did.length,btn:["+ Create DID","createDID"],rows:()=>A.did,tab:"proc",q:["name","number","flow"],page:12,
+    kp:()=>D.did.byProc.slice(0,3).map(([k,v])=>[k,n(v)]),
+    cols:[["DID Name",r=>`<b>${esc(r.name)}</b>`],["DID Number",r=>esc(r.number),"nw"],["Flow Type",r=>esc(r.flow)],["Process",r=>pill(r.proc)]],
+    det:r=>[r.name,[["DID Name",r.name],["DID Number",r.number],["Flow Type",r.flow],["Process",r.proc]]]},
+};
+const S={q:"",tab:"",page:1};
+function listPage(key){
+  const C=P[key];let rows=C.rows();
+  const tabs=C.tab?Object.entries(rows.reduce((a,r)=>{const v=r[C.tab]||"—";a[v]=(a[v]||0)+1;return a},{})).sort((a,b)=>b[1]-a[1]):[];
+  if(S.tab)rows=rows.filter(r=>(r[C.tab]||"—")===S.tab);
+  if(S.q){const q=S.q.toLowerCase();rows=rows.filter(r=>C.q.some(k=>String(r[k]??"").toLowerCase().includes(q)))}
+  const per=C.page||10,pages=Math.max(1,Math.ceil(rows.length/per));S.page=Math.min(S.page,pages);
+  const vis=rows.slice((S.page-1)*per,S.page*per);
+  const kp=C.kp?C.kp():[];
+  return `<section class="ph"><div class="l"><h1><i>${C.i}</i>${esc(C.t)}</h1><p>${esc(C.d)}</p>${kp.length?`<div class="kps">${kp.map(([a,b,r])=>`<div><small>${esc(a)}</small><b class="${r||""}">${b}</b></div>`).join("")}</div>`:""}</div>
+    <div class="r"><small>${C.totalL?esc(C.totalL):"Total records"}</small><b>${n(C.total??C.rows().length)}</b>${C.btn?`<button type="button" data-form="${C.btn[1]}">${esc(C.btn[0])}</button>`:""}</div></section>
+  ${C.rows().length<(C.total||0)?`<div class="note">Showing the latest ${C.rows().length} of ${n(C.total)} from the live app. In the real page these load page by page from the API.</div>`:""}
+  <div class="tb"><div class="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="q" value="${esc(S.q)}" placeholder="Search keyword" autocomplete="off"></div>
+    ${tabs.length>1?`<div class="tabs2"><button type="button" data-tab="" class="${!S.tab?"on":""}">All<b>${C.rows().length}</b></button>${tabs.slice(0,6).map(([k,v])=>`<button type="button" data-tab="${esc(k)}" class="${S.tab===k?"on":""}">${esc(k)}<b>${v}</b></button>`).join("")}</div>`:""}
+    <span class="cnt">${rows.length} shown</span><button class="ex" type="button" id="exp">Export</button></div>
+  <div class="tcard"><div class="tw"><table class="t"><thead><tr>${C.cols.map(c=>`<th class="${c[2]==="n"?"n":""}">${esc(c[0])}</th>`).join("")}${C.acts?"<th></th>":""}</tr></thead>
+  <tbody>${vis.map((r,i)=>`<tr data-i="${(S.page-1)*per+i}">${C.cols.map(c=>`<td class="${c[2]||""}">${c[1](r)}</td>`).join("")}${C.acts?`<td class="act">${C.acts(r).map((a,j)=>`<button type="button" class="${a[2]||""}" data-a="${j}">${esc(a[0])}</button>`).join("")}</td>`:""}</tr>`).join("")||`<tr><td colspan="${C.cols.length+1}"><div class="empty"><div class="i">🔍</div><b>No match</b>Try another keyword or tab.</div></td></tr>`}</tbody></table></div>
+  ${pages>1?`<div class="pg"><span>Page ${S.page} of ${pages}</span><button type="button" data-p="${S.page-1}" ${S.page===1?"disabled":""}>‹</button>${[...Array(pages)].map((_,i)=>i+1).filter(p=>Math.abs(p-S.page)<3||p===1||p===pages).map(p=>`<button type="button" data-p="${p}" class="${p===S.page?"on":""}">${p}</button>`).join("")}<button type="button" data-p="${S.page+1}" ${S.page===pages?"disabled":""}>›</button></div>`:""}</div>`;
+}
+function bindList(key){
+  const C=P[key];
+  const q=$("#q");q.oninput=()=>{S.q=q.value;S.page=1;const pos=q.selectionStart;render();const nq=$("#q");nq.focus();nq.setSelectionRange(pos,pos)};
+  $$("[data-tab]").forEach(b=>b.onclick=()=>{S.tab=b.dataset.tab;S.page=1;render()});
+  $$("[data-p]").forEach(b=>b.onclick=()=>{S.page=+b.dataset.p;render()});
+  $("#exp").onclick=()=>toast("Export: preview only.");
+  let rows=C.rows();if(S.tab)rows=rows.filter(r=>(r[C.tab]||"—")===S.tab);if(S.q){const s=S.q.toLowerCase();rows=rows.filter(r=>C.q.some(k=>String(r[k]??"").toLowerCase().includes(s)))}
+  $$("tbody tr[data-i]").forEach(tr=>tr.onclick=e=>{const r=rows[+tr.dataset.i];const a=e.target.closest("[data-a]");if(a){C.acts(r)[+a.dataset.a][1]();return}if(C.det){const [t,p]=C.det(r);openDetail(t,C.i,p)}});
+}
+
+/* ---------- other pages ---------- */
+const MENU=[
+  ["Table Booking",[["🍽️","Domestic Booking","booking-11.html","Book a table"],["🌍","International Booking","#/intl-booking",A.intlBranches.length+" outlets"],["🍝","Toscano Salt Booking","#/toscano-booking",A.toscano.length+" outlets"]]],
+  ["Reservations",[["🔗","Manage Payment Links","#/payment-links",n(A.paylinks.total)+" links"],["🎟️","Coupon Issue Request","#/coupons",n(A.coupons.total)+" requests"],["📅","Reservation View","#/reservation-view","Outlet day view"],["🧾","Quotation List","#/quotations",n(A.quotes.total)+" emails"],["📈","Reservation Report","#/reservation-report","By outlet and date"],["💳","Advance Collection","#/advance",inr(D.adv.st.all.unpaidAmount)+" unpaid"],["🎧","Agent Call Review","#/call-review",n(A.calls.total)+" calls"],["👥","Team Lead Call Review","#/tl-review",n(A.tls.total)+" team leaders"]]],
+  ["Leads",[["📊","Lead Dashboard","#/lead-dashboard","Agents and sources"],["📋","Domestic View Leads","#/leads",n(L.lead7.domestic.total)+" in 7 days"],["🗂️","Domestic View Leads New","#/leads-new","By source"],["🌐","International View Leads","#/intl-leads",n(A.intl.total)+" calls today"],["🍷","Toscano Salt Leads","#/toscano-leads","Toscano and Salt"],["➕","Add Leads","#/leads?open=createLead","Popup form"]]],
+  ["ODC",[["🍽️","Manage Cater Leads","#/cater",n(D.odc.total)+" leads"],["➕","New Catering Leads","#/cater?open=newCater","Popup form"]]],
+  ["Admin",[["📌","Branch Instruction","#/instructions",A.instr.length+" instructions"],["🏷️","Offer Matrix","#/offers",A.offers.total+" offers"],["🕒","Branch Slot Management","#/slots",A.slots.length+" definitions"]]],
+  ["Tools",[["📊","Dashboard","dashboard.html","Today at a glance"],["🔎","Search Booking","#/home?open=searchBooking","Popup"],["📝","Log Booking","#/home?open=logBooking","Popup"],["☎️","DID Mapping","#/did",A.did.length+" numbers"]]],
+];
+const PAGES={
+  home:{t:"All modules",i:"🧭",r:()=>`<section class="ph"><div class="l"><h1><i>🧭</i>All modules</h1><p>Every page of Reeserio in one place. Pick one to open it.</p></div><div class="r"><small>Pages</small><b>${MENU.reduce((a,g)=>a+g[1].length,0)}</b><a href="booking-11.html">+ Book a table</a></div></section>`+
+    MENU.map(([g,items])=>`<div class="hgrp">${g}</div><div class="hg">${items.map(([i,t,h,s])=>`<a class="hc" href="${h}"><i>${i}</i><span><b>${t}</b><small>${s}</small></span><em>OPEN →</em></a>`).join("")}</div>`).join("")},
+  "lead-dashboard":{g:"Leads",t:"Lead Dashboard",i:"📊",r:()=>{const ag=L.agentsToday.slice(0,12),sr=L.sourcesToday;
+    return `<section class="ph"><div class="l"><h1><i>📊</i>Lead Dashboard</h1><p>Today by agent and by source</p><div class="kps"><div><small>Domestic today</small><b>${n(L.daily.at(-1).domTotal)}</b></div><div><small>Converted</small><b>${n(L.daily.at(-1).dom.converted)}</b></div><div><small>Agents active</small><b>${n(L.agentsActiveToday)}</b></div></div></div><div class="r"><small>Leads, 7 days</small><b>${n(L.lead7.domestic.total)}</b><a href="dashboard.html">Open dashboard</a></div></section>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr));gap:16px"><div class="tcard"><div class="tw"><table class="t"><thead><tr><th>User Name</th><th class="n">Total</th><th class="n">Domestic</th><th class="n">Intl</th><th class="n">Confirmed</th><th class="n">Pending</th><th class="n">Not conf.</th></tr></thead><tbody>${ag.map(a=>`<tr><td><b>${esc(a.agentName)}</b></td><td class="n">${n(a.total)}</td><td class="n">${n(a.domestic)}</td><td class="n">${n(a.international)}</td><td class="n"><b>${n(a.confirmed)}</b></td><td class="n">${n(a.pending)}</td><td class="n">${n(a.notConfirmed)}</td></tr>`).join("")}</tbody></table></div></div>
+    <div class="tcard"><div class="tw"><table class="t"><thead><tr><th>Source</th><th class="n">Total</th><th class="n">New</th><th class="n">Open</th><th class="n">Booked</th><th class="n">Not conv.</th></tr></thead><tbody>${sr.map(s=>`<tr><td><b>${esc(s.source)}</b></td><td class="n">${n(s.total)}</td><td class="n">${n(s.new)}</td><td class="n">${n(s.ongoing)}</td><td class="n"><b>${n(s.booked)}</b></td><td class="n">${n(s.notConverted)}</td></tr>`).join("")}</tbody></table></div></div></div>`}},
+  "leads-new":{g:"Leads",t:"Domestic View Leads New",i:"🗂️",r:()=>`<section class="ph"><div class="l"><h1><i>🗂️</i>Domestic View Leads New</h1><p>LMS leads by source, last 2 days</p></div><div class="r"><small>All sources</small><b>${n((A.leadSources.find(s=>s.name==="All")||{}).count)}</b><button type="button" data-form="createLead">+ Create Lead</button></div></section>
+    <div class="hg">${A.leadSources.filter(s=>s.name!=="All").map(s=>`<a class="hc" href="#/leads"><i>📥</i><span><b>${esc(s.name)}</b><small>${n(s.count)} leads</small></span><em>VIEW →</em></a>`).join("")}</div>`},
+  "intl-booking":{g:"Table Booking",t:"International Booking",i:"🌍",r:()=>branchPage("International Booking","🌍","International outlets",A.intlBranches.map(b=>({name:b,sub:"International"})))},
+  "toscano-booking":{g:"Table Booking",t:"Toscano Salt Booking",i:"🍝",r:()=>branchPage("Toscano Salt Booking","🍝","Toscano and Salt outlets",A.toscano.map(b=>({name:b.name,sub:[b.city,b.liquor==="Y"||b.liquor===true?"Bar":""].filter(Boolean).join(" · ")})))},
+  "reservation-view":{g:"Reservations",t:"Reservation View",i:"📅",r:()=>emptyPage("Reservation View","📅","Bookings at one outlet for a day, by session",["Lunch 1","Lunch 2","Dinner 1","Dinner 2"],["Active","Settled","Cancelled","Not confirmed"])},
+  "reservation-report":{g:"Reservations",t:"Reservation Report",i:"📈",r:()=>emptyPage("Reservation Report","📈","Bookings by outlet, date and booking mode",[],["Reeserio","AryanTest"])},
+  "toscano-leads":{g:"Leads",t:"Toscano Salt Leads",i:"🍷",r:()=>emptyPage("Toscano Salt Leads","🍷","Leads for Toscano and Salt outlets",[],[])},
+  "followups":{g:"",t:"Follow-ups",i:"⏰",r:()=>`<section class="ph"><div class="l"><h1><i>⏰</i>Follow-ups</h1><p>Leads waiting for a call back</p><div class="kps"><div><small>Overdue</small><b class="r">${n(L.followup.overdueFollowUps)}</b></div><div><small>Coming up next</small><b>${n(L.followup.upcomingFollowUps)}</b></div></div></div><div class="r"><small>Total</small><b>${n(L.followup.overdueFollowUps+L.followup.upcomingFollowUps)}</b><button type="button" data-form="logBooking">Log a call</button></div></section><div class="tcard"><div class="empty"><div class="i">⏰</div><b>Follow-up list loads from the live app</b>This snapshot only has the counts. Open Domestic View Leads to work on leads.<br><br><a href="#/leads" style="color:var(--ember);font-weight:800">Open Domestic View Leads →</a></div></div>`},
+};
+function branchPage(t,i,d,list){return `<section class="ph"><div class="l"><h1><i>${i}</i>${t}</h1><p>${d}. The booking flow is the same as Domestic Booking.</p></div><div class="r"><small>Outlets</small><b>${list.length}</b><a href="booking-11.html">Open booking page</a></div></section><div class="bg">${list.map(b=>`<div class="bc"><span><b>${esc(b.name)}</b><small>${esc(b.sub)}</small></span><a href="booking-11.html">Book →</a></div>`).join("")}</div>`}
+function emptyPage(t,i,d,sess,stat){return `<section class="ph"><div class="l"><h1><i>${i}</i>${t}</h1><p>${d}</p></div><div class="r"><small>Outlets</small><b>${OUTLETS.length}</b><button type="button" data-form="searchBooking">Search booking</button></div></section>
+  <div class="fl"><select aria-label="Outlet"><option>Select Outlet/Branch</option>${OUTLETS.map(o=>`<option>${esc(o)}</option>`).join("")}</select><input type="date" aria-label="Date"></div>
+  ${sess.length?`<div class="tabs2" style="margin-bottom:10px">${sess.map((s,k)=>`<button type="button" class="${k?"":"on"}">${s}<b>0</b></button>`).join("")}${stat.map(s=>`<button type="button">${s}<b>0</b></button>`).join("")}</div>`:""}
+  <div class="tcard"><div class="empty"><div class="i">${i}</div><b>Select an outlet and a date</b>Bookings load from CRS for the outlet you pick. This snapshot has no bookings loaded.</div></div>`}
+
+/* ---------- router ---------- */
+let cur="";
+function route(){const h=location.hash.replace(/^#\/?/,"")||"home";const [p,qs]=h.split("?");return {key:p,open:new URLSearchParams(qs||"").get("open")}}
+function render(){
+  const {key}=route(),pg=P[key]||PAGES[key]||PAGES.home,k=P[key]||PAGES[key]?key:"home";
+  $("#view").innerHTML=P[k]?listPage(k):pg.r();
+  if(P[k])bindList(k);
+  $$("#view [data-form]").forEach(b=>b.onclick=()=>openForm(b.dataset.form));
+  // header crumb + active menu
+  const g=pg.g;$(".crumb").innerHTML=`<a href="dashboard.html">Dashboard</a>${g?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg><span>${esc(g)}</span>`:""}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg><b>${esc(pg.t)}</b>`;
+  document.title=`Reeserio · ${pg.t}`;
+  $$("#side a").forEach(a=>{const on=a.getAttribute("href")===`#/${k}`;a.classList.toggle("on2",on);if(on){let d=a.closest("details");while(d){d.open=true;d=d.parentElement.closest("details")}}});
+}
+addEventListener("hashchange",()=>{const r=route();if(r.key!==cur){S.q="";S.tab="";S.page=1;cur=r.key;render();scrollTo(0,0)}if(r.open&&F[r.open])openForm(r.open)});
+
+/* ---------- shell ---------- */
+const shell=$("#shell"),side=$("#side"),scrim=$("#scrim"),mq=matchMedia("(max-width:979px)");
+const closeDrawer=()=>{side.classList.remove("open");scrim.classList.remove("show")};
+$("#ham").onclick=()=>{if(mq.matches){side.classList.toggle("open");scrim.classList.toggle("show")}else shell.classList.toggle("collapsed")};
+$("#sideClose").onclick=closeDrawer;scrim.onclick=closeDrawer;
+side.addEventListener("click",e=>{if(e.target.closest("a")&&mq.matches)closeDrawer()});
+addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer()});
+$("#envLive").onclick=()=>{$("#envLive").classList.add("on");$("#envTest").classList.remove("on")};
+$("#envTest").onclick=()=>{$("#envTest").classList.add("on");$("#envLive").classList.remove("on")};
+$("#fuN").textContent=L.followup.upcomingFollowUps;$("#fuO").textContent=L.followup.overdueFollowUps;
+cur=route().key;render();{const o=route().open;if(o&&F[o])openForm(o)}
+</script>

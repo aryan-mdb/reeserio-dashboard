@@ -121,7 +121,7 @@ main.wrap{max-width:1280px;padding-top:18px;padding-bottom:40px}
   </div>
 </section>
 
-<div class="sh"><h2>Modules</h2><small>One number for each part of Reeserio. Open any to go to that page.</small></div>
+<div class="sh"><h2>Modules</h2><small>One number for each part of Reeserio. Open any to go to that page.</small><a href="app.html#/home" style="margin-left:auto;font-size:13px;font-weight:800;color:var(--ember);text-decoration:none">All modules →</a></div>
 <div class="mods" id="mods"></div>
 
 <div class="pn3">
@@ -166,20 +166,20 @@ $("#wkR").innerHTML=`Converted <b>${n(W.leadsProgress.converted)}</b> · ${pct(W
 /* module coupons */
 const A=D.adv, Q=D.quality, O=D.odc;
 const M=[
-  ["📊","Lead Dashboard",n(L.lead7.domestic.total+L.lead7.international.total),"leads in the last 7 days"],
-  ["⏰","Follow-ups",n(L.followup.overdueFollowUps),`overdue · ${n(L.followup.upcomingFollowUps)} next`,"r"],
-  ["💳","Advance Collection",inr(A.st.all.unpaidAmount),`unpaid on ${n(A.total)} bookings`],
-  ["🔗","Payment Links",n(D.pay.today),`today · ${n(D.pay.last30)} in 30 days`],
-  ["🎟️","Coupon Issue",n(D.coupons.total),"coupons requested"],
-  ["🧾","Quotation List",n(D.quotes.total),"quotations"],
-  ["🎧","Call Quality",Q.dash.overallRating+" / 5",`${n(Q.dash.toAcknowledge)} to acknowledge`],
-  ["🍽️","Catering (ODC)",n(O.total),`leads · ${n(O.upcoming)} upcoming events`],
-  ["📌","Branch Instruction",n(D.instr.upcomingCount),`upcoming · ${n(D.instr.byType[0][1])} stop booking`],
-  ["🏷️","Offer Matrix",n(D.offers.total),`offers · up to ₹${D.offers.maxDisc} off/person`],
-  ["☎️","DID Mapping",n(D.did.total),`numbers · ${n(D.did.inb)} inbound`],
-  ["📍","Outlets",n(D.net.dom),`in ${D.net.cities} cities · ${D.net.intl} international`],
+  ["📊","Lead Dashboard",n(L.lead7.domestic.total+L.lead7.international.total),"leads in the last 7 days","","app.html#/lead-dashboard"],
+  ["⏰","Follow-ups",n(L.followup.overdueFollowUps),`overdue · ${n(L.followup.upcomingFollowUps)} next`,"r","app.html#/followups"],
+  ["💳","Advance Collection",inr(A.st.all.unpaidAmount),`unpaid on ${n(A.total)} bookings`,"","app.html#/advance"],
+  ["🔗","Payment Links",n(D.pay.today),`today · ${n(D.pay.last30)} in 30 days`,"","app.html#/payment-links"],
+  ["🎟️","Coupon Issue",n(D.coupons.total),"coupons requested","","app.html#/coupons"],
+  ["🧾","Quotation List",n(D.quotes.total),"quotations","","app.html#/quotations"],
+  ["🎧","Call Quality",Q.dash.overallRating+" / 5",`${n(Q.dash.toAcknowledge)} to acknowledge`,"","app.html#/call-review"],
+  ["🍽️","Catering (ODC)",n(O.total),`leads · ${n(O.upcoming)} upcoming events`,"","app.html#/cater"],
+  ["📌","Branch Instruction",n(D.instr.upcomingCount),`upcoming · ${n(D.instr.byType[0][1])} stop booking`,"","app.html#/instructions"],
+  ["🏷️","Offer Matrix",n(D.offers.total),`offers · up to ₹${D.offers.maxDisc} off/person`,"","app.html#/offers"],
+  ["☎️","DID Mapping",n(D.did.total),`numbers · ${n(D.did.inb)} inbound`,"","app.html#/did"],
+  ["📍","Outlets",n(D.net.dom),`in ${D.net.cities} cities · ${D.net.intl} international`,"","app.html#/home"],
 ];
-$("#mods").innerHTML=M.map(([i,t,v,s,w])=>`<a class="md" href="#"><div class="top"><div class="h"><i class="${w?"w":""}">${i}</i>${t}</div><b class="${w||""}">${v}</b><span>${s}</span></div><div class="go">Open<span aria-hidden="true">→</span></div></a>`).join("");
+$("#mods").innerHTML=M.map(([i,t,v,s,w,h])=>`<a class="md" href="${h}"><div class="top"><div class="h"><i class="${w?"w":""}">${i}</i>${t}</div><b class="${w||""}">${v}</b><span>${s}</span></div><div class="go">Open<span aria-hidden="true">→</span></div></a>`).join("");
 
 /* 7-day stacked bars: converted + other leads (one axis, one hue family) */
 function chart(){
