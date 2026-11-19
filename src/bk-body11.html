@@ -1,0 +1,261 @@
+<style>
+/* Booking v11: one editable booking ticket + an offers board.
+   Fields are filled right on the ticket; the stub carries the total and Create.
+   Every deal for the slot, every outlet offer and every Happiness Card is visible below. */
+main.wrap{max-width:1180px;padding-top:18px;padding-bottom:40px}
+.crumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);flex:1;min-width:0}
+.crumb b{color:var(--fg);font-weight:600}
+.crumb svg{width:14px;height:14px;color:var(--faint)}
+
+/* ---- ticket ---- */
+.tkt{display:grid;grid-template-columns:minmax(0,1fr) 290px;filter:drop-shadow(0 10px 24px rgba(16,24,40,.09))}
+.tm{background:#fff;border-radius:20px 0 0 20px;padding:20px 26px 18px;position:relative;
+  -webkit-mask:radial-gradient(circle 13px at 100% 0,#0000 98%,#000) top right/100% 51% no-repeat,radial-gradient(circle 13px at 100% 100%,#0000 98%,#000) bottom right/100% 51% no-repeat;
+          mask:radial-gradient(circle 13px at 100% 0,#0000 98%,#000) top right/100% 51% no-repeat,radial-gradient(circle 13px at 100% 100%,#0000 98%,#000) bottom right/100% 51% no-repeat}
+.ts{background:linear-gradient(160deg,#ff7a1f,#ff5a00);color:#fff;border-radius:0 20px 20px 0;padding:20px 22px;display:flex;flex-direction:column;position:relative;border-left:2.5px dashed rgba(255,255,255,.55);
+  -webkit-mask:radial-gradient(circle 13px at 0 0,#0000 98%,#000) top left/100% 51% no-repeat,radial-gradient(circle 13px at 0 100%,#0000 98%,#000) bottom left/100% 51% no-repeat;
+          mask:radial-gradient(circle 13px at 0 0,#0000 98%,#000) top left/100% 51% no-repeat,radial-gradient(circle 13px at 0 100%,#0000 98%,#000) bottom left/100% 51% no-repeat}
+.th{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.th img{width:26px;height:28px;object-fit:contain}
+.th b{font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.th .new{margin-left:auto;border:0;background:none;color:var(--muted);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px}
+.th .new:hover{color:var(--ember)}
+.tr{display:grid;gap:14px;padding:12px 0;border-top:1px dashed var(--line-2)}
+.tr:first-of-type{border-top:0;padding-top:0}
+.tr.a{grid-template-columns:minmax(0,1.15fr) minmax(0,1.1fr) auto auto}
+.tr.b{grid-template-columns:minmax(0,.9fr) minmax(0,1.5fr)}
+.tr.d{grid-template-columns:minmax(0,.9fr) minmax(0,1.5fr)}
+.f{display:flex;flex-direction:column;gap:5px;min-width:0}
+.f>label,.f>.l{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
+.f .l small{letter-spacing:0;text-transform:none;font-weight:600}
+.u{border:0;border-bottom:2px solid var(--line-2);background:none;font:inherit;font-size:18px;font-weight:700;color:var(--fg);padding:4px 0 6px;width:100%;min-width:0;outline:none;border-radius:0}
+.u::placeholder{color:#c3c3cb;font-weight:600}
+.u:focus{border-bottom-color:var(--ember)}
+.u.sm{font-size:14.5px}
+select.u{appearance:none;cursor:pointer;padding-right:22px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23495057' stroke-width='2.4'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 0 center}
+.mob{display:flex;align-items:baseline;gap:6px;border-bottom:2px solid var(--line-2)}
+.mob:focus-within{border-bottom-color:var(--ember)}
+.mob span{font-size:18px;font-weight:700;color:var(--muted)}
+.mob .u{border:0}
+.cnt{display:flex;align-items:center;gap:8px;padding-top:2px}
+.cnt button{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--line-2);background:#fff;font-size:18px;cursor:pointer;color:#495057;line-height:1}
+.cnt button:hover{border-color:var(--ember);color:var(--ember)}
+.cnt output{font-size:22px;font-weight:800;min-width:26px;text-align:center;font-variant-numeric:tabular-nums}
+.pl{display:flex;flex-wrap:wrap;gap:6px}
+.p{border:1.5px solid var(--line-2);background:#fff;border-radius:10px;padding:7px 12px;font:inherit;font-size:13.5px;font-weight:700;color:#343a40;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.p small{font-size:11.5px;font-weight:600;color:var(--muted)}
+.p:hover{border-color:var(--ember)}
+.p.on{background:var(--fg);border-color:var(--fg);color:#fff}
+.p.on small{color:rgba(255,255,255,.75)}
+.p .d{width:7px;height:7px;border-radius:50%;background:var(--s)}
+.s-ok{--s:#2fa36b}.s-fill{--s:#e8a317}.s-low{--s:#e35d6a}.s-na{--s:#c9c9d1}
+.lowp{font-size:12px;color:#1d4f91;font-weight:700;margin-top:6px}
+.nt{font-size:12px;color:#7a5408;margin-top:6px}
+
+/* stub */
+.ts .k{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+.ts .o{font-size:15px;font-weight:800;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ts .dt{font-size:30px;font-weight:800;line-height:1.1;margin-top:10px;letter-spacing:-.01em}
+.ts .dd{font-size:14px;font-weight:700;opacity:.9}
+.ts .px{margin-top:10px;font-size:13px;font-weight:700;opacity:.92}
+.ts .of{margin-top:10px;background:rgba(255,255,255,.18);border-radius:10px;padding:8px 10px;font-size:12.5px;font-weight:700;line-height:1.35}
+.ts .of small{display:block;font-weight:600;opacity:.85}
+.ts .tot{margin-top:auto;padding-top:12px}
+.ts .tot small{font-size:12px;opacity:.85;display:block}
+.ts .tot b{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.ts .save{display:inline-block;margin-top:2px;background:#fff;color:#1f7a4d;border-radius:99px;padding:2px 9px;font-size:11.5px;font-weight:800}
+.ts .go{margin-top:12px;height:52px;border:0;border-radius:14px;background:#1f2328;color:#fff;font:inherit;font-weight:800;font-size:16px;cursor:pointer}
+.ts .go:disabled{background:rgba(0,0,0,.18);color:rgba(255,255,255,.7);cursor:not-allowed}
+.ts .need{font-size:12px;font-weight:700;margin-top:8px;min-height:16px;opacity:.95}
+
+/* ---- offers board ---- */
+.ob{margin-top:22px;display:flex;flex-direction:column;gap:18px}
+.oh{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;margin-bottom:10px}
+.oh h2{margin:0;font-size:17px;font-weight:800}
+.oh .c{font-size:11.5px;font-weight:800;background:var(--ember);color:#fff;border-radius:99px;padding:1px 8px}
+.oh small{font-size:12.5px;color:var(--muted)}
+.dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.dc{position:relative;text-align:left;border:1.5px solid var(--line);background:#fff;border-radius:16px;padding:14px 14px 12px;cursor:pointer;font:inherit;color:inherit;display:flex;flex-direction:column;gap:4px;transition:transform .12s,border-color .12s,box-shadow .12s}
+.dc:hover:not(:disabled){border-color:var(--ember);transform:translateY(-2px);box-shadow:0 8px 18px rgba(255,98,0,.12)}
+.dc.on{border-color:var(--ember);background:linear-gradient(160deg,#fff4ec,#fff);box-shadow:0 0 0 1.5px var(--ember) inset}
+.dc:disabled{cursor:not-allowed;opacity:.5}
+.dc .rb{align-self:flex-start;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#fff;background:var(--ember);border-radius:6px;padding:2px 7px}
+.dc .rb.g{background:var(--bg-2);color:var(--muted)}
+.dc .nm{font-weight:800;font-size:14.5px;display:flex;align-items:center;gap:6px;margin-top:2px}
+.dc .pr{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.dc .pr small{font-size:12px;font-weight:600;color:var(--muted)}
+.dc .pr s{font-size:12.5px;color:var(--faint);font-weight:600;margin-left:4px}
+.dc .mt{font-size:12px;color:var(--muted)}
+.dc .mt.x{color:var(--red);font-weight:700}
+.dc .ck{position:absolute;top:12px;right:12px;width:22px;height:22px;border-radius:50%;background:var(--ember);color:#fff;display:none;place-items:center}
+.dc.on .ck{display:grid}
+.dc .best{position:absolute;top:-9px;right:12px;background:#1f7a4d;color:#fff;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;border-radius:6px;padding:2px 7px}
+.dc.on .best{right:40px}
+.veg{width:12px;height:12px;border:1.5px solid #198754;border-radius:2px;display:inline-grid;place-items:center;flex:none;background:#fff}
+.veg::after{content:"";width:6px;height:6px;border-radius:50%;background:#198754}
+.veg.nv{border-color:#a0410d}.veg.nv::after{background:#a0410d}
+.emp{padding:18px;border:1.5px dashed var(--line-2);border-radius:14px;color:var(--muted);font-size:13.5px;text-align:center}
+.two{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:18px}
+.pc{background:#fff;border:1px solid var(--line);border-radius:16px;padding:6px 16px}
+.pr2{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.35}
+.pr2:last-child{border-bottom:0}
+.pr2 i{width:30px;height:30px;border-radius:9px;background:var(--ember-soft);color:var(--ember);display:grid;place-items:center;font-style:normal;font-size:15px;flex:none}
+.hc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.hcc{border-radius:12px;padding:10px 12px;background:linear-gradient(150deg,#fff4ec,#fff);border:1px solid #ffdcc4}
+.hcc small{display:block;font-size:11.5px;color:var(--muted);font-weight:600}
+.hcc b{font-size:15.5px;font-variant-numeric:tabular-nums}
+.foot{font-size:11.5px;color:var(--faint);text-align:center;margin-top:20px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:#1f2328;color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:all .25s;z-index:60;max-width:calc(100vw - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:1100px){.tr.a{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}}
+@media (max-width:860px){
+  .tkt{grid-template-columns:1fr}
+  .tm{border-radius:20px 20px 0 0;-webkit-mask:none;mask:none}
+  .ts{border-radius:0 0 20px 20px;border-left:0;border-top:2.5px dashed rgba(255,255,255,.55);-webkit-mask:none;mask:none}
+  .tr.b,.tr.d{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  .hbtn.fill .plus{display:block!important}
+  .crumb{display:none}
+  main.wrap{padding-left:12px;padding-right:12px}
+  .tm{padding:16px}
+  .tr.a{grid-template-columns:1fr 1fr}
+  .tr.a .f:nth-child(-n+2){grid-column:1/-1}
+  .hc{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dl{grid-template-columns:1fr 1fr}
+}
+</style>
+
+<section class="tkt">
+  <div class="tm">
+    <div class="th"><img src="data:image/png;base64,LOGO_B64" alt=""><b>Table booking</b><button class="new" id="new" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 11a8 8 0 10-2.3 5.7M20 4v7h-7"/></svg>New</button></div>
+    <div class="tr a">
+      <div class="f"><label for="mob">Mobile Number</label><div class="mob"><span>+91</span><input class="u" id="mob" inputmode="numeric" maxlength="10" placeholder="98765 43210" autocomplete="off"></div></div>
+      <div class="f"><label for="nm">Guest Name</label><input class="u" id="nm" placeholder="Name" autocomplete="off"></div>
+      <div class="f"><span class="l">Adult</span><div class="cnt" data-k="adults"><button type="button" data-d="-1" aria-label="Fewer adults">−</button><output>2</output><button type="button" data-d="1" aria-label="More adults">+</button></div></div>
+      <div class="f"><span class="l">Kids 6–9</span><div class="cnt" data-k="kids"><button type="button" data-d="-1" aria-label="Fewer kids">−</button><output>0</output><button type="button" data-d="1" aria-label="More kids">+</button></div></div>
+    </div>
+    <div class="tr b">
+      <div class="f"><label for="outlet">Outlet</label><select class="u" id="outlet"></select></div>
+      <div class="f"><span class="l">Dine Date</span><div class="pl" id="days"></div></div>
+    </div>
+    <div class="tr"><div class="f"><span class="l">Time <small id="tN"></small></span><div class="pl" id="slots"></div><div id="tX"></div></div></div>
+    <div class="tr d">
+      <div class="f"><label for="occ">Occasion <small style="font-weight:600;letter-spacing:0;text-transform:none">optional</small></label><select class="u sm" id="occ"></select></div>
+      <div class="f"><label for="ins">Instruction to outlet <small style="font-weight:600;letter-spacing:0;text-transform:none">optional</small></label><input class="u sm" id="ins" placeholder="e.g. window seat" autocomplete="off"></div>
+    </div>
+  </div>
+  <div class="ts">
+    <div class="k">Your booking</div>
+    <div class="o" id="sO"></div>
+    <div class="dt" id="sT">--:--</div><div class="dd" id="sD"></div>
+    <div class="px" id="sP"></div>
+    <div class="of" id="sF"></div>
+    <div class="tot"><small id="eS">Estimate</small><b id="eT">₹0</b><div id="sv"></div></div>
+    <button class="go" id="create" type="button" disabled>Create Booking</button>
+    <div class="need" id="need"></div>
+  </div>
+</section>
+
+<section class="ob">
+  <div><div class="oh"><h2>Deals &amp; booking type</h2><span class="c" id="dN"></span><small id="dS"></small></div><div id="deals"></div></div>
+  <div class="two">
+    <div><div class="oh"><h2>Outlet Offers</h2><span class="c" id="oN"></span><small>Cashback, birthday and seasonal offers to share</small></div><div class="pc" id="promos"></div></div>
+    <div><div class="oh"><h2>Happiness Card</h2><span class="c" id="hN"></span><small>Sold separately</small></div><div class="hc" id="cards"></div></div>
+  </div>
+</section>
+<p class="foot">Preview built from the live booking page for Atria Mall, Worli, 18 Nov 2026, 3:50 PM IST. Nothing is saved.</p>
+</main>
+</div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const BK=/*BOOK*/null, FU=/*FU*/null;
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const inr=n=>"₹"+Math.round(n).toLocaleString("en-IN");
+const t12=h=>{let [a,b]=h.split(":").map(Number);const p=a>=12?"PM":"AM";a=a%12||12;return a+":"+String(b).padStart(2,"0")+" "+p};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const SNAP=new Date(BK.snap), SNAPMIN=SNAP.getHours()*60+SNAP.getMinutes(), mins=h=>{const [a,b]=h.split(":").map(Number);return a*60+b};
+const DAYS=[...Array(6)].map((_,i)=>{const d=new Date(SNAP);d.setDate(d.getDate()+i);return d});
+const fresh=()=>({mobile:"",name:"",adults:2,kids:0,outlet:BK.outlet.branch_name,day:0,slot:null,pkg:null,manual:false});
+let S=fresh();
+
+$("#outlet").innerHTML=`<option value="">Select branch</option>`+BK.cities.slice().sort((a,b)=>b.l.length-a.l.length).map(c=>`<optgroup label="${esc(c.c)}">${c.l.map(o=>`<option ${o===S.outlet?"selected":""}>${esc(o)}</option>`).join("")}</optgroup>`).join("");
+$("#occ").innerHTML=`<option value="">—</option>`+BK.occasions.filter(o=>o!=="Not mentioned").map(o=>`<option>${esc(o)}</option>`).join("");
+$("#days").innerHTML=DAYS.map((d,i)=>`<button type="button" class="p" data-i="${i}">${i===0?"Today":i===1?"Tomorrow":d.toLocaleDateString("en-IN",{weekday:"short"})} <small>${d.getDate()}</small></button>`).join("");
+
+const hasData=()=>S.outlet===BK.outlet.branch_name&&S.day===0;
+const open=()=>BK.slots.filter(s=>!hasData()||(mins(s.from)>=SNAPMIN&&s.cap>0));
+const slotObj=()=>S.slot&&BK.slots.find(s=>s.p+s.from===S.slot);
+const pkgs=()=>{const s=slotObj();if(!s)return[];const t=mins(s.from);return BK.prices.filter(p=>p.ct==="Adult"&&mins(p.from)<=t&&t<=mins(p.to))};
+const kidPrice=()=>{const s=slotObj();if(!s)return 0;const t=mins(s.from);const k=BK.prices.find(p=>p.ct==="Child"&&mins(p.from)<=t&&t<=mins(p.to));return k?k.amt:0};
+const pkObj=()=>S.pkg==="REG"?{dn:"Regular booking",reg:true}:pkgs().find(p=>p.dn===S.pkg);
+const base=()=>pkgs().find(p=>p.dn==="NON-VEG");
+/* best deal = cheapest non-veg buffet the party qualifies for; Student needs an ID so it is never auto-picked */
+const best=()=>pkgs().filter(p=>p.ft==="NON-VEG"&&S.adults>=p.min&&!/Student/.test(p.dn)).sort((a,b)=>a.amt-b.amt)[0];
+function autoPick(){if(!slotObj()){S.pkg=null;return}const cur=pkObj();if(S.manual&&cur&&(cur.reg||S.adults>=cur.min))return;S.manual=false;const b=best();S.pkg=b?b.dn:"REG"}
+
+$("#mob").oninput=e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,10);S.mobile=e.target.value;if(/^[6-9]\d{9}$/.test(S.mobile)&&!S.name)$("#nm").focus();render()};
+$("#nm").oninput=e=>{S.name=e.target.value;render()};
+$$(".cnt").forEach(c=>c.onclick=e=>{const b=e.target.closest("button");if(!b)return;const k=c.dataset.k;S[k]=Math.max(0,Math.min(99,S[k]+ +b.dataset.d));render()});
+$("#outlet").onchange=e=>{S.outlet=e.target.value;S.slot=null;render()};
+$("#days").onclick=e=>{const b=e.target.closest(".p");if(!b)return;S.day=+b.dataset.i;S.slot=null;render()};
+$("#slots").onclick=e=>{const b=e.target.closest(".p");if(!b)return;S.slot=b.dataset.k;render()};
+$("#deals").onclick=e=>{const b=e.target.closest(".dc");if(!b||b.disabled)return;S.pkg=b.dataset.k;S.manual=true;render()};
+$("#new").onclick=()=>{S=fresh();$("#mob").value=$("#nm").value=$("#ins").value="";$("#occ").value="";$("#outlet").value=S.outlet;render();$("#mob").focus()};
+
+const TICK='<span class="ck"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><path d="M5 12l5 5L20 7"/></svg></span>';
+function render(){
+  autoPick();
+  const s=slotObj(),p=pkObj(),mobOk=/^[6-9]\d{9}$/.test(S.mobile),nm=S.name.trim();
+  $$(".cnt").forEach(c=>c.querySelector("output").textContent=S[c.dataset.k]);
+  $$("#days .p").forEach((b,i)=>b.classList.toggle("on",i===S.day));
+  // time: only bookable slots, seats as a small number
+  if(!S.outlet){$("#slots").innerHTML=`<span class="nt" style="color:var(--muted)">Select an outlet</span>`;$("#tX").innerHTML="";$("#tN").textContent=""}
+  else{
+    $("#slots").innerHTML=open().map(x=>{const r=x.cap/x.tot,c=!hasData()?"s-na":r>.4?"s-ok":r>.15?"s-fill":"s-low";return `<button type="button" class="p ${c} ${S.slot===x.p+x.from?"on":""}" data-k="${x.p+x.from}"><span class="d"></span>${t12(x.from)}${hasData()?` <small>${x.cap}</small>`:""}</button>`}).join("");
+    const low=BK.prices.filter(q=>q.ct==="Adult").reduce((a,b)=>b.amt<a.amt?b:a);
+    $("#tX").innerHTML=hasData()?`<div class="lowp">LOWEST PRICE ON: ${t12(low.from)} - ${t12(low.to)} @${low.amt}/-</div>`:`<div class="nt">Seat counts in this preview are for Atria Mall, Worli today; the live page loads them for every outlet and date.</div>`;
+    $("#tN").textContent=hasData()?"· seats left shown":"";
+  }
+  // deals board
+  const L=pkgs();$("#dN").textContent=s?L.length+1:"";
+  $("#dS").textContent=s?`for ${t12(s.from)} · best price for ${S.adults} adult${S.adults===1?"":"s"} is applied automatically`:"";
+  const b=best();
+  $("#deals").innerHTML=!s?`<div class="emp">Pick a time on the ticket. All deals for that time show here and the best one is applied for you.</div>`:
+    `<div class="dl">${L.map(q=>{const off=S.adults<q.min;return `<button type="button" class="dc ${S.pkg===q.dn?"on":""}" data-k="${esc(q.dn)}" ${off?"disabled":""}>${TICK}${b&&b.dn===q.dn?`<span class="best">Best price</span>`:""}<span class="rb ${q.rib?"":"g"}">${esc(q.rib||"Buffet")}</span><span class="nm"><span class="veg ${q.ft==="VEG"?"":"nv"}"></span>${esc(q.dn)}</span><span class="pr">${inr(q.amt)}<small> /person</small>${q.orig>q.amt?`<s>${inr(q.orig)}</s>`:""}</span><span class="mt ${off?"x":""}">${off?`Needs ${q.min}+ adults`:q.min>1?`Min ${q.min} pax`:/Student/.test(q.dn)?"Student ID at outlet":"Any party size"}</span></button>`}).join("")}
+    <button type="button" class="dc ${S.pkg==="REG"?"on":""}" data-k="REG">${TICK}<span class="rb g">Amount not fixed</span><span class="nm">Regular booking</span><span class="pr" style="font-size:16px">Pay as per order</span><span class="mt">Standard menu pricing</span></button></div>`;
+  // stub
+  const dl=DAYS[S.day].toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"});
+  $("#sO").textContent=S.outlet||"Select outlet";
+  $("#sT").textContent=s?t12(s.from):"--:--";$("#sD").textContent=dl;
+  $("#sP").textContent=`${nm||"Guest"} · ${S.adults} adult${S.adults===1?"":"s"}${S.kids?` + ${S.kids} kid${S.kids===1?"":"s"}`:""}`;
+  $("#sF").innerHTML=p?`${esc(p.dn)}<small>${p.reg?"Pay as per order":`${inr(p.amt)}/person${S.kids?` · kids ${inr(kidPrice())}`:""}`}</small>`:"Deal is applied after you pick a time";
+  const tot=p&&!p.reg?p.amt*S.adults+kidPrice()*S.kids:0, save=p&&!p.reg&&p.orig>p.amt?(p.orig-p.amt)*S.adults:0; /* only a real discount counts as saving, not a cheaper menu */
+  $("#eT").textContent=p?(p.reg?"At outlet":inr(tot)):"₹0";
+  $("#eS").textContent=p&&!p.reg?`Estimate · ${S.adults} × ${inr(p.amt)}${S.kids?` + ${S.kids} × ${inr(kidPrice())}`:""}`:"Estimate";
+  $("#sv").innerHTML=save?`<span class="save">You save ${inr(save)}</span>`:"";
+  const miss=[!mobOk&&"mobile",!nm&&"name",!S.adults&&"adults",!S.outlet&&"outlet",!s&&"time"].filter(Boolean);
+  $("#need").textContent=miss.length?"Still needed: "+miss.join(", "):"";
+  $("#create").disabled=miss.length>0||!p;
+}
+$("#oN").textContent=BK.promos.length;$("#hN").textContent=BK.cards.length;
+const PI=["🔥","💑","👨‍👩‍👧","🍲","💰","🧒"];
+$("#promos").innerHTML=BK.promos.map((p,i)=>`<div class="pr2"><i>${PI[i]||"%"}</i><span>${esc(p.trim())}</span></div>`).join("");
+$("#cards").innerHTML=BK.cards.map(c=>`<div class="hcc"><small>${esc(c.n)}${c.pax?` · ${c.pax} pax`:""}</small><b>${inr(c.price)}</b></div>`).join("");
+const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("show"),2800)};
+$("#create").onclick=()=>toast("Preview only. On the live page this creates the booking in CRS.");
+
+/* shell: side menu starts closed like the live app */
+const shell=$("#shell"),side=$("#side"),scrim=$("#scrim"),mq=matchMedia("(max-width:979px)");
+const closeDrawer=()=>{side.classList.remove("open");scrim.classList.remove("show")};
+$("#ham").onclick=()=>{if(mq.matches){side.classList.toggle("open");scrim.classList.toggle("show")}else shell.classList.toggle("collapsed")};
+$("#sideClose").onclick=closeDrawer;scrim.onclick=closeDrawer;
+addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer()});
+$("#envLive").onclick=()=>{$("#envLive").classList.add("on");$("#envTest").classList.remove("on")};
+$("#envTest").onclick=()=>{$("#envTest").classList.add("on");$("#envLive").classList.remove("on")};
+$("#fuN").textContent=FU.upcomingFollowUps;$("#fuO").textContent=FU.overdueFollowUps;
+if(!mq.matches)shell.classList.add("collapsed");
+render();$("#mob").focus();
+</script>
