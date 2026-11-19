@@ -1,0 +1,160 @@
+<style>
+/* "My Day" dashboard: what an agent has to do today first, quick actions second, numbers last. */
+main.wrap{max-width:1280px;padding-top:22px;padding-bottom:40px}
+.crumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);flex:1;min-width:0}
+.crumb b{color:var(--fg);font-weight:600}
+.asof{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.asof i{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 4px var(--good-soft)}
+
+.hi{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.hi h1{margin:0;font-size:28px;font-weight:800;letter-spacing:-.01em}
+.hi p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.qa{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:22px}
+.qa a{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px;text-decoration:none;color:inherit;font-weight:700;font-size:14px;transition:transform .12s,border-color .12s,box-shadow .12s}
+.qa a:hover{transform:translateY(-2px);border-color:#ffc29a;box-shadow:0 10px 20px rgba(255,98,0,.10)}
+.qa a i{width:40px;height:40px;border-radius:12px;background:var(--ember-soft);display:grid;place-items:center;font-style:normal;font-size:19px;flex:none}
+.qa a small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
+.qa a.pri{background:linear-gradient(160deg,#ff7a1f,#ff5a00);border-color:transparent;color:#fff}
+.qa a.pri i{background:rgba(255,255,255,.22)}
+.qa a.pri small{color:rgba(255,255,255,.85)}
+
+.cols{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px;align-items:start}
+.box{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.bh{display:flex;align-items:baseline;gap:10px;padding:16px 20px 12px}
+.bh h2{margin:0;font-size:16px;font-weight:800}
+.bh small{font-size:12.5px;color:var(--muted)}
+.bh .r{margin-left:auto;font-size:12.5px;font-weight:800;color:var(--ember);text-decoration:none}
+
+/* to-do list */
+.td{display:flex;align-items:center;gap:16px;padding:16px 20px;border-top:1px dashed var(--line)}
+.td .ic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:22px;flex:none;background:var(--ember-soft)}
+.td.hot .ic{background:var(--bad-soft)}
+.td .num{font-size:28px;font-weight:800;min-width:92px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.td.hot .num{color:var(--red)}
+.td .tx{flex:1;min-width:0}
+.td .tx b{display:block;font-size:14.5px}
+.td .tx small{display:block;font-size:12.5px;color:var(--muted);margin-top:1px}
+.td .bar{height:6px;border-radius:99px;background:#f1f1f4;margin-top:8px;overflow:hidden;max-width:320px}
+.td .bar i{display:block;height:100%;border-radius:99px;background:var(--ember)}
+.td.hot .bar i{background:var(--red)}
+.td a.go{flex:none;height:40px;padding:0 18px;border-radius:11px;background:var(--fg);color:#fff;font-weight:800;font-size:13.5px;text-decoration:none;display:flex;align-items:center;gap:6px}
+.td a.go:hover{background:var(--ember)}
+.td.hot a.go{background:var(--red)}
+
+/* side */
+.side2{display:flex;flex-direction:column;gap:20px}
+.ks{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.ks div{padding:14px 20px;border-top:1px dashed var(--line)}
+.ks div:nth-child(odd){border-right:1px dashed var(--line)}
+.ks small{display:block;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.ks b{display:block;font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px}
+.ks span{display:block;font-size:12px;color:var(--muted)}
+.ks em{font-style:normal;font-weight:800;color:var(--red)}
+.spark{padding:6px 20px 16px;border-top:1px dashed var(--line)}
+.spark .t{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin:10px 0 6px}
+.spark .bars{display:flex;align-items:flex-end;gap:6px;height:70px}
+.spark .bars div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:2px;height:100%;position:relative}
+.spark .bars i{display:block;border-radius:4px 4px 0 0;background:#f6c9ad}
+.spark .bars i.c{background:#e0611f;border-radius:0 0 4px 4px}
+.spark .bars span{font-size:10.5px;color:var(--muted);text-align:center;margin-top:4px}
+.spark .bars div:last-child span{color:var(--fg);font-weight:800}
+.ins{padding:0 20px 8px}
+.ins .r{display:flex;gap:12px;padding:11px 0;border-top:1px dashed var(--line)}
+.ins .r:first-child{border-top:0}
+.ins .d{width:46px;flex:none;text-align:center;border-radius:10px;background:var(--bg-2);padding:5px 0}
+.ins .d b{display:block;font-size:16px;line-height:1.1}
+.ins .d small{font-size:10.5px;font-weight:800;color:var(--muted);text-transform:uppercase}
+.ins .x{min-width:0}
+.ins .x b{display:block;font-size:13.5px}
+.ins .x small{display:block;font-size:12px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ins .pill{display:inline-block;font-size:11px;font-weight:800;padding:1px 7px;border-radius:99px;background:var(--bad-soft);color:#b42335;margin-left:6px}
+.ag{padding:0 20px 12px}
+.ag .r{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px dashed var(--line);font-size:13.5px}
+.ag .r:first-child{border-top:0}
+.ag .rk{width:24px;height:24px;border-radius:8px;background:var(--bg-2);display:grid;place-items:center;font-size:11.5px;font-weight:800;color:var(--muted);flex:none}
+.ag .r:first-child .rk{background:var(--ember);color:#fff}
+.ag .r b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ag .r span{color:var(--muted);font-size:12.5px;white-space:nowrap}
+.ag .r strong{font-variant-numeric:tabular-nums;min-width:28px;text-align:right}
+.foot{font-size:11.5px;color:var(--faint);text-align:center;margin-top:22px}
+
+@media (max-width:1100px){.qa{grid-template-columns:repeat(3,minmax(0,1fr))}.cols{grid-template-columns:1fr}}
+@media (max-width:640px){
+  .crumb{display:none}main.wrap{padding-left:12px;padding-right:12px}
+  .hi h1{font-size:22px}
+  .qa{grid-template-columns:1fr 1fr}.qa a:first-child{grid-column:1/-1}
+  .td{flex-wrap:wrap;gap:10px 14px;padding:14px 16px}.td .num{min-width:0;font-size:24px}.td .tx{flex-basis:calc(100% - 64px)}.td a.go{width:100%;justify-content:center}
+}
+</style>
+
+<div class="hi"><div><h1 id="hello"></h1><p id="sub"></p></div></div>
+
+<nav class="qa" aria-label="Quick actions">
+  <a class="pri" href="booking-11.html"><i>🍽️</i><span>Book a table<small>New reservation</small></span></a>
+  <a href="app.html#/home?open=logBooking"><i>📝</i><span>Log booking<small>Call + follow-up</small></span></a>
+  <a href="app.html#/home?open=searchBooking"><i>🔎</i><span>Search booking<small>Mobile or ID</small></span></a>
+  <a href="app.html#/leads?open=createLead"><i>➕</i><span>Add lead<small>Create in LMS</small></span></a>
+  <a href="app.html#/cater?open=newCater"><i>🎉</i><span>Catering lead<small>Outdoor event</small></span></a>
+</nav>
+
+<div class="cols">
+  <section class="box">
+    <div class="bh"><h2>To do today</h2><small>Highest priority first</small><a class="r" href="app.html#/home">All modules →</a></div>
+    <div id="todo"></div>
+  </section>
+  <div class="side2">
+    <section class="box"><div class="bh"><h2>Today so far</h2><small id="asof2"></small></div><div class="ks" id="ks"></div>
+      <div class="spark"><div class="t"><span>Domestic leads, last 7 days + today</span><span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#e0611f"></i> converted</span></div><div class="bars" id="bars"></div></div></section>
+    <section class="box"><div class="bh"><h2>Check before booking</h2><small>Upcoming branch instructions</small><a class="r" href="app.html#/instructions">All →</a></div><div class="ins" id="ins"></div></section>
+    <section class="box"><div class="bh"><h2>Top agents today</h2><small>By confirmed bookings</small><a class="r" href="app.html#/lead-dashboard">More →</a></div><div class="ag" id="ag"></div></section>
+  </div>
+</div>
+<p class="foot" id="foot"></p>
+</main>
+</div></div>
+
+<script>
+const D=/*DASH*/null;
+const $=s=>document.querySelector(s);
+const n=v=>Math.round(v).toLocaleString("en-IN");
+const inr=v=>"₹"+n(v);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const L=D.lead,today=L.daily.at(-1),prev=L.daily.slice(0,-1);
+const snapH=+L.asOf.slice(11,13);
+$("#hello").textContent=`${snapH<12?"Good morning":snapH<17?"Good afternoon":"Good evening"}, AryanTest 👋`;
+$("#sub").textContent=`Here is what needs you today. Snapshot ${L.asOf}.`;
+
+/* to-do: biggest backlog first, red when it is overdue work */
+const odcNew=(D.odc.byStatus.find(s=>s[0]==="New")||[0,0])[1];
+const TODO=[
+  {i:"⏰",hot:1,num:L.followup.overdueFollowUps,t:"Overdue follow-ups",s:`${n(L.followup.upcomingFollowUps)} more are due next`,share:L.followup.overdueFollowUps/(L.followup.overdueFollowUps+L.followup.upcomingFollowUps),go:"Start calling",h:"app.html#/followups"},
+  {i:"💳",num:D.adv.st.new.count,t:"Advances to acknowledge",s:`${inr(D.adv.st.all.unpaidAmount)} unpaid across ${n(D.adv.total)} bookings`,share:D.adv.st.new.count/D.adv.total,go:"Open",h:"app.html#/advance"},
+  {i:"🎧",num:D.quality.dash.toAcknowledge,t:"Call reviews to acknowledge",s:`${n(D.quality.dash.toReview)} to review · ${n(D.quality.dash.trainingPending)} training pending · team rating ${D.quality.dash.overallRating}/5`,share:D.quality.dash.toAcknowledge/D.quality.total,go:"Review",h:"app.html#/call-review"},
+  {i:"🍽️",num:odcNew,t:"New catering leads",s:`In the latest ${n(D.odc.sample)} enquiries · ${n(D.odc.upcoming)} upcoming events`,share:odcNew/D.odc.sample,go:"Open",h:"app.html#/cater"},
+  {i:"📌",num:D.instr.upcomingCount,t:"Branch instructions coming up",s:`${n(D.instr.byType[0][1])} are stop-booking rules, check before you book`,share:D.instr.upcomingCount/D.instr.total,go:"Check",h:"app.html#/instructions"},
+];
+$("#todo").innerHTML=TODO.map(x=>`<div class="td ${x.hot?"hot":""}"><span class="ic">${x.i}</span><span class="num">${n(x.num)}</span><span class="tx"><b>${x.t}</b><small>${esc(x.s)}</small><div class="bar"><i style="width:${Math.max(3,Math.min(100,x.share*100))}%"></i></div></span><a class="go" href="${x.h}">${x.go} →</a></div>`).join("");
+
+/* today so far */
+const avg=prev.reduce((a,d)=>a+d.dom.converted,0)/prev.reduce((a,d)=>a+d.domTotal,0),conv=today.dom.converted/today.domTotal;
+$("#asof2").textContent="till "+L.asOf.slice(11,16)+" IST";
+$("#ks").innerHTML=[["Leads",n(today.domTotal+today.intl),`${n(today.domTotal)} domestic · ${n(today.intl)} intl`],["Converted",n(today.dom.converted),`<em style="color:${conv<avg?"var(--red)":"var(--good)"}">${(conv*100).toFixed(1)}%</em> vs ${(avg*100).toFixed(1)}% avg`],["Agents active",n(L.agentsActiveToday),`of ${n(L.agentsTotal)}`],["Payment links",n(D.pay.today),`${n(D.pay.last30)} in 30 days`]].map(([a,b,c])=>`<div><small>${a}</small><b>${b}</b><span>${c}</span></div>`).join("");
+const mx=Math.max(...L.daily.map(d=>d.domTotal));
+$("#bars").innerHTML=L.daily.map((d,i)=>{const last=i===L.daily.length-1;return `<div title="${new Date(d.date).toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"})}: ${n(d.domTotal)} leads, ${n(d.dom.converted)} converted${last?" (so far)":""}"><i style="height:${(d.domTotal-d.dom.converted)/mx*56}px"></i><i class="c" style="height:${d.dom.converted/mx*56}px"></i><span>${last?"Today":new Date(d.date).toLocaleDateString("en-IN",{weekday:"narrow"})}</span></div>`}).join("");
+
+/* instructions + agents */
+$("#ins").innerHTML=D.instr.upcoming.slice(0,4).map(x=>{const d=new Date(x.d);return `<div class="r"><span class="d"><b>${d.getDate()}</b><small>${d.toLocaleDateString("en-IN",{month:"short"})}</small></span><span class="x"><b>${esc(x.b)}<span class="pill">${esc(x.t)}</span></b><small>${esc(x.s)} · ${esc(x.r)}</small></span></div>`}).join("");
+$("#ag").innerHTML=L.agentsToday.slice().sort((a,b)=>b.confirmed-a.confirmed||b.total-a.total).slice(0,5).map((a,i)=>`<div class="r"><span class="rk">${i+1}</span><b>${esc(a.agentName)}</b><span>${n(a.total)} leads</span><strong>${n(a.confirmed)}</strong></div>`).join("");
+$("#foot").textContent=`Read-only snapshot of reeserio.bnhl.in taken ${L.asOf}.`;
+
+/* shell */
+const shell=$("#shell"),side=$("#side"),scrim=$("#scrim"),mq=matchMedia("(max-width:979px)");
+const closeDrawer=()=>{side.classList.remove("open");scrim.classList.remove("show")};
+$("#ham").onclick=()=>{if(mq.matches){side.classList.toggle("open");scrim.classList.toggle("show")}else shell.classList.toggle("collapsed")};
+$("#sideClose").onclick=closeDrawer;scrim.onclick=closeDrawer;
+addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer()});
+$("#envLive").onclick=()=>{$("#envLive").classList.add("on");$("#envTest").classList.remove("on")};
+$("#envTest").onclick=()=>{$("#envTest").classList.add("on");$("#envLive").classList.remove("on")};
+$("#fuN").textContent=L.followup.upcomingFollowUps;$("#fuO").textContent=L.followup.overdueFollowUps;
+if(!mq.matches)shell.classList.add("collapsed");
+</script>

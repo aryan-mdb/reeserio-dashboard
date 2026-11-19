@@ -171,7 +171,7 @@ const F={
   createSlot:{t:"Create Slot Definition",i:"🕒",s:"Set the bookable slot times for a branch",ok:"Create",two:1,f:[["Branch","sel",1,()=>OUTLETS],["Week Day","sel",1,()=>["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]],["Start Date","date",1],["End Date","date",1],["Slot Times","text",1,null,"e.g. 12:00, 12:30, 13:00"]]},
   addInstr:{t:"Add Branch Instruction",i:"📌",s:"Shown to agents while booking",ok:"Add instruction",two:1,f:[["Branch","sel",1,()=>OUTLETS],["Date","date",1],["Session","sel",1,()=>["Lunch","Dinner","Both"]],["Instruction Type","sel",1,()=>D.instr.byType.map(x=>x[0])],["Instruction","area",1]]},
 };
-function openForm(key){
+function openForm(key,pre){
   const C=F[key],dl=$("#dlg");dl.className="dlg"+(C.sm?" sm":"");
   const field=([l,t="text",req,opts,ph],i)=>l==="__or"?`<div class="or">OR</div>`:`<div class="ff ${t==="area"?"w":""}"><label for="f${i}">${esc(l)}${req?" <em>*</em>":""}</label>${
     t==="sel"?`<select id="f${i}" data-l="${esc(l)}" ${req?"required":""}><option value="">Select ${esc(l)}</option>${(opts?opts():[]).map(o=>`<option>${esc(o)}</option>`).join("")}</select>`:
@@ -191,6 +191,8 @@ function openForm(key){
     if(bad.length){dl.querySelector(".err").textContent=`Fill ${bad.length} required field${bad.length>1?"s":""}`;bad[0].focus();return}
     dl.close();toast(`${C.t}: preview only, nothing was saved.`)};
   dl.showModal();dl.querySelector("input,select")?.focus();
+  /* header search hands over what was typed: 10 digits = mobile, anything else = booking ID */
+  if(pre){const mob=/^\d{10}$/.test(pre.replace(/\D/g,""))&&!/[a-z]/i.test(pre);const el=dl.querySelector(`[data-l="${mob?"Mobile Number":"Booking ID"}"]`)||dl.querySelector("input");if(el){el.value=mob?pre.replace(/\D/g,""):pre;el.focus()}}
 }
 function openDetail(title,icon,pairs){
   const dl=$("#dlg");dl.className="dlg";
@@ -328,7 +330,7 @@ function emptyPage(t,i,d,sess,stat){return `<section class="ph"><div class="l"><
 
 /* ---------- router ---------- */
 let cur="";
-function route(){const h=location.hash.replace(/^#\/?/,"")||"home";const [p,qs]=h.split("?");return {key:p,open:new URLSearchParams(qs||"").get("open")}}
+function route(){const h=location.hash.replace(/^#\/?/,"")||"home";const [p,qs]=h.split("?");const u=new URLSearchParams(qs||"");return {key:p,open:u.get("open"),q:u.get("q")}}
 function render(){
   const {key}=route(),pg=P[key]||PAGES[key]||PAGES.home,k=P[key]||PAGES[key]?key:"home";
   $("#view").innerHTML=P[k]?listPage(k):pg.r();
@@ -339,7 +341,7 @@ function render(){
   document.title=`Reeserio · ${pg.t}`;
   $$("#side a").forEach(a=>{const on=a.getAttribute("href")===`#/${k}`;a.classList.toggle("on2",on);if(on){let d=a.closest("details");while(d){d.open=true;d=d.parentElement.closest("details")}}});
 }
-addEventListener("hashchange",()=>{const r=route();if(r.key!==cur){S.q="";S.tab="";S.page=1;cur=r.key;render();scrollTo(0,0)}if(r.open&&F[r.open])openForm(r.open)});
+addEventListener("hashchange",()=>{const r=route();if(r.key!==cur){S.q="";S.tab="";S.page=1;cur=r.key;render();scrollTo(0,0)}if(r.open&&F[r.open])openForm(r.open,r.q)});
 
 /* ---------- shell ---------- */
 const shell=$("#shell"),side=$("#side"),scrim=$("#scrim"),mq=matchMedia("(max-width:979px)");
@@ -351,5 +353,5 @@ addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer()});
 $("#envLive").onclick=()=>{$("#envLive").classList.add("on");$("#envTest").classList.remove("on")};
 $("#envTest").onclick=()=>{$("#envTest").classList.add("on");$("#envLive").classList.remove("on")};
 $("#fuN").textContent=L.followup.upcomingFollowUps;$("#fuO").textContent=L.followup.overdueFollowUps;
-cur=route().key;render();{const o=route().open;if(o&&F[o])openForm(o)}
+cur=route().key;render();{const o=route().open;if(o&&F[o])openForm(o,route().q)}
 </script>

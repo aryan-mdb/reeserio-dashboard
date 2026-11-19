@@ -33,7 +33,7 @@ function linkify(html, inApp) {
 }
 
 // app.html: shell from dashboard.html, nothing marked active (the router marks it)
-const dash = rd(G + 'dashboard.html');
+const dash = rd(G + 'dashboard-ticket.html'); // shell source (dashboard.html is now the My Day page)
 const cut = dash.indexOf('<style>\n/* Dashboard in the booking-ticket language');
 if (cut < 0) throw new Error('dashboard body marker not found');
 let pre = dash.slice(0, cut).replace('<title>Reeserio Dashboard</title>', '<title>Reeserio</title>').replace(/<a class="mi on" href="[^"]*">/, '<a class="mi" href="dashboard.html">');
