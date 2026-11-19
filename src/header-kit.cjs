@@ -12,21 +12,37 @@ const ICON = {
   caret: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>',
 };
 const CSS = `<style id="hdr2css">
-.app-h.h2{gap:14px;box-shadow:0 1px 0 var(--line),0 6px 18px rgba(16,24,40,.04);border-bottom:0}
-.h2 .logo{text-decoration:none}
-.h2 .env{flex:none}
-.h2 .env button{padding:3px 10px;font-size:12.5px}
-.hs{flex:1;max-width:560px;margin:0 auto;position:relative;display:flex;align-items:center}
+/* one family: every control is 40px tall, 12px radius, 1.5px border; orange only for the primary action */
+.app-h.h2{gap:12px;border-bottom:1px solid var(--line);box-shadow:0 4px 16px rgba(16,24,40,.04);padding-top:3px}
+.app-h.h2::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#ff5a00,#ff7a1f 55%,#ffb46b)}
+.h2 .ham{width:40px;height:40px;border-radius:12px;border:1.5px solid var(--line);color:#343a40}
+.h2 .ham:hover{border-color:var(--ember);color:var(--ember);background:#fff}
+.h2 .logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--fg);flex:none}
+.h2 .logo .tile{width:40px;height:40px;border-radius:12px;background:linear-gradient(160deg,#ff7a1f,#ff5a00);display:grid;place-items:center;box-shadow:0 4px 10px rgba(255,98,0,.25)}
+.h2 .logo .tile img{width:24px;height:26px;object-fit:contain;filter:brightness(0) invert(1)}
+.h2 .logo .wm{display:flex;flex-direction:column;line-height:1.1}
+.h2 .logo .wm b{font-size:17px;font-weight:800;letter-spacing:-.01em}
+.h2 .logo .wm small{font-size:10.5px;font-weight:700;color:var(--faint);letter-spacing:.04em;text-transform:uppercase}
+.h2 .env{flex:none;height:40px;display:flex;align-items:center;gap:2px;padding:4px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg)}
+.h2 .env button{height:30px;padding:0 11px;border-radius:9px;border:0;font-size:12.5px;font-weight:700;color:var(--muted);background:none;display:flex;align-items:center;gap:6px}
+.h2 .env button::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--line-2)}
+.h2 .env button.on{background:#fff;color:var(--good);box-shadow:0 1px 3px rgba(16,24,40,.12)}
+.h2 .env button.on::before{background:var(--good);box-shadow:0 0 0 3px var(--good-soft)}
+.h2 .env button.on.test{color:#b07a12}
+.h2 .env button.on.test::before{background:#f0a020;box-shadow:0 0 0 3px rgba(240,160,32,.18)}
+.hs{flex:1;max-width:600px;margin:0 auto;position:relative;display:flex;align-items:center}
 .hs svg{position:absolute;left:14px;color:var(--faint);pointer-events:none}
-.hs input{width:100%;height:42px;border:1.5px solid var(--line);border-radius:99px;background:var(--bg);padding:0 46px 0 42px;font:inherit;font-size:14px;color:var(--fg);transition:all .15s}
+.hs input{width:100%;height:40px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);padding:0 46px 0 42px;font:inherit;font-size:14px;color:var(--fg);transition:all .15s}
 .hs input::placeholder{color:var(--faint)}
+.hs input:hover{border-color:var(--line-2)}
 .hs input:focus{outline:none;background:#fff;border-color:var(--ember);box-shadow:0 0 0 4px var(--ember-glow)}
-.hs kbd{position:absolute;right:12px;font:inherit;font-size:11px;font-weight:800;color:var(--faint);border:1px solid var(--line-2);border-radius:6px;padding:1px 6px;background:#fff}
+.hs kbd{position:absolute;right:10px;font:inherit;font-size:11px;font-weight:800;color:var(--faint);border:1px solid var(--line-2);border-radius:6px;padding:1px 7px;background:#fff}
 .hr2{display:flex;align-items:center;gap:8px;flex:none}
-.h2 .ib,.h2 .hs-ic{position:relative;width:42px;height:42px;border-radius:12px;border:0;background:none;display:grid;place-items:center;color:#343a40;cursor:pointer;text-decoration:none}
-.h2 .ib:hover,.h2 .hs-ic:hover,.h2 .ib[aria-expanded="true"]{background:var(--ember-soft);color:var(--ember)}
+.h2 .ib,.h2 .hs-ic{position:relative;width:40px;height:40px;border-radius:12px;border:1.5px solid var(--line);background:#fff;display:grid;place-items:center;color:#343a40;cursor:pointer;text-decoration:none}
+.h2 .ib:hover,.h2 .hs-ic:hover,.h2 .ib[aria-expanded="true"]{border-color:var(--ember);color:var(--ember)}
 .h2 .hs-ic{display:none}
-.h2 .bd{position:absolute;top:-2px;right:-8px;min-width:20px;height:20px;padding:0 5px;border-radius:99px;background:var(--red);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;border:2px solid #fff}
+.h2 .bd{position:absolute;top:-7px;right:-9px;min-width:22px;height:18px;padding:0 5px;border-radius:99px;background:var(--red);color:#fff;font-size:10.5px;font-weight:800;display:grid;place-items:center;border:2px solid #fff;line-height:1}
+.hdiv{width:1px;height:28px;background:var(--line);margin:0 4px}
 .bell{position:relative}
 .bm{position:absolute;right:0;top:calc(100% + 8px);width:250px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 50px rgba(16,24,40,.18);padding:6px;opacity:0;transform:translateY(-6px);pointer-events:none;transition:all .15s;z-index:70}
 .bm.open{opacity:1;transform:none;pointer-events:auto}
@@ -35,30 +51,37 @@ const CSS = `<style id="hdr2css">
 .bm a:hover{background:var(--bg)}
 .bm a b{color:#fff;background:var(--purple);border-radius:99px;padding:1px 9px;font-size:12px}
 .bm a.od b{background:var(--red)}
-.h2 .lg{height:42px;display:flex;align-items:center;gap:7px;padding:0 14px;border-radius:12px;color:#343a40;text-decoration:none;font-weight:700;font-size:14px;border:1.5px solid var(--line)}
+.h2 .lg{height:40px;display:flex;align-items:center;gap:8px;padding:0 14px;border-radius:12px;color:#343a40;background:#fff;text-decoration:none;font-weight:700;font-size:13.5px;border:1.5px solid var(--line)}
+.h2 .lg svg{color:var(--ember)}
 .h2 .lg:hover{border-color:var(--ember);color:var(--ember)}
-.h2 .cb{height:42px;display:flex;align-items:center;gap:7px;padding:0 16px;border-radius:12px;background:var(--ember);color:#fff;text-decoration:none;font-weight:800;font-size:14px;box-shadow:0 6px 14px rgba(255,98,0,.25)}
-.h2 .cb:hover{background:#e85800}
-.uchip{height:42px;display:flex;align-items:center;gap:8px;padding:0 10px 0 4px;border-radius:99px;border:1.5px solid var(--line);background:#fff;cursor:pointer;font:inherit;color:#343a40}
-.uchip:hover,.uchip[aria-expanded="true"]{border-color:var(--ember)}
-.uchip .av{width:34px;height:34px;border-radius:50%;background:linear-gradient(160deg,#ff7a1f,#ff5a00);color:#fff;display:grid;place-items:center;font-weight:800;font-size:12.5px}
-.uchip .nm{font-weight:700;font-size:13.5px}
-@media (max-width:1180px){.h2 .lg span,.uchip .nm{display:none}.h2 .lg{padding:0 11px}}
-@media (max-width:860px){.hs{display:none}.h2 .hs-ic{display:grid}.hr2{margin-left:auto}}
-@media (max-width:640px){.app-h.h2{gap:6px}.h2 .logo span,.h2 .lg,.h2 .cb span{display:none!important}.h2 .cb{padding:0 12px}.uchip{padding:0 4px;border:0}.uchip svg{display:none}}
+.h2 .cb{height:40px;display:flex;align-items:center;gap:8px;padding:0 16px;border-radius:12px;background:linear-gradient(160deg,#ff7a1f,#ff5a00);color:#fff;text-decoration:none;font-weight:800;font-size:13.5px;box-shadow:0 2px 6px rgba(255,98,0,.28);border:0}
+.h2 .cb:hover{filter:brightness(.96)}
+.uchip{height:40px;display:flex;align-items:center;gap:9px;padding:0 10px 0 4px;border-radius:12px;border:1.5px solid transparent;background:none;cursor:pointer;font:inherit;color:#343a40;text-align:left}
+.uchip:hover,.uchip[aria-expanded="true"]{border-color:var(--line);background:#fff}
+.uchip .av{width:32px;height:32px;border-radius:10px;background:#1f2328;color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px;flex:none}
+.uchip .who2{display:flex;flex-direction:column;line-height:1.15}
+.uchip .nm{font-weight:800;font-size:13.5px}
+.uchip .rl{font-size:11px;color:var(--muted);font-weight:600}
+.uchip svg{color:var(--muted)}
+@media (max-width:1280px){.h2 .logo .wm small{display:none}}
+@media (max-width:1180px){.h2 .lg span,.uchip .who2{display:none}.h2 .lg{padding:0 11px}}
+@media (max-width:979px){.h2 .env{display:none}}
+@media (max-width:860px){.hs{display:none}.h2 .hs-ic{display:grid}.hr2{margin-left:auto}.hdiv{display:none}}
+@media (max-width:640px){.h2 .logo .tile{display:grid!important}.app-h.h2{gap:6px}.h2 .logo .wm,.h2 .lg,.h2 .cb span{display:none!important}.h2 .cb{padding:0;width:40px;justify-content:center}.uchip{padding:0;border:0}.uchip svg{display:none}.hr2{gap:6px}}
 </style>`;
 const header = (base, logo) => `<header class="app-h h2">
   <button class="ham" id="ham" type="button" aria-label="Toggle menu" aria-controls="side">${ICON.ham}</button>
-  <a class="logo" href="dashboard.html"><img src="data:image/png;base64,${logo}" alt=""><span>Reeserio</span></a>
+  <a class="logo" href="dashboard.html" aria-label="Reeserio dashboard"><span class="tile"><img src="data:image/png;base64,${logo}" alt=""></span><span class="wm"><b>Reeserio</b><small>by Barbeque Nation</small></span></a>
   <div class="env" role="group" aria-label="Environment"><button type="button" class="on" id="envLive">Live</button><button type="button" class="test" id="envTest">Testing</button></div>
-  <form class="hs" id="hdrSearch" role="search" data-base="${base}">${ICON.search}<input id="hdrQ" placeholder="Search booking by mobile number or booking ID" autocomplete="off" aria-label="Search booking"><kbd>/</kbd></form>
+  <form class="hs" id="hdrSearch" role="search" data-base="${base}">${ICON.search}<input id="hdrQ" placeholder="Search by mobile or booking ID" autocomplete="off" aria-label="Search booking"><kbd>/</kbd></form>
   <div class="hr2">
     <a class="hs-ic" href="${base}#/home?open=searchBooking" aria-label="Search booking">${ICON.search}</a>
     <div class="bell"><button type="button" class="ib" id="bellBtn" aria-label="Follow-ups" aria-haspopup="menu" aria-expanded="false">${ICON.bell}<span class="bd" id="bellBd"></span></button>
       <div class="bm" id="bellMenu" role="menu"><div class="h">Follow-ups</div><a href="${base}#/followups" role="menuitem"><span>Next follow up</span><b class="num" id="fuN"></b></a><a class="od" href="${base}#/followups" role="menuitem"><span>Overdue follow up</span><b class="num" id="fuO"></b></a></div></div>
     <a class="lg" href="${base}#/home?open=logBooking">${ICON.log}<span>Log Booking</span></a>
     <a class="cb" href="booking-11.html">${ICON.plus}<span>Create Booking</span></a>
-    <button type="button" class="uchip" id="userBtn" aria-label="Account" aria-haspopup="menu" aria-expanded="false"><span class="av">AR</span><span class="nm">AryanTest</span>${ICON.caret}</button>
+    <span class="hdiv" aria-hidden="true"></span>
+    <button type="button" class="uchip" id="userBtn" aria-label="Account" aria-haspopup="menu" aria-expanded="false"><span class="av">AR</span><span class="who2"><span class="nm">AryanTest</span><span class="rl">Admin · IB Agent</span></span>${ICON.caret}</button>
   </div>
 </header>`;
 const KIT = `<div id="hdrKit"><script>
