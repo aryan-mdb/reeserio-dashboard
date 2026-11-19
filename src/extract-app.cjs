@@ -58,6 +58,33 @@ const out = {};
   out.didProc = get('DID Mapping', /did-process-list/).rows.map(r => r.processName); }
 out.intlBranches = get('International Booking', /InterNationalBranchList/).rows.map(r => r.branchName);
 out.toscano = get('Toscano Salt Booking', /FetchToscanoSalt/).rows.map(r => ({ name: r.branchName, city: r.city, liquor: r.liquor }));
+// Access Control & Administration (users, roles, permission matrix). Staff phone/email masked;
+// login IDs masked too, since a public list of real login IDs would help password guessing.
+if (fs.existsSync('./live/acct.json') && fs.existsSync('./live/admin.json')) {
+  const acct = require('./live/acct.json'), adm = require('./live/admin.json');
+  const body = re => JSON.parse(acct.cap.filter(c => re.test(c.u)).pop().body);
+  const roleJ = body(/RoleMaster\/list/).data;
+  const roleRows = rowsOf(roleJ) || [];
+  out.roles = roleRows.map(r => ({ id: r.roleID, name: r.roleName, code: r.roleCode, desc: r.description, users: r.userCount, active: r.active }));
+  const roleName = Object.fromEntries(out.roles.map(r => [r.id, r.name]));
+  const U = rowsOf(body(/User\/GetAllUsers/)) || [];
+  const byId = Object.fromEntries(U.map(u => [u.userID, u.userName]));
+  const loginMask = v => { const s = String(v || ''); return s.length > 2 ? s.slice(0, 2) + '•'.repeat(Math.min(6, s.length - 2)) : s; };
+  // user names are the login IDs for almost everyone, so they are masked as well (first 2 + last letter)
+  const nameMask = v => { const s = String(v || '').trim(); if (!s) return ''; return s.length <= 3 ? s[0] + '••' : s.slice(0, 2) + '•'.repeat(Math.min(4, s.length - 3)) + s.slice(-1); };
+  for (const u of U) { u._n = nameMask(u.userName); }
+  for (const k of Object.keys(byId)) byId[k] = nameMask(byId[k]);
+  out.users = U.map(u => ({ id: u.userID, name: u._n, login: loginMask(u.loginID), role: roleName[u.roleID] || String(u.roleID ?? ''), roleId: u.roleID, type: u.agentType || '', email: email(u.emailID), phone: phone(u.mobileNo),
+    tl: u.teamLeadID ? byId[u.teamLeadID] || '' : '', qa: nameMask(u.qaName), onRoll: !!u.isOnRoll, active: !!u.active, status: u.active ? 'Active' : 'Deactive',
+    twoFA: u.isRequiredTwoFactorEnabled ? 'Yes' : 'No', pub: u.isPublicAccess ? 'Yes' : 'No', wa: !!u.whatsAppLogin, last: dt(u.lastLogin), created: dt(u.createdOn) }));
+  out.perms = {};
+  for (const [id, t] of Object.entries(adm.perms || {})) {
+    const arr = rowsOf(JSON.parse(t)) || []; const seen = new Set();
+    out.perms[id] = arr.filter(m => !seen.has(m.moduleId) && seen.add(m.moduleId)).sort((a, b) => a.sortOrder - b.sortOrder)
+      .map(m => ({ id: m.moduleId, n: m.moduleName, g: m.groupName, ops: ['View', 'Edit', 'Add', 'Delete', 'Export', 'Import'].map(o => [!!m['moduleCan' + o], !!m['can' + o]]) }));
+  }
+  out.addUserFields = adm.addUser ? adm.addUser.labels : [];
+}
 out.crawledAt = new Date().toISOString();
 fs.writeFileSync('app-data.json', JSON.stringify(out));
 for (const [k, v] of Object.entries(out)) console.log(k, Array.isArray(v) ? v.length : v && v.rows ? `rows ${v.rows.length} total ${v.total}` : typeof v);

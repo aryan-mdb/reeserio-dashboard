@@ -12,11 +12,14 @@ const MAP = {
   'Toscano Salt Leads': '#/toscano-leads', 'Add Leads': '#/leads?open=createLead', 'Manage Cater Leads': '#/cater', 'New Catering Leads': '#/cater?open=newCater',
   'Branch Instruction': '#/instructions', 'Offer Matrix': '#/offers', 'Branch Slot Management': '#/slots', 'Search Booking': '#/home?open=searchBooking',
   'Log Booking': '#/home?open=logBooking', 'DID Mapping': '#/did',
+  'User Management': '#/users', 'Role &amp; Permission Matrix': '#/roles',
 };
 const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 function linkify(html, inApp) {
   const to = h => (h.startsWith('#') && !inApp ? 'app.html' + h : h);
   let hits = 0;
+  // Access Control pages live under Admin in the side menu (once)
+  if (!html.includes('>User Management</a>')) html = html.replace(/(<a href="[^"]*">Branch Slot Management<\/a>)/, '$1<a href="#">User Management</a><a href="#">Role &amp; Permission Matrix</a>');
   for (const [label, h] of Object.entries(MAP)) {
     // sub-menu links: <a href="...">Label</a>  (also re-link ones already pointing somewhere)
     html = html.replace(new RegExp(`<a href="[^"]*">${reEsc(label)}</a>`, 'g'), () => { hits++; return `<a href="${to(h)}">${label}</a>`; });

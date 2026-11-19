@@ -406,7 +406,7 @@ section.sec{padding-block:clamp(26px,3vw,40px) 0}
       <details><summary class="mi"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 13a4 4 0 01-.5-8 5 5 0 019 0A4 4 0 0118 13v7H6z"/><path d="M6 17h12"/></svg>ODC<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>
         <div class="sub"><a href="app.html#/cater">Manage Cater Leads</a><a href="app.html#/cater?open=newCater">New Catering Leads</a></div></details>
       <details><summary class="mi"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>Admin<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></summary>
-        <div class="sub"><a href="app.html#/instructions">Branch Instruction</a><a href="app.html#/offers">Offer Matrix</a><a href="app.html#/slots">Branch Slot Management</a></div></details>
+        <div class="sub"><a href="app.html#/instructions">Branch Instruction</a><a href="app.html#/offers">Offer Matrix</a><a href="app.html#/slots">Branch Slot Management</a><a href="app.html#/users">User Management</a><a href="app.html#/roles">Role &amp; Permission Matrix</a></div></details>
       <a class="mi" href="app.html#/home?open=searchBooking"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>Search Booking</a>
       <a class="mi" href="app.html#/home?open=logBooking"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/></svg>Log Booking</a>
       <a class="mi" href="app.html#/did"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 14h18M8 4v16"/></svg>DID Mapping</a>
@@ -800,6 +800,7 @@ const btn=q("#userBtn"),pm=q("#pm"),pd=q("#pd");if(!btn)return;
 const toast=m=>{const t=q("#ptoast");t.textContent=m;t.classList.add("show");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("show"),2600)};
 pm.innerHTML=`<div class="who"><span class="av">${e(U.name.slice(0,2).toUpperCase())}</span><span><b>${e(U.name)}</b><small>${e(U.agentType||U.role)} · ${e(U.role)}</small></span></div>
 <button class="it" data-x="profile" role="menuitem"><i>👤</i>My Profile</button>
+<a class="it" href="app.html#/users" role="menuitem" style="text-decoration:none"><i>🛡️</i>Administrator<em>Users &amp; roles</em></a>
 <button class="it" data-x="pwd" role="menuitem"><i>🔑</i>Change Password<em>exp ${e(new Date(U.pwdExpiry).toLocaleDateString("en-IN",{day:"numeric",month:"short"}))}</em></button>
 <button class="it" data-x="2fa" role="menuitem"><i>🛡️</i>Two-factor authentication<em>${U.twoFA?"On":"Off"}</em></button>
 <button class="it out" data-x="out" role="menuitem"><i>⏻</i>Logout</button>`;

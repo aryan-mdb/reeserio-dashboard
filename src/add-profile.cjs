@@ -59,6 +59,7 @@ const btn=q("#userBtn"),pm=q("#pm"),pd=q("#pd");if(!btn)return;
 const toast=m=>{const t=q("#ptoast");t.textContent=m;t.classList.add("show");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("show"),2600)};
 pm.innerHTML=\`<div class="who"><span class="av">\${e(U.name.slice(0,2).toUpperCase())}</span><span><b>\${e(U.name)}</b><small>\${e(U.agentType||U.role)} · \${e(U.role)}</small></span></div>
 <button class="it" data-x="profile" role="menuitem"><i>👤</i>My Profile</button>
+<a class="it" href="app.html#/users" role="menuitem" style="text-decoration:none"><i>🛡️</i>Administrator<em>Users &amp; roles</em></a>
 <button class="it" data-x="pwd" role="menuitem"><i>🔑</i>Change Password<em>exp \${e(new Date(U.pwdExpiry).toLocaleDateString("en-IN",{day:"numeric",month:"short"}))}</em></button>
 <button class="it" data-x="2fa" role="menuitem"><i>🛡️</i>Two-factor authentication<em>\${U.twoFA?"On":"Off"}</em></button>
 <button class="it out" data-x="out" role="menuitem"><i>⏻</i>Logout</button>\`;

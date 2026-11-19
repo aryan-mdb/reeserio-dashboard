@@ -68,6 +68,33 @@ table.t{width:100%;border-collapse:collapse;font-size:13.5px}
 .chips{display:flex;flex-wrap:wrap;gap:4px}
 .chips span{font-size:11.5px;font-weight:700;background:#fff1e6;color:#b8480a;border-radius:6px;padding:2px 6px}
 .stars{color:#e8a317;letter-spacing:1px;white-space:nowrap}
+/* Access Control: tab strip, role cards, permission matrix */
+.atabs{display:flex;gap:6px;margin:-4px 0 16px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.atabs a{padding:10px 14px;font-size:14px;font-weight:700;color:var(--muted);text-decoration:none;border-bottom:2.5px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.atabs a:hover{color:var(--fg)}
+.atabs a.on{color:var(--ember);border-bottom-color:var(--ember)}
+.rcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:16px}
+.rcard{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:16px;cursor:pointer;display:flex;flex-direction:column;gap:4px;transition:border-color .12s,box-shadow .12s}
+.rcard:hover{border-color:#ffc29a}
+.rcard.on{border-color:var(--ember);background:#fffaf6;box-shadow:0 0 0 1px var(--ember) inset}
+.rcard b{font-size:16px}
+.rcard code{font-size:11px;color:var(--muted);background:var(--bg-2);border-radius:6px;padding:1px 6px;align-self:flex-start}
+.rcard p{margin:4px 0 8px;font-size:13px;color:var(--muted);line-height:1.45;flex:1}
+.rcard .rf{display:flex;align-items:center;gap:6px;border-top:1px dashed var(--line);padding-top:10px;font-size:12.5px;font-weight:700;color:#495057}
+.rcard .rf span{margin-right:auto}
+.rcard .rf em{font-style:normal;font-size:11px;color:var(--faint)}
+.rcard .rf button{border:1.5px solid var(--line-2);background:#fff;border-radius:9px;width:32px;height:32px;cursor:pointer}
+.rcard .rf button:hover{border-color:var(--ember)}
+.mh{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--line)}
+.mh>div:first-child{flex:1;min-width:220px}
+.mh b{font-size:15px}
+.mh small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.mh .srch{flex:0 1 260px}
+.mxt th.c,.mxt td.c{text-align:center;width:84px}
+.mxt tbody tr{cursor:default}
+.mxt input[type=checkbox]{width:18px;height:18px;accent-color:var(--ember);cursor:pointer}
+.mxt input[type=checkbox]:disabled{cursor:not-allowed;opacity:.7}
+dialog.dlg.wide{width:min(980px,96vw)}
 /* pager: same look as the dashboard lists, always shown */
 .pg{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:6px;padding:12px 16px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--muted);background:var(--card-2)}
 .pg .info{margin-right:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -179,7 +206,46 @@ const F={
   createSlot:{t:"Create Slot Definition",i:"🕒",s:"Set the bookable slot times for a branch",ok:"Create",two:1,f:[["Branch","sel",1,()=>OUTLETS],["Week Day","sel",1,()=>["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]],["Start Date","date",1],["End Date","date",1],["Slot Times","text",1,null,"e.g. 12:00, 12:30, 13:00"]]},
   addInstr:{t:"Add Branch Instruction",i:"📌",s:"Shown to agents while booking",ok:"Add instruction",two:1,f:[["Branch","sel",1,()=>OUTLETS],["Date","date",1],["Session","sel",1,()=>["Lunch","Dinner","Both"]],["Instruction Type","sel",1,()=>D.instr.byType.map(x=>x[0])],["Instruction","area",1]]},
 };
-function openForm(key,pre){
+/* Access Control forms (fields as on the live Add User / Add Role popups) */
+const USER_F=req=>[["User Name","text",1],["Login ID","text",1],["Password","password",req,null,req?"Set a password":"Leave empty to keep the current one"],["Mobile No","tel",1],["Email ID","email",1],["Select Role","sel",1,()=>A.roles.map(r=>r.name)],["User Type","sel",1,()=>[...new Set(A.users.map(u=>u.type).filter(Boolean))]],["Assign Reporting To","sel",0,()=>A.users.filter(u=>u.role==="TeamLead"&&u.active).map(u=>u.name)],["Assign QA","sel",0,()=>[...new Set(A.users.map(u=>u.qa).filter(Boolean))]],["Is On Roll","yn",1],["Is Active","yn"],["WhatsApp Login","yn"],["2FA Required","yn"],["Is Public Access","yn"]];
+F.addUser={t:"Add User",i:"👤",s:"Create a login for a new team member",ok:"Submit",f:USER_F(1)};
+F.editUser={t:"Edit User",i:"✏️",s:"Update details, role and access flags",ok:"Save changes",f:USER_F(0)};
+F.addRole={t:"Add New Role",i:"🛡️",s:"New roles start with no module permissions",ok:"Create role",two:1,f:[["Role Name","text",1],["Role Code","text",1,null,"e.g. ROLE_SUPERVISOR"],["Is User Type","yn"],["Description","area",1]]};
+F.editRole={t:"Edit Role",i:"🛡️",s:"Rename or describe this role",ok:"Save changes",two:1,f:F.addRole.f};
+/* ---------- Access Control helpers ---------- */
+const OPS=["View","Edit","Add","Delete","Export","Import"];
+const RS={role:(A.roles[1]||A.roles[0]||{}).id,q:"",dirty:0,orig:null};
+const adminTabs=k=>`<nav class="atabs" aria-label="Access Control"><a href="#/users" class="${k==="users"?"on":""}">👥 User Management</a><a href="#/roles" class="${k==="roles"?"on":""}">🛡️ Role &amp; Permission Matrix</a></nav>`;
+/* one row per module; a box only where the operation exists for that module (as on the live page) */
+function matrixHtml(mods,editable,q){
+  const s=(q||"").toLowerCase(),L=mods.filter(m=>!s||m.n.toLowerCase().includes(s)||m.g.toLowerCase().includes(s));
+  if(!L.length)return `<div class="empty"><div class="i">🔍</div><b>No module matches</b>Try another name.</div>`;
+  return `<table class="t mxt"><thead><tr><th>Module</th><th>Group</th>${OPS.map(o=>`<th class="c">${o}</th>`).join("")}</tr></thead><tbody>${L.map(m=>`<tr data-m="${m.id}"><td><b>${esc(m.n)}</b></td><td><span class="mut" style="display:inline">${esc(m.g)}</span></td>${m.ops.map(([has,on],j)=>`<td class="c">${has?`<input type="checkbox" data-o="${j}" ${on?"checked":""} ${editable?"":"disabled"} aria-label="${esc(m.n)}: ${OPS[j]}">`:""}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+}
+function bindMatrix(){
+  const cur=A.perms[RS.role]||[];
+  if(!RS.orig||RS.orig.role!==RS.role)RS.orig={role:RS.role,snap:JSON.stringify(cur)};
+  const count=()=>{const a=JSON.parse(RS.orig.snap),b=cur;let c=0;b.forEach((m,i)=>m.ops.forEach((o,j)=>{if(o[1]!==a[i].ops[j][1])c++}));return c};
+  const upd=()=>{RS.dirty=count();$("#mxInfo").innerHTML=RS.dirty?`<b style="color:var(--ember)">${RS.dirty} change${RS.dirty>1?"s":""} not saved</b>`:"No changes";$("#mxSave").disabled=$("#mxReset").disabled=!RS.dirty};
+  $("#mx").onchange=e=>{const c=e.target.closest("input[data-o]");if(!c)return;const m=cur.find(x=>x.id===+c.closest("tr").dataset.m);m.ops[+c.dataset.o][1]=c.checked;upd()};
+  $("#mq").oninput=e=>{RS.q=e.target.value;$("#mx").innerHTML=matrixHtml(cur,(A.roles.find(r=>r.id===RS.role)||{}).name!=="Admin",RS.q)};
+  $("#mxReset").onclick=()=>{A.perms[RS.role]=JSON.parse(RS.orig.snap);RS.dirty=0;render()};
+  $("#mxSave").onclick=()=>confirmAct("Save permissions",`Save <b>${RS.dirty}</b> permission change${RS.dirty>1?"s":""} for the <b>${esc((A.roles.find(r=>r.id===RS.role)||{}).name)}</b> role? Everyone with this role gets them.`,"Save");
+  $$("[data-role]").forEach(c=>{const pick=e=>{if(e.target.closest("button")||+c.dataset.role===RS.role)return;if(RS.dirty){A.perms[RS.role]=JSON.parse(RS.orig.snap);toast("Unsaved permission changes were discarded.")}RS.role=+c.dataset.role;RS.dirty=0;RS.orig=null;RS.q="";render()};c.onclick=pick;c.onkeydown=e=>{if(e.key==="Enter")pick(e)}});
+  $$("[data-redit]").forEach(b=>b.onclick=()=>{const r=A.roles.find(x=>x.id===+b.dataset.redit);openForm("editRole",null,{"Role Name":r.name,"Role Code":r.code,"Description":r.desc,"Is User Type":true})});
+  $$("[data-rdel]").forEach(b=>b.onclick=()=>{const r=A.roles.find(x=>x.id===+b.dataset.rdel);confirmAct("Delete role",`Delete the <b>${esc(r.name)}</b> role? ${n(r.users)} users have it and would need a new role first.`,"Delete")});
+}
+/* user-wise access: starts from the user's role, can be changed for this one user */
+function openAccess(u){
+  const role=A.roles.find(r=>r.name===u.role)||A.roles[0],mods=JSON.parse(JSON.stringify(A.perms[role.id]||[])),dl=$("#dlg");dl.className="dlg wide";
+  dl.innerHTML=`<div class="dh"><i>🛡️</i><div><b>Access for ${esc(u.name)}</b><small>Starts from the ${esc(role.name)} role · changes apply to this user only</small></div><button class="x" type="button" aria-label="Close">×</button></div>
+    <div class="db" style="padding:0"><div class="tw">${matrixHtml(mods,role.name!=="Admin","")}</div></div>
+    <div class="df"><span class="err" style="color:var(--muted);font-weight:500">${role.name==="Admin"?"Admin users always have full access":"Tick or untick to change this user's access"}</span><button class="c" type="button">Cancel</button><button class="s" type="button">Save access</button></div>`;
+  dl.querySelector(".x").onclick=dl.querySelector(".c").onclick=()=>dl.close();
+  dl.querySelector(".s").onclick=()=>{dl.close();toast(`Access for ${u.name}: preview only, nothing was changed.`)};
+  dl.showModal();
+}
+function openForm(key,pre,vals){
   const C=F[key],dl=$("#dlg");dl.className="dlg"+(C.sm?" sm":"");
   const field=([l,t="text",req,opts,ph],i)=>l==="__or"?`<div class="or">OR</div>`:`<div class="ff ${t==="area"?"w":""}"><label for="f${i}">${esc(l)}${req?" <em>*</em>":""}</label>${
     t==="sel"?`<select id="f${i}" data-l="${esc(l)}" ${req?"required":""}><option value="">Select ${esc(l)}</option>${(opts?opts():[]).map(o=>`<option>${esc(o)}</option>`).join("")}</select>`:
@@ -200,6 +266,9 @@ function openForm(key,pre){
     dl.close();toast(`${C.t}: preview only, nothing was saved.`)};
   dl.showModal();dl.querySelector("input,select")?.focus();
   /* header search hands over what was typed: 10 digits = mobile, anything else = booking ID */
+  /* edit forms: fill each field by its label; Yes/No toggles by boolean */
+  if(vals)for(const [l,v] of Object.entries(vals)){const el=dl.querySelector(`[data-l="${l}"]`);if(!el)continue;
+    if(el.classList.contains("yn"))el.querySelectorAll("button").forEach((b,i)=>b.classList.toggle("on",(i===0)===!!v));else el.value=v??""}
   if(pre){const mob=/^\d{10}$/.test(pre.replace(/\D/g,""))&&!/[a-z]/i.test(pre);const el=dl.querySelector(`[data-l="${mob?"Mobile Number":"Booking ID"}"]`)||dl.querySelector("input");if(el){el.value=mob?pre.replace(/\D/g,""):pre;el.focus()}}
 }
 function openDetail(title,icon,pairs){
@@ -271,6 +340,11 @@ const P={
   "slots":{g:"Admin",t:"Branch Slot Management",i:"🕒",d:"Bookable slot times per branch and weekday",total:A.slots.length,btn:["+ Create New","createSlot"],rows:()=>A.slots,q:["branch","day"],
     cols:[["Branch",r=>`<b>${esc(r.branch)}</b>`],["Week Day",r=>esc(r.day)],["Slot Times",r=>`<div class="chips">${r.times.slice(0,6).map(t=>`<span>${esc(t)}</span>`).join("")}${r.times.length>6?`<span>+${r.times.length-6}</span>`:""}</div>`],["Dates",r=>`${esc(r.from)}<span class="mut">to ${esc(r.to)}</span>`,"nw"],["Created",r=>`${esc(r.createdAt)}<span class="mut">${esc(r.by)}</span>`,"nw"]],
     det:r=>[r.branch,[["Branch",r.branch],["Week Day",r.day],["Start",r.from],["End",r.to],["Created",r.createdAt],["Created by",r.by],["Updated",r.updatedAt],["Updated by",r.updBy],["Slot times",r.times.join(", "),1]]]},
+  "users":{g:"Access Control",t:"User Management",i:"👥",d:"Logins, roles and access flags for everyone who uses Reeserio",total:A.users.length,totalL:"Users",btn:["+ Add New User","addUser"],rows:()=>A.users,tab:"role",q:["name","email","phone","type","tl"],sub:()=>adminTabs("users"),
+    kp:()=>[["Active",n(A.users.filter(u=>u.active).length)],["Deactive",n(A.users.filter(u=>!u.active).length),"r"],["2FA required",n(A.users.filter(u=>u.twoFA==="Yes").length)],["Public access",n(A.users.filter(u=>u.pub==="Yes").length)]],
+    cols:[["Name",r=>`<b>${esc(r.name)}</b><span class="mut">${esc(r.type||"—")}${r.tl?` · reports to ${esc(r.tl)}`:""}</span>`],["Email",r=>esc(r.email)],["Phone No.",r=>esc(r.phone),"nw"],["Role",r=>`<span class="pill ${r.role==="Admin"?"o":r.role==="TeamLead"?"b":""}">${esc(r.role)}</span>`],["2FA",r=>esc(r.twoFA)],["Public",r=>esc(r.pub)],["Status",r=>pill(r.status)]],
+    acts:r=>[["🛡️ Access",()=>openAccess(r)],["✏️ Edit",()=>openForm("editUser",null,{"User Name":r.name,"Login ID":r.login,"Mobile No":r.phone,"Email ID":r.email,"Select Role":r.role,"User Type":r.type,"Assign Reporting To":r.tl,"Assign QA":r.qa,"Is On Roll":r.onRoll,"Is Active":r.active,"WhatsApp Login":r.wa,"2FA Required":r.twoFA==="Yes","Is Public Access":r.pub==="Yes"}),"pri"]],
+    det:r=>[r.name,[["User name",r.name],["Login ID",r.login],["Role",r.role],["User type",r.type],["Email",r.email],["Phone",r.phone],["Reports to",r.tl],["QA",r.qa],["On roll",r.onRoll?"Yes":"No"],["Status",pill(r.status)],["2FA required",r.twoFA],["Public access",r.pub],["WhatsApp login",r.wa?"Yes":"No"],["Last login",r.last],["Created",r.created]]]},
   "did":{g:"",t:"DID Mapping",i:"☎️",d:"Phone numbers and the call flow they route to",total:A.did.length,btn:["+ Create DID","createDID"],rows:()=>A.did,tab:"proc",q:["name","number","flow"],page:12,
     kp:()=>D.did.byProc.slice(0,3).map(([k,v])=>[k,n(v)]),
     cols:[["DID Name",r=>`<b>${esc(r.name)}</b>`],["DID Number",r=>esc(r.number),"nw"],["Flow Type",r=>esc(r.flow)],["Process",r=>pill(r.proc)]],
@@ -310,6 +384,7 @@ function listPage(key){
   const kp=C.kp?C.kp():[];
   return `<section class="ph"><div class="phm"><h1><i>${C.i}</i>${esc(C.t)}</h1><p>${esc(C.d)}</p>${kp.length?`<div class="kps">${kp.map(([a,b,r])=>`<div><small>${esc(a)}</small><b class="${r?"neg":""}">${b}</b></div>`).join("")}</div>`:""}</div>
     <div class="phs"><small>${C.totalL?esc(C.totalL):"Total records"}</small><b>${n(C.total??C.rows().length)}</b>${C.btn?`<button type="button" data-form="${C.btn[1]}">${esc(C.btn[0])}</button>`:""}</div></section>
+  ${C.sub?C.sub():""}
   ${C.rows().length<(C.total||0)?`<div class="note">Showing the latest ${C.rows().length} of ${n(C.total)} from the live app. In the real page these load page by page from the API.</div>`:""}
   <div class="tb"><div class="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="q" value="${esc(S.q)}" placeholder="Search keyword" autocomplete="off"></div>
     ${tabs.length>1?`<div class="tabs2"><button type="button" data-tab="" class="${!S.tab?"on":""}">All<b>${C.rows().length}</b></button>${tabs.slice(0,6).map(([k,v])=>`<button type="button" data-tab="${esc(k)}" class="${S.tab===k?"on":""}">${esc(k)}<b>${v}</b></button>`).join("")}</div>`:""}
@@ -336,6 +411,7 @@ const MENU=[
   ["Leads",[["📊","Lead Dashboard","#/lead-dashboard","Agents and sources"],["📋","Domestic View Leads","#/leads",n(L.lead7.domestic.total)+" in 7 days"],["🗂️","Domestic View Leads New","#/leads-new","By source"],["🌐","International View Leads","#/intl-leads",n(A.intl.total)+" calls today"],["🍷","Toscano Salt Leads","#/toscano-leads","Toscano and Salt"],["➕","Add Leads","#/leads?open=createLead","Popup form"]]],
   ["ODC",[["🍽️","Manage Cater Leads","#/cater",n(D.odc.total)+" leads"],["➕","New Catering Leads","#/cater?open=newCater","Popup form"]]],
   ["Admin",[["📌","Branch Instruction","#/instructions",A.instr.length+" instructions"],["🏷️","Offer Matrix","#/offers",A.offers.total+" offers"],["🕒","Branch Slot Management","#/slots",A.slots.length+" definitions"]]],
+  ["Access Control",[["👥","User Management","#/users",n(A.users.length)+" users"],["🛡️","Role & Permission Matrix","#/roles",A.roles.length+" roles · "+(A.perms[1]||[]).length+" modules"]]],
   ["Tools",[["📊","Dashboard","dashboard.html","Today at a glance"],["🔎","Search Booking","#/home?open=searchBooking","Popup"],["📝","Log Booking","#/home?open=logBooking","Popup"],["☎️","DID Mapping","#/did",A.did.length+" numbers"]]],
 ];
 const PAGES={
@@ -355,6 +431,13 @@ const PAGES={
   "reservation-view":{g:"Reservations",t:"Reservation View",i:"📅",r:()=>emptyPage("Reservation View","📅","Bookings at one outlet for a day, by session",["Lunch 1","Lunch 2","Dinner 1","Dinner 2"],["Active","Settled","Cancelled","Not confirmed"])},
   "reservation-report":{g:"Reservations",t:"Reservation Report",i:"📈",r:()=>emptyPage("Reservation Report","📈","Bookings by outlet, date and booking mode",[],["Reeserio","AryanTest"])},
   "toscano-leads":{g:"Leads",t:"Toscano Salt Leads",i:"🍷",r:()=>emptyPage("Toscano Salt Leads","🍷","Leads for Toscano and Salt outlets",[],[])},
+  "roles":{g:"Access Control",t:"Role & Permission Matrix",i:"🛡️",after:()=>bindMatrix(),r:()=>{const R=A.roles,cur=R.find(x=>x.id===RS.role)||R[0];
+    return `<section class="ph"><div class="phm"><h1><i>🛡️</i>Role &amp; Permission Matrix</h1><p>Create, update or remove roles and set the default module operations each role gets</p><div class="kps">${R.map(r=>`<div><small>${esc(r.name)}</small><b>${n(r.users)}</b></div>`).join("")}</div></div>
+      <div class="phs"><small>Defined roles</small><b>${R.length}</b><button type="button" data-form="addRole">+ Add New Role</button></div></section>${adminTabs("roles")}
+    <div class="rcards">${R.map(r=>`<div class="rcard ${r.id===cur.id?"on":""}" data-role="${r.id}" role="button" tabindex="0"><b>${esc(r.name)}</b><code>${esc(r.code)}</code><p>${esc(r.desc)}</p><div class="rf"><span>${n(r.users)} users</span>${r.name==="Admin"?'<em>System role</em>':`<button type="button" data-redit="${r.id}" aria-label="Edit role">✏️</button><button type="button" data-rdel="${r.id}" aria-label="Delete role">🗑️</button>`}</div></div>`).join("")}</div>
+    <div class="tcard"><div class="mh"><div><b>Fixed module permissions</b> <span class="pill o">${esc(cur.name)}</span><small>Default operations for everyone with this role${cur.name==="Admin"?" · Admin always has full access":""}</small></div><div class="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="mq" value="${esc(RS.q)}" placeholder="Search module" autocomplete="off"></div></div>
+      <div class="tw" id="mx">${matrixHtml(A.perms[cur.id]||[],cur.name!=="Admin",RS.q)}</div>
+      <div class="pg"><span class="info" id="mxInfo">${RS.dirty?`<b style="color:var(--ember)">${RS.dirty} change${RS.dirty>1?"s":""} not saved</b>`:"No changes"}</span><button type="button" id="mxReset" ${RS.dirty?"":"disabled"}>Reset</button><button type="button" class="on" id="mxSave" style="padding:0 14px" ${RS.dirty?"":"disabled"}>Save Permissions</button></div></div>`}},
   "followups":{g:"",t:"Follow-ups",i:"⏰",r:()=>`<section class="ph"><div class="phm"><h1><i>⏰</i>Follow-ups</h1><p>Leads waiting for a call back</p><div class="kps"><div><small>Overdue</small><b class="neg">${n(L.followup.overdueFollowUps)}</b></div><div><small>Coming up next</small><b>${n(L.followup.upcomingFollowUps)}</b></div></div></div><div class="phs"><small>Total</small><b>${n(L.followup.overdueFollowUps+L.followup.upcomingFollowUps)}</b><button type="button" data-form="logBooking">Log a call</button></div></section><div class="tcard"><div class="empty"><div class="i">⏰</div><b>Follow-up list loads from the live app</b>This snapshot only has the counts. Open Domestic View Leads to work on leads.<br><br><a href="#/leads" style="color:var(--ember);font-weight:800">Open Domestic View Leads →</a></div></div>`},
 };
 function branchPage(t,i,d,list){return `<section class="ph"><div class="phm"><h1><i>${i}</i>${t}</h1><p>${d}. The booking flow is the same as Domestic Booking.</p></div><div class="phs"><small>Outlets</small><b>${list.length}</b><a href="booking-11.html">Open booking page</a></div></section><div class="bg">${list.map(b=>`<div class="bc"><span><b>${esc(b.name)}</b><small>${esc(b.sub)}</small></span><a href="booking-11.html">Book →</a></div>`).join("")}</div>`}
