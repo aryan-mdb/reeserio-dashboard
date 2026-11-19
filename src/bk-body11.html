@@ -2,7 +2,11 @@
 /* Booking v11: one editable booking ticket + an offers board.
    Fields are filled right on the ticket; the stub carries the total and Create.
    Every deal for the slot, every outlet offer and every Happiness Card is visible below. */
-main.wrap{max-width:1180px;padding-top:18px;padding-bottom:40px}
+main.wrap,.subbar .wrap{max-width:2100px;padding-left:clamp(20px,2.2vw,48px);padding-right:clamp(20px,2.2vw,48px)}
+main.wrap{padding-top:18px;padding-bottom:40px}
+.oh .c:empty{display:none}
+.crumb a{color:var(--muted);text-decoration:none}.crumb a:hover{color:var(--ember)}
+@media (min-width:1600px){.tkt{grid-template-columns:minmax(0,1fr) 340px}.tm{padding:24px 32px 20px}.ts{padding:24px 26px}.dl{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}}
 .crumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);flex:1;min-width:0}
 .crumb b{color:var(--fg);font-weight:600}
 .crumb svg{width:14px;height:14px;color:var(--faint)}

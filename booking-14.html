@@ -177,14 +177,18 @@ details[open]>.mi .chev{transform:rotate(90deg)}
   <div class="scrim" id="scrim"></div>
   <div class="content-col" style="min-width:0">
     <div class="subbar"><div class="wrap">
-      <div class="crumb"><span>Table Booking</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg><b>Domestic Booking</b></div>
+      <div class="crumb"><a href="dashboard.html">Dashboard</a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg><span>Table Booking</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg><b>Domestic Booking</b></div>
     </div></div>
 <main class="wrap">
 <style>
 /* Booking v14 (from v11): one editable booking ticket + an offers board.
    Fields are filled right on the ticket; the stub carries the total and Create.
    Every deal for the slot, every outlet offer and every Happiness Card is visible below. */
-main.wrap{max-width:1180px;padding-top:18px;padding-bottom:40px}
+main.wrap,.subbar .wrap{max-width:2100px;padding-left:clamp(20px,2.2vw,48px);padding-right:clamp(20px,2.2vw,48px)}
+main.wrap{padding-top:18px;padding-bottom:40px}
+.oh .c:empty{display:none}
+.crumb a{color:var(--muted);text-decoration:none}.crumb a:hover{color:var(--ember)}
+@media (min-width:1600px){.tkt{grid-template-columns:minmax(0,1fr) 340px}.tm{padding:24px 32px 20px}.ts{padding:24px 26px}.dl{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}}
 .crumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);flex:1;min-width:0}
 .crumb b{color:var(--fg);font-weight:600}
 .crumb svg{width:14px;height:14px;color:var(--faint)}
@@ -352,7 +356,7 @@ dialog.bt[open]{animation:tin .35s cubic-bezier(.2,.9,.3,1.2)}
   .dl{grid-template-columns:1fr 1fr}
 }
 /* v14: compact */
-main.wrap{max-width:1360px;padding-bottom:110px}
+main.wrap{padding-bottom:110px}
 .tkt{grid-template-columns:1fr}
 .tm{border-radius:20px;-webkit-mask:none;mask:none}
 .tr.a{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto auto minmax(0,1.3fr)}

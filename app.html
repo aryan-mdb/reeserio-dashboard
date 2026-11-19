@@ -185,7 +185,7 @@ details[open]>.mi .chev{transform:rotate(90deg)}
    Data is a read-only snapshot of the live app with customer contact details masked. Nothing is saved. */
 main.wrap,.subbar .wrap{max-width:2100px;padding-left:clamp(20px,2.2vw,48px);padding-right:clamp(20px,2.2vw,48px)}
 main.wrap{padding-top:18px;padding-bottom:40px}
-@media (min-width:1600px){.ph{grid-template-columns:minmax(0,1fr) 320px}.ph .l{padding:22px 30px}.ph .r b{font-size:36px}.t td,.t th{padding-left:18px;padding-right:18px}}
+@media (min-width:1600px){.ph{grid-template-columns:minmax(0,1fr) 320px}.ph .phm{padding:22px 30px}.ph .phs b{font-size:36px}.t td,.t th{padding-left:18px;padding-right:18px}}
 .crumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);flex:1;min-width:0}
 .crumb b{color:var(--fg);font-weight:600}
 .crumb a{color:var(--muted);text-decoration:none}
@@ -196,10 +196,10 @@ main.wrap{padding-top:18px;padding-bottom:40px}
 
 /* page ticket */
 .ph{display:grid;grid-template-columns:minmax(0,1fr) 260px;filter:drop-shadow(0 8px 20px rgba(16,24,40,.08));margin-bottom:18px}
-.ph .l{background:#fff;border-radius:18px 0 0 18px;padding:18px 24px;
+.ph .phm{background:#fff;border-radius:18px 0 0 18px;padding:18px 24px;
   -webkit-mask:radial-gradient(circle 11px at 100% 0,#0000 98%,#000) top right/100% 51% no-repeat,radial-gradient(circle 11px at 100% 100%,#0000 98%,#000) bottom right/100% 51% no-repeat;
           mask:radial-gradient(circle 11px at 100% 0,#0000 98%,#000) top right/100% 51% no-repeat,radial-gradient(circle 11px at 100% 100%,#0000 98%,#000) bottom right/100% 51% no-repeat}
-.ph .r{background:linear-gradient(160deg,#ff7a1f,#ff5a00);color:#fff;border-radius:0 18px 18px 0;padding:18px 20px;border-left:2.5px dashed rgba(255,255,255,.55);display:flex;flex-direction:column;gap:10px;justify-content:center;
+.ph .phs{background:linear-gradient(160deg,#ff7a1f,#ff5a00);color:#fff;border-radius:0 18px 18px 0;padding:18px 20px;border-left:2.5px dashed rgba(255,255,255,.55);display:flex;flex-direction:column;gap:10px;justify-content:center;
   -webkit-mask:radial-gradient(circle 11px at 0 0,#0000 98%,#000) top left/100% 51% no-repeat,radial-gradient(circle 11px at 0 100%,#0000 98%,#000) bottom left/100% 51% no-repeat;
           mask:radial-gradient(circle 11px at 0 0,#0000 98%,#000) top left/100% 51% no-repeat,radial-gradient(circle 11px at 0 100%,#0000 98%,#000) bottom left/100% 51% no-repeat}
 .ph h1{margin:0;font-size:22px;font-weight:800;display:flex;align-items:center;gap:10px}
@@ -209,10 +209,10 @@ main.wrap{padding-top:18px;padding-bottom:40px}
 .kps div small{display:block;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
 .kps div b{font-size:20px;font-variant-numeric:tabular-nums}
 .kps div b.neg{color:var(--red)} /* not ".r": that is the orange stub's class */
-.ph .r small{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.85}
-.ph .r b{font-size:30px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
-.ph .r button,.ph .r a{height:42px;border:0;border-radius:12px;background:#1f2328;color:#fff;font:inherit;font-weight:800;font-size:14px;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px}
-.ph .r button:hover,.ph .r a:hover{background:#000}
+.ph .phs small{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.85}
+.ph .phs b{font-size:30px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.ph .phs button,.ph .phs a{height:42px;border:0;border-radius:12px;background:#1f2328;color:#fff;font:inherit;font-weight:800;font-size:14px;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px}
+.ph .phs button:hover,.ph .phs a:hover{background:#000}
 
 /* toolbar + table */
 .tb{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
@@ -318,7 +318,7 @@ dialog.dlg::backdrop{background:rgba(20,22,26,.45);backdrop-filter:blur(2px)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .foot{font-size:11.5px;color:var(--faint);text-align:center;margin-top:20px}
 
-@media (max-width:860px){.ph{grid-template-columns:1fr}.ph .l{border-radius:18px 18px 0 0;-webkit-mask:none;mask:none}.ph .r{border-radius:0 0 18px 18px;border-left:0;border-top:2.5px dashed rgba(255,255,255,.55);-webkit-mask:none;mask:none}.fg{grid-template-columns:1fr 1fr}.kv{grid-template-columns:1fr}}
+@media (max-width:860px){.ph{grid-template-columns:1fr}.ph .phm{border-radius:18px 18px 0 0;-webkit-mask:none;mask:none}.ph .phs{border-radius:0 0 18px 18px;border-left:0;border-top:2.5px dashed rgba(255,255,255,.55);-webkit-mask:none;mask:none}.fg{grid-template-columns:1fr 1fr}.kv{grid-template-columns:1fr}}
 @media (max-width:640px){.hbtn.fill .plus{display:block!important}.crumb{display:none}main.wrap{padding-left:12px;padding-right:12px}.fg,.fg.two{grid-template-columns:1fr}.srch{flex:1 1 100%}.tb .cnt{margin-left:0}}
 </style>
 
@@ -461,8 +461,8 @@ function listPage(key){
   const per=C.page||10,pages=Math.max(1,Math.ceil(rows.length/per));S.page=Math.min(S.page,pages);
   const vis=rows.slice((S.page-1)*per,S.page*per);
   const kp=C.kp?C.kp():[];
-  return `<section class="ph"><div class="l"><h1><i>${C.i}</i>${esc(C.t)}</h1><p>${esc(C.d)}</p>${kp.length?`<div class="kps">${kp.map(([a,b,r])=>`<div><small>${esc(a)}</small><b class="${r?"neg":""}">${b}</b></div>`).join("")}</div>`:""}</div>
-    <div class="r"><small>${C.totalL?esc(C.totalL):"Total records"}</small><b>${n(C.total??C.rows().length)}</b>${C.btn?`<button type="button" data-form="${C.btn[1]}">${esc(C.btn[0])}</button>`:""}</div></section>
+  return `<section class="ph"><div class="phm"><h1><i>${C.i}</i>${esc(C.t)}</h1><p>${esc(C.d)}</p>${kp.length?`<div class="kps">${kp.map(([a,b,r])=>`<div><small>${esc(a)}</small><b class="${r?"neg":""}">${b}</b></div>`).join("")}</div>`:""}</div>
+    <div class="phs"><small>${C.totalL?esc(C.totalL):"Total records"}</small><b>${n(C.total??C.rows().length)}</b>${C.btn?`<button type="button" data-form="${C.btn[1]}">${esc(C.btn[0])}</button>`:""}</div></section>
   ${C.rows().length<(C.total||0)?`<div class="note">Showing the latest ${C.rows().length} of ${n(C.total)} from the live app. In the real page these load page by page from the API.</div>`:""}
   <div class="tb"><div class="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="q" value="${esc(S.q)}" placeholder="Search keyword" autocomplete="off"></div>
     ${tabs.length>1?`<div class="tabs2"><button type="button" data-tab="" class="${!S.tab?"on":""}">All<b>${C.rows().length}</b></button>${tabs.slice(0,6).map(([k,v])=>`<button type="button" data-tab="${esc(k)}" class="${S.tab===k?"on":""}">${esc(k)}<b>${v}</b></button>`).join("")}</div>`:""}
@@ -491,23 +491,23 @@ const MENU=[
   ["Tools",[["📊","Dashboard","dashboard.html","Today at a glance"],["🔎","Search Booking","#/home?open=searchBooking","Popup"],["📝","Log Booking","#/home?open=logBooking","Popup"],["☎️","DID Mapping","#/did",A.did.length+" numbers"]]],
 ];
 const PAGES={
-  home:{t:"All modules",i:"🧭",r:()=>`<section class="ph"><div class="l"><h1><i>🧭</i>All modules</h1><p>Every page of Reeserio in one place. Pick one to open it.</p></div><div class="r"><small>Pages</small><b>${MENU.reduce((a,g)=>a+g[1].length,0)}</b><a href="booking-11.html">+ Book a table</a></div></section>`+
+  home:{t:"All modules",i:"🧭",r:()=>`<section class="ph"><div class="phm"><h1><i>🧭</i>All modules</h1><p>Every page of Reeserio in one place. Pick one to open it.</p></div><div class="phs"><small>Pages</small><b>${MENU.reduce((a,g)=>a+g[1].length,0)}</b><a href="booking-11.html">+ Book a table</a></div></section>`+
     MENU.map(([g,items])=>`<div class="hgrp">${g}</div><div class="hg">${items.map(([i,t,h,s])=>`<a class="hc" href="${h}"><i>${i}</i><span><b>${t}</b><small>${s}</small></span><em>OPEN →</em></a>`).join("")}</div>`).join("")},
   "lead-dashboard":{g:"Leads",t:"Lead Dashboard",i:"📊",r:()=>{const ag=L.agentsToday.slice(0,12),sr=L.sourcesToday;
-    return `<section class="ph"><div class="l"><h1><i>📊</i>Lead Dashboard</h1><p>Today by agent and by source</p><div class="kps"><div><small>Domestic today</small><b>${n(L.daily.at(-1).domTotal)}</b></div><div><small>Converted</small><b>${n(L.daily.at(-1).dom.converted)}</b></div><div><small>Agents active</small><b>${n(L.agentsActiveToday)}</b></div></div></div><div class="r"><small>Leads, 7 days</small><b>${n(L.lead7.domestic.total)}</b><a href="dashboard.html">Open dashboard</a></div></section>
+    return `<section class="ph"><div class="phm"><h1><i>📊</i>Lead Dashboard</h1><p>Today by agent and by source</p><div class="kps"><div><small>Domestic today</small><b>${n(L.daily.at(-1).domTotal)}</b></div><div><small>Converted</small><b>${n(L.daily.at(-1).dom.converted)}</b></div><div><small>Agents active</small><b>${n(L.agentsActiveToday)}</b></div></div></div><div class="phs"><small>Leads, 7 days</small><b>${n(L.lead7.domestic.total)}</b><a href="dashboard.html">Open dashboard</a></div></section>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr));gap:16px"><div class="tcard"><div class="tw"><table class="t"><thead><tr><th>User Name</th><th class="n">Total</th><th class="n">Domestic</th><th class="n">Intl</th><th class="n">Confirmed</th><th class="n">Pending</th><th class="n">Not conf.</th></tr></thead><tbody>${ag.map(a=>`<tr><td><b>${esc(a.agentName)}</b></td><td class="n">${n(a.total)}</td><td class="n">${n(a.domestic)}</td><td class="n">${n(a.international)}</td><td class="n"><b>${n(a.confirmed)}</b></td><td class="n">${n(a.pending)}</td><td class="n">${n(a.notConfirmed)}</td></tr>`).join("")}</tbody></table></div></div>
     <div class="tcard"><div class="tw"><table class="t"><thead><tr><th>Source</th><th class="n">Total</th><th class="n">New</th><th class="n">Open</th><th class="n">Booked</th><th class="n">Not conv.</th></tr></thead><tbody>${sr.map(s=>`<tr><td><b>${esc(s.source)}</b></td><td class="n">${n(s.total)}</td><td class="n">${n(s.new)}</td><td class="n">${n(s.ongoing)}</td><td class="n"><b>${n(s.booked)}</b></td><td class="n">${n(s.notConverted)}</td></tr>`).join("")}</tbody></table></div></div></div>`}},
-  "leads-new":{g:"Leads",t:"Domestic View Leads New",i:"🗂️",r:()=>`<section class="ph"><div class="l"><h1><i>🗂️</i>Domestic View Leads New</h1><p>LMS leads by source, last 2 days</p></div><div class="r"><small>All sources</small><b>${n((A.leadSources.find(s=>s.name==="All")||{}).count)}</b><button type="button" data-form="createLead">+ Create Lead</button></div></section>
+  "leads-new":{g:"Leads",t:"Domestic View Leads New",i:"🗂️",r:()=>`<section class="ph"><div class="phm"><h1><i>🗂️</i>Domestic View Leads New</h1><p>LMS leads by source, last 2 days</p></div><div class="phs"><small>All sources</small><b>${n((A.leadSources.find(s=>s.name==="All")||{}).count)}</b><button type="button" data-form="createLead">+ Create Lead</button></div></section>
     <div class="hg">${A.leadSources.filter(s=>s.name!=="All").map(s=>`<a class="hc" href="#/leads"><i>📥</i><span><b>${esc(s.name)}</b><small>${n(s.count)} leads</small></span><em>VIEW →</em></a>`).join("")}</div>`},
   "intl-booking":{g:"Table Booking",t:"International Booking",i:"🌍",r:()=>branchPage("International Booking","🌍","International outlets",A.intlBranches.map(b=>({name:b,sub:"International"})))},
   "toscano-booking":{g:"Table Booking",t:"Toscano Salt Booking",i:"🍝",r:()=>branchPage("Toscano Salt Booking","🍝","Toscano and Salt outlets",A.toscano.map(b=>({name:b.name,sub:[b.city,b.liquor==="Y"||b.liquor===true?"Bar":""].filter(Boolean).join(" · ")})))},
   "reservation-view":{g:"Reservations",t:"Reservation View",i:"📅",r:()=>emptyPage("Reservation View","📅","Bookings at one outlet for a day, by session",["Lunch 1","Lunch 2","Dinner 1","Dinner 2"],["Active","Settled","Cancelled","Not confirmed"])},
   "reservation-report":{g:"Reservations",t:"Reservation Report",i:"📈",r:()=>emptyPage("Reservation Report","📈","Bookings by outlet, date and booking mode",[],["Reeserio","AryanTest"])},
   "toscano-leads":{g:"Leads",t:"Toscano Salt Leads",i:"🍷",r:()=>emptyPage("Toscano Salt Leads","🍷","Leads for Toscano and Salt outlets",[],[])},
-  "followups":{g:"",t:"Follow-ups",i:"⏰",r:()=>`<section class="ph"><div class="l"><h1><i>⏰</i>Follow-ups</h1><p>Leads waiting for a call back</p><div class="kps"><div><small>Overdue</small><b class="r">${n(L.followup.overdueFollowUps)}</b></div><div><small>Coming up next</small><b>${n(L.followup.upcomingFollowUps)}</b></div></div></div><div class="r"><small>Total</small><b>${n(L.followup.overdueFollowUps+L.followup.upcomingFollowUps)}</b><button type="button" data-form="logBooking">Log a call</button></div></section><div class="tcard"><div class="empty"><div class="i">⏰</div><b>Follow-up list loads from the live app</b>This snapshot only has the counts. Open Domestic View Leads to work on leads.<br><br><a href="#/leads" style="color:var(--ember);font-weight:800">Open Domestic View Leads →</a></div></div>`},
+  "followups":{g:"",t:"Follow-ups",i:"⏰",r:()=>`<section class="ph"><div class="phm"><h1><i>⏰</i>Follow-ups</h1><p>Leads waiting for a call back</p><div class="kps"><div><small>Overdue</small><b class="neg">${n(L.followup.overdueFollowUps)}</b></div><div><small>Coming up next</small><b>${n(L.followup.upcomingFollowUps)}</b></div></div></div><div class="phs"><small>Total</small><b>${n(L.followup.overdueFollowUps+L.followup.upcomingFollowUps)}</b><button type="button" data-form="logBooking">Log a call</button></div></section><div class="tcard"><div class="empty"><div class="i">⏰</div><b>Follow-up list loads from the live app</b>This snapshot only has the counts. Open Domestic View Leads to work on leads.<br><br><a href="#/leads" style="color:var(--ember);font-weight:800">Open Domestic View Leads →</a></div></div>`},
 };
-function branchPage(t,i,d,list){return `<section class="ph"><div class="l"><h1><i>${i}</i>${t}</h1><p>${d}. The booking flow is the same as Domestic Booking.</p></div><div class="r"><small>Outlets</small><b>${list.length}</b><a href="booking-11.html">Open booking page</a></div></section><div class="bg">${list.map(b=>`<div class="bc"><span><b>${esc(b.name)}</b><small>${esc(b.sub)}</small></span><a href="booking-11.html">Book →</a></div>`).join("")}</div>`}
-function emptyPage(t,i,d,sess,stat){return `<section class="ph"><div class="l"><h1><i>${i}</i>${t}</h1><p>${d}</p></div><div class="r"><small>Outlets</small><b>${OUTLETS.length}</b><button type="button" data-form="searchBooking">Search booking</button></div></section>
+function branchPage(t,i,d,list){return `<section class="ph"><div class="phm"><h1><i>${i}</i>${t}</h1><p>${d}. The booking flow is the same as Domestic Booking.</p></div><div class="phs"><small>Outlets</small><b>${list.length}</b><a href="booking-11.html">Open booking page</a></div></section><div class="bg">${list.map(b=>`<div class="bc"><span><b>${esc(b.name)}</b><small>${esc(b.sub)}</small></span><a href="booking-11.html">Book →</a></div>`).join("")}</div>`}
+function emptyPage(t,i,d,sess,stat){return `<section class="ph"><div class="phm"><h1><i>${i}</i>${t}</h1><p>${d}</p></div><div class="phs"><small>Outlets</small><b>${OUTLETS.length}</b><button type="button" data-form="searchBooking">Search booking</button></div></section>
   <div class="fl"><select aria-label="Outlet"><option>Select Outlet/Branch</option>${OUTLETS.map(o=>`<option>${esc(o)}</option>`).join("")}</select><input type="date" aria-label="Date"></div>
   ${sess.length?`<div class="tabs2" style="margin-bottom:10px">${sess.map((s,k)=>`<button type="button" class="${k?"":"on"}">${s}<b>0</b></button>`).join("")}${stat.map(s=>`<button type="button">${s}<b>0</b></button>`).join("")}</div>`:""}
   <div class="tcard"><div class="empty"><div class="i">${i}</div><b>Select an outlet and a date</b>Bookings load from CRS for the outlet you pick. This snapshot has no bookings loaded.</div></div>`}
@@ -537,6 +537,7 @@ addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer()});
 $("#envLive").onclick=()=>{$("#envLive").classList.add("on");$("#envTest").classList.remove("on")};
 $("#envTest").onclick=()=>{$("#envTest").classList.add("on");$("#envLive").classList.remove("on")};
 $("#fuN").textContent=L.followup.upcomingFollowUps;$("#fuO").textContent=L.followup.overdueFollowUps;
+if(!mq.matches)shell.classList.add("collapsed"); /* same as every other page: menu opens from ☰ */
 cur=route().key;render();{const o=route().open;if(o&&F[o])openForm(o,route().q)}
 </script>
 <div id="hdrKit"><script>

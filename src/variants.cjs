@@ -9,7 +9,6 @@ let v12 = src;
 must(v12, '<section class="tkt">'); must(v12, '<p class="foot">');
 v12 = v12.replace('<section class="tkt">', '<div class="v12">\n<section class="tkt">').replace('<p class="foot">', '</div>\n<p class="foot">');
 v12 = addCss(v12, `/* v12: tall ticket left, offers right */
-main.wrap{max-width:1360px}
 .v12{display:grid;grid-template-columns:430px minmax(0,1fr);gap:24px;align-items:start}
 .v12 .tkt{grid-template-columns:1fr;position:sticky;top:calc(var(--hdr) + 56px)}
 .v12 .tm{border-radius:20px 20px 0 0;padding:18px 22px 14px;
@@ -86,7 +85,7 @@ v13 = v13.replace('/* Booking v11:', '/* Booking v13 (from v11):');
 /* ---------- 14: full-width ticket, three offer columns, sticky checkout bar ---------- */
 let v14 = src;
 v14 = addCss(v14, `/* v14: compact */
-main.wrap{max-width:1360px;padding-bottom:110px}
+main.wrap{padding-bottom:110px}
 .tkt{grid-template-columns:1fr}
 .tm{border-radius:20px;-webkit-mask:none;mask:none}
 .tr.a{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto auto minmax(0,1.3fr)}

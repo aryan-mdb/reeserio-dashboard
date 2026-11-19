@@ -14,7 +14,9 @@ JSON.parse(BK); JSON.parse(FU);
 const body = fs.readFileSync(bodyFile, 'utf8')
   .replace('/*BOOK*/null', () => BK).replace('/*FU*/null', () => FU)
   .split('LOGO_B64').join(LOGO);
-const out = prefix + body + '</body></html>';
+const CR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>';
+const pre2 = prefix.replace(/<div class="crumb">[\s\S]*?<\/div>/, `<div class="crumb"><a href="dashboard.html">Dashboard</a>${CR}<span>Table Booking</span>${CR}<b>Domestic Booking</b></div>`);
+const out = pre2 + body + '</body></html>';
 fs.writeFileSync(`../ghpages/booking-${n}.html`, out);
 fs.writeFileSync(`../reeserio-booking-v${n}.html`, out);
 console.log('built', n, out.length);
