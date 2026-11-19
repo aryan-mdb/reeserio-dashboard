@@ -208,7 +208,7 @@ main.wrap{padding-top:18px;padding-bottom:40px}
 .kps{display:flex;flex-wrap:wrap;gap:8px 26px;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line-2)}
 .kps div small{display:block;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
 .kps div b{font-size:20px;font-variant-numeric:tabular-nums}
-.kps div b.r{color:var(--red)}
+.kps div b.neg{color:var(--red)} /* not ".r": that is the orange stub's class */
 .ph .r small{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.85}
 .ph .r b{font-size:30px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
 .ph .r button,.ph .r a{height:42px;border:0;border-radius:12px;background:#1f2328;color:#fff;font:inherit;font-weight:800;font-size:14px;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px}
@@ -461,7 +461,7 @@ function listPage(key){
   const per=C.page||10,pages=Math.max(1,Math.ceil(rows.length/per));S.page=Math.min(S.page,pages);
   const vis=rows.slice((S.page-1)*per,S.page*per);
   const kp=C.kp?C.kp():[];
-  return `<section class="ph"><div class="l"><h1><i>${C.i}</i>${esc(C.t)}</h1><p>${esc(C.d)}</p>${kp.length?`<div class="kps">${kp.map(([a,b,r])=>`<div><small>${esc(a)}</small><b class="${r||""}">${b}</b></div>`).join("")}</div>`:""}</div>
+  return `<section class="ph"><div class="l"><h1><i>${C.i}</i>${esc(C.t)}</h1><p>${esc(C.d)}</p>${kp.length?`<div class="kps">${kp.map(([a,b,r])=>`<div><small>${esc(a)}</small><b class="${r?"neg":""}">${b}</b></div>`).join("")}</div>`:""}</div>
     <div class="r"><small>${C.totalL?esc(C.totalL):"Total records"}</small><b>${n(C.total??C.rows().length)}</b>${C.btn?`<button type="button" data-form="${C.btn[1]}">${esc(C.btn[0])}</button>`:""}</div></section>
   ${C.rows().length<(C.total||0)?`<div class="note">Showing the latest ${C.rows().length} of ${n(C.total)} from the live app. In the real page these load page by page from the API.</div>`:""}
   <div class="tb"><div class="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="q" value="${esc(S.q)}" placeholder="Search keyword" autocomplete="off"></div>

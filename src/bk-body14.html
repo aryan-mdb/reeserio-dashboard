@@ -105,6 +105,50 @@ select.u{appearance:none;cursor:pointer;padding-right:22px;background:url("data:
 .hcc small{display:block;font-size:11.5px;color:var(--muted);font-weight:600}
 .hcc b{font-size:15.5px;font-variant-numeric:tabular-nums}
 .foot{font-size:11.5px;color:var(--faint);text-align:center;margin-top:20px}
+/* booking-created ticket popup */
+dialog.bt{border:0;background:none;padding:12px;width:min(784px,96vw);max-height:96dvh;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+dialog.bt::-webkit-scrollbar{display:none}
+dialog.bt::backdrop{background:rgba(20,22,26,.55);backdrop-filter:blur(3px)}
+dialog.bt[open]{animation:tin .35s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes tin{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:none}}
+.btk{display:grid;grid-template-columns:minmax(0,1fr) 230px;filter:drop-shadow(0 24px 50px rgba(0,0,0,.35))}
+.bm2{background:#fff;border-radius:20px 0 0 20px;padding:22px 24px;
+  -webkit-mask:radial-gradient(circle 14px at 100% 0,#0000 98%,#000) top right/100% 51% no-repeat,radial-gradient(circle 14px at 100% 100%,#0000 98%,#000) bottom right/100% 51% no-repeat;
+          mask:radial-gradient(circle 14px at 100% 0,#0000 98%,#000) top right/100% 51% no-repeat,radial-gradient(circle 14px at 100% 100%,#0000 98%,#000) bottom right/100% 51% no-repeat}
+.bs2{background:linear-gradient(160deg,#ff7a1f,#ff5a00);color:#fff;border-radius:0 20px 20px 0;padding:22px 20px;border-left:2.5px dashed rgba(255,255,255,.6);display:flex;flex-direction:column;
+  -webkit-mask:radial-gradient(circle 14px at 0 0,#0000 98%,#000) top left/100% 51% no-repeat,radial-gradient(circle 14px at 0 100%,#0000 98%,#000) bottom left/100% 51% no-repeat;
+          mask:radial-gradient(circle 14px at 0 0,#0000 98%,#000) top left/100% 51% no-repeat,radial-gradient(circle 14px at 0 100%,#0000 98%,#000) bottom left/100% 51% no-repeat}
+.bh2{display:flex;align-items:center;gap:12px}
+.bh2 img{width:34px;height:36px;object-fit:contain}
+.bh2 b{display:block;font-size:20px;font-weight:800}
+.bh2 small{display:block;font-size:12.5px;color:var(--muted)}
+.bh2 i{margin-left:auto;width:42px;height:42px;border-radius:50%;background:var(--good);color:#fff;display:grid;place-items:center;font-style:normal;font-size:22px;font-weight:800;box-shadow:0 0 0 6px var(--good-soft)}
+.bid{display:flex;align-items:baseline;gap:10px;margin:18px 0 6px;padding:12px 14px;border-radius:12px;background:var(--card-2);border:1.5px dashed var(--line-2)}
+.bid small{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.bid b{font-size:20px;font-weight:800;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.bid em{margin-left:auto;font-style:normal;font-size:11px;font-weight:800;color:var(--muted);background:var(--bg-2);border-radius:99px;padding:2px 8px}
+.bg2{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.bg2 div{display:flex;flex-direction:column;gap:2px;padding:9px 0;border-bottom:1px dashed var(--line);min-width:0}
+.bg2 span{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.bg2 b{font-size:14.5px;overflow-wrap:anywhere}
+.ad{margin:10px 0 0;font-size:12.5px;color:var(--muted)}
+.bs2 small{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.85}
+.bs2 .tm2{font-size:38px;font-weight:800;line-height:1.05;margin-top:2px}
+.bs2>span{font-size:13.5px;font-weight:700;opacity:.92}
+.bs2 .px2{margin-top:12px;font-size:13.5px;opacity:.95}
+.bs2 .px2 b{font-size:18px}
+.bs2 .tt2{margin-top:12px;background:rgba(255,255,255,.18);border-radius:12px;padding:10px 12px}
+.bs2 .tt2 b{display:block;font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+.bc2{margin-top:auto;height:46px;border-radius:6px;background:#fff;padding:6px 8px;background-clip:content-box;
+  background-image:repeating-linear-gradient(90deg,#1f2328 0 2px,transparent 2px 4px,#1f2328 4px 7px,transparent 7px 9px,#1f2328 9px 10px,transparent 10px 13px);background-color:#fff}
+.bcn{display:block;text-align:center;margin-top:4px;letter-spacing:.2em!important}
+.ba2{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:16px}
+.ba2 button{height:44px;border:0;border-radius:12px;padding:0 16px;background:#fff;color:#343a40;font:inherit;font-weight:800;font-size:14px;cursor:pointer}
+.ba2 button:hover{background:var(--ember-soft);color:var(--ember)}
+.ba2 button.pri{background:var(--ember);color:#fff}
+.bn2{text-align:center;color:rgba(255,255,255,.85);font-size:12px;margin:10px 0 0}
+@media (max-width:640px){.btk{grid-template-columns:1fr}.bm2{border-radius:20px 20px 0 0;-webkit-mask:none;mask:none}.bs2{border-radius:0 0 20px 20px;border-left:0;border-top:2.5px dashed rgba(255,255,255,.6);-webkit-mask:none;mask:none}.bc2{margin-top:14px;height:38px}.bg2{grid-template-columns:1fr 1fr}.bm2{padding:16px}.bs2{padding:16px;display:grid;grid-template-columns:1fr auto;column-gap:12px;align-items:end}.bs2>*{grid-column:1/-1}.bs2 .tm2{font-size:30px}.bs2 .tt2{grid-column:2;grid-row:2/5;margin:0;align-self:center}.bs2 .px2{grid-column:1;margin-top:6px}.bid b{font-size:17px}.bh2 b{font-size:17px}.ad{display:none}.ba2 button{flex:1 1 45%}}
+@media print{body *{visibility:hidden}dialog.bt,dialog.bt *{visibility:visible}dialog.bt{position:fixed;inset:0;margin:auto}.ba2,.bn2{display:none}}
 .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:#1f2328;color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:all .25s;z-index:60;max-width:calc(100vw - 32px)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
@@ -187,6 +231,7 @@ main.wrap{max-width:1360px;padding-bottom:110px}
   </div>
 </section>
 <p class="foot">Preview built from the live booking page for Atria Mall, Worli, 18 Nov 2026, 3:50 PM IST. Nothing is saved.</p>
+<dialog class="bt" id="bt" aria-label="Booking confirmed"></dialog>
 </main>
 </div></div>
 <div class="toast" id="toast" role="status"></div>
@@ -266,7 +311,32 @@ const PI=["🔥","💑","👨‍👩‍👧","🍲","💰","🧒"];
 $("#promos").innerHTML=BK.promos.map((p,i)=>`<div class="pr2"><i>${PI[i]||"%"}</i><span>${esc(p.trim())}</span></div>`).join("");
 $("#cards").innerHTML=BK.cards.map(c=>`<div class="hcc"><small>${esc(c.n)}${c.pax?` · ${c.pax} pax`:""}</small><b>${inr(c.price)}</b></div>`).join("");
 const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("show"),2800)};
-$("#create").onclick=()=>toast("Preview only. On the live page this creates the booking in CRS.");
+/* booking created: show the booking as a ticket */
+function showTicket(){
+  const s=slotObj(),p=pkObj(),d=DAYS[S.day],nm=S.name.trim(),tot=p&&!p.reg?p.amt*S.adults+kidPrice()*S.kids:0;
+  const id="BN"+d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0")+String(Math.floor(1000+Math.random()*9000));
+  const occ=$("#occ").value,ins=$("#ins").value.trim(),addr=S.outlet===BK.outlet.branch_name?BK.outlet.address:"";
+  const row=(k,v)=>v?`<div><span>${k}</span><b>${esc(v)}</b></div>`:"";
+  const bt=$("#bt");
+  bt.innerHTML=`<div class="btk"><div class="bm2">
+      <div class="bh2"><img src="data:image/png;base64,LOGO_B64" alt=""><span><b>Booking confirmed</b><small>Barbeque Nation · Table booking</small></span><i aria-hidden="true">✓</i></div>
+      <div class="bid"><small>Booking ID</small><b>${id}</b><em>preview</em></div>
+      <div class="bg2">${row("Guest",nm)}${row("Mobile","+91 "+S.mobile.replace(/(\d{5})(\d{5})/,"$1 $2"))}${row("Outlet",S.outlet)}${row("Booking type",p?p.dn:"")}${row("Occasion",occ)}${row("Instruction",ins)}</div>
+      ${addr?`<p class="ad">📍 ${esc(addr)}</p>`:""}
+    </div><div class="bs2">
+      <small>Dine</small><b class="tm2">${t12(s.from)}</b><span>${d.toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"short"})}</span>
+      <div class="px2"><b>${S.adults}</b> adult${S.adults===1?"":"s"}${S.kids?` · <b>${S.kids}</b> kid${S.kids===1?"":"s"}`:""}</div>
+      <div class="tt2"><small>Estimate</small><b>${p&&!p.reg?inr(tot):"Pay at outlet"}</b></div>
+      <div class="bc2" aria-hidden="true"></div><small class="bcn">${id}</small>
+    </div></div>
+    <div class="ba2"><button type="button" data-a="wa">💬 Share on WhatsApp</button><button type="button" data-a="pr">🖨️ Print</button><button type="button" data-a="nb">+ New booking</button><button type="button" class="pri" data-a="x">Done</button></div>
+    <p class="bn2">Preview only: on the live page this is where CRS creates the booking and sends the confirmation.</p>`;
+  bt.querySelector(".ba2").onclick=e=>{const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;
+    if(a==="x")bt.close();if(a==="pr")window.print();if(a==="wa")toast("WhatsApp share: preview only, nothing was sent.");
+    if(a==="nb"){bt.close();$("#new").click()}};
+  bt.showModal();
+}
+$("#create").onclick=showTicket;
 
 /* shell: side menu starts closed like the live app */
 const shell=$("#shell"),side=$("#side"),scrim=$("#scrim"),mq=matchMedia("(max-width:979px)");
