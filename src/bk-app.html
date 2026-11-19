@@ -68,8 +68,14 @@ table.t{width:100%;border-collapse:collapse;font-size:13.5px}
 .chips{display:flex;flex-wrap:wrap;gap:4px}
 .chips span{font-size:11.5px;font-weight:700;background:#fff1e6;color:#b8480a;border-radius:6px;padding:2px 6px}
 .stars{color:#e8a317;letter-spacing:1px;white-space:nowrap}
-.pg{display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:10px 14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
-.pg button{min-width:32px;height:32px;border:1.5px solid var(--line-2);background:#fff;border-radius:9px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+/* pager: same look as the dashboard lists, always shown */
+.pg{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:6px;padding:12px 16px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--muted);background:var(--card-2)}
+.pg .info{margin-right:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.pg .info b{color:var(--fg)}
+.pg select{height:32px;border:1.5px solid var(--line-2);border-radius:9px;background:#fff;font:inherit;font-size:12.5px;font-weight:700;padding:0 8px;cursor:pointer}
+.pg em{font-style:normal;padding:0 2px}
+.pg button{min-width:32px;height:32px;padding:0 6px;border:1.5px solid var(--line-2);background:#fff;border-radius:9px;font:inherit;font-size:12.5px;font-weight:800;color:#495057;cursor:pointer}
+.pg button:hover:not(:disabled):not(.on){border-color:var(--ember);color:var(--ember)}
 .pg button.on{background:var(--ember);border-color:var(--ember);color:#fff}
 .pg button:disabled{opacity:.4;cursor:not-allowed}
 .note{margin:0 0 12px;padding:10px 14px;border-radius:12px;background:#eef5ff;color:#1d4f91;font-size:12.5px}
@@ -270,13 +276,36 @@ const P={
     cols:[["DID Name",r=>`<b>${esc(r.name)}</b>`],["DID Number",r=>esc(r.number),"nw"],["Flow Type",r=>esc(r.flow)],["Process",r=>pill(r.proc)]],
     det:r=>[r.name,[["DID Name",r.name],["DID Number",r.number],["Flow Type",r.flow],["Process",r.proc]]]},
 };
-const S={q:"",tab:"",page:1};
+const S={q:"",tab:"",page:1,per:0}
+/* stand-alone pager for the tables on non-list pages (Lead Dashboard): 10 rows per page, same look */
+function tablePager(sel,items,row){
+  const tb=$(sel),card=tb.closest(".tcard");let page=1,per=10;
+  const box=document.createElement("div");card.appendChild(box);
+  const draw=()=>{const pages=Math.max(1,Math.ceil(items.length/per));page=Math.min(page,pages);
+    tb.innerHTML=items.slice((page-1)*per,page*per).map(row).join("");
+    const a=items.length?(page-1)*per+1:0,b=Math.min(page*per,items.length);
+    const nums=[...Array(pages)].map((_,i)=>i+1).filter(p=>pages<=7||p===1||p===pages||Math.abs(p-page)<=1);
+    let last=0;box.className="pg";
+    box.innerHTML=`<span class="info"><span><b>${a}–${b}</b> of <b>${items.length}</b></span><label>Rows <select aria-label="Rows per page">${[10,25,50].map(v=>`<option ${v===per?"selected":""}>${v}</option>`).join("")}</select></label></span><button type="button" data-q="${page-1}" ${page<=1?"disabled":""} aria-label="Previous page">‹</button>`+
+      nums.map(p=>{const gap=p-last>1?"<em>…</em>":"";last=p;return `${gap}<button type="button" data-q="${p}" class="${p===page?"on":""}">${p}</button>`}).join("")+`<button type="button" data-q="${page+1}" ${page>=pages?"disabled":""} aria-label="Next page">›</button>`;
+    box.querySelector("select").onchange=e=>{per=+e.target.value;page=1;draw()}};
+  box.onclick=e=>{const b=e.target.closest("[data-q]");if(b&&!b.disabled){page=+b.dataset.q;draw()}};
+  draw();
+}
+/* pager under every list: "1–10 of 50", rows-per-page, ‹ 1 … 4 5 6 … 9 › */
+function pagerHtml(total,per,pages){
+  const a=total?(S.page-1)*per+1:0,b=Math.min(S.page*per,total);
+  const nums=[...Array(pages)].map((_,i)=>i+1).filter(p=>pages<=7||p===1||p===pages||Math.abs(p-S.page)<=1);
+  let last=0;const btns=nums.map(p=>{const gap=p-last>1?"<em>…</em>":"";last=p;return `${gap}<button type="button" data-p="${p}" class="${p===S.page?"on":""}" ${p===S.page?'aria-current="page"':""}>${p}</button>`}).join("");
+  return `<div class="pg"><span class="info"><span><b>${a}–${b}</b> of <b>${total}</b></span><label>Rows <select data-per aria-label="Rows per page">${[10,25,50].map(v=>`<option ${v===per?"selected":""}>${v}</option>`).join("")}</select></label></span>
+    <button type="button" data-p="${S.page-1}" ${S.page<=1?"disabled":""} aria-label="Previous page">‹</button>${btns}<button type="button" data-p="${S.page+1}" ${S.page>=pages?"disabled":""} aria-label="Next page">›</button></div>`;
+};
 function listPage(key){
   const C=P[key];let rows=C.rows();
   const tabs=C.tab?Object.entries(rows.reduce((a,r)=>{const v=r[C.tab]||"—";a[v]=(a[v]||0)+1;return a},{})).sort((a,b)=>b[1]-a[1]):[];
   if(S.tab)rows=rows.filter(r=>(r[C.tab]||"—")===S.tab);
   if(S.q){const q=S.q.toLowerCase();rows=rows.filter(r=>C.q.some(k=>String(r[k]??"").toLowerCase().includes(q)))}
-  const per=C.page||10,pages=Math.max(1,Math.ceil(rows.length/per));S.page=Math.min(S.page,pages);
+  const per=S.per||10,pages=Math.max(1,Math.ceil(rows.length/per));S.page=Math.min(S.page,pages);
   const vis=rows.slice((S.page-1)*per,S.page*per);
   const kp=C.kp?C.kp():[];
   return `<section class="ph"><div class="phm"><h1><i>${C.i}</i>${esc(C.t)}</h1><p>${esc(C.d)}</p>${kp.length?`<div class="kps">${kp.map(([a,b,r])=>`<div><small>${esc(a)}</small><b class="${r?"neg":""}">${b}</b></div>`).join("")}</div>`:""}</div>
@@ -287,13 +316,14 @@ function listPage(key){
     <span class="cnt">${rows.length} shown</span><button class="ex" type="button" id="exp">Export</button></div>
   <div class="tcard"><div class="tw"><table class="t"><thead><tr>${C.cols.map(c=>`<th class="${c[2]==="n"?"n":""}">${esc(c[0])}</th>`).join("")}${C.acts?"<th></th>":""}</tr></thead>
   <tbody>${vis.map((r,i)=>`<tr data-i="${(S.page-1)*per+i}">${C.cols.map(c=>`<td class="${c[2]||""}">${c[1](r)}</td>`).join("")}${C.acts?`<td class="act">${C.acts(r).map((a,j)=>`<button type="button" class="${a[2]||""}" data-a="${j}">${esc(a[0])}</button>`).join("")}</td>`:""}</tr>`).join("")||`<tr><td colspan="${C.cols.length+1}"><div class="empty"><div class="i">🔍</div><b>No match</b>Try another keyword or tab.</div></td></tr>`}</tbody></table></div>
-  ${pages>1?`<div class="pg"><span>Page ${S.page} of ${pages}</span><button type="button" data-p="${S.page-1}" ${S.page===1?"disabled":""}>‹</button>${[...Array(pages)].map((_,i)=>i+1).filter(p=>Math.abs(p-S.page)<3||p===1||p===pages).map(p=>`<button type="button" data-p="${p}" class="${p===S.page?"on":""}">${p}</button>`).join("")}<button type="button" data-p="${S.page+1}" ${S.page===pages?"disabled":""}>›</button></div>`:""}</div>`;
+  ${pagerHtml(rows.length,per,pages)}</div>`;
 }
 function bindList(key){
   const C=P[key];
   const q=$("#q");q.oninput=()=>{S.q=q.value;S.page=1;const pos=q.selectionStart;render();const nq=$("#q");nq.focus();nq.setSelectionRange(pos,pos)};
   $$("[data-tab]").forEach(b=>b.onclick=()=>{S.tab=b.dataset.tab;S.page=1;render()});
-  $$("[data-p]").forEach(b=>b.onclick=()=>{S.page=+b.dataset.p;render()});
+  const ps=$("[data-per]");if(ps)ps.onchange=()=>{S.per=+ps.value;S.page=1;render()};
+$$("[data-p]").forEach(b=>b.onclick=()=>{S.page=+b.dataset.p;render()});
   $("#exp").onclick=()=>toast("Export: preview only.");
   let rows=C.rows();if(S.tab)rows=rows.filter(r=>(r[C.tab]||"—")===S.tab);if(S.q){const s=S.q.toLowerCase();rows=rows.filter(r=>C.q.some(k=>String(r[k]??"").toLowerCase().includes(s)))}
   $$("tbody tr[data-i]").forEach(tr=>tr.onclick=e=>{const r=rows[+tr.dataset.i];const a=e.target.closest("[data-a]");if(a){C.acts(r)[+a.dataset.a][1]();return}if(C.det){const [t,p]=C.det(r);openDetail(t,C.i,p)}});
@@ -311,10 +341,13 @@ const MENU=[
 const PAGES={
   home:{t:"All modules",i:"🧭",r:()=>`<section class="ph"><div class="phm"><h1><i>🧭</i>All modules</h1><p>Every page of Reeserio in one place. Pick one to open it.</p></div><div class="phs"><small>Pages</small><b>${MENU.reduce((a,g)=>a+g[1].length,0)}</b><a href="booking-11.html">+ Book a table</a></div></section>`+
     MENU.map(([g,items])=>`<div class="hgrp">${g}</div><div class="hg">${items.map(([i,t,h,s])=>`<a class="hc" href="${h}"><i>${i}</i><span><b>${t}</b><small>${s}</small></span><em>OPEN →</em></a>`).join("")}</div>`).join("")},
-  "lead-dashboard":{g:"Leads",t:"Lead Dashboard",i:"📊",r:()=>{const ag=L.agentsToday.slice(0,12),sr=L.sourcesToday;
+  "lead-dashboard":{g:"Leads",t:"Lead Dashboard",i:"📊",after:()=>{
+      tablePager("#ldAg",L.agentsToday,a=>`<tr><td><b>${esc(a.agentName)}</b></td><td class="n">${n(a.total)}</td><td class="n">${n(a.domestic)}</td><td class="n">${n(a.international)}</td><td class="n"><b>${n(a.confirmed)}</b></td><td class="n">${n(a.pending)}</td><td class="n">${n(a.notConfirmed)}</td></tr>`);
+      tablePager("#ldSr",L.sourcesToday,s=>`<tr><td><b>${esc(s.source)}</b></td><td class="n">${n(s.total)}</td><td class="n">${n(s.new)}</td><td class="n">${n(s.ongoing)}</td><td class="n"><b>${n(s.booked)}</b></td><td class="n">${n(s.notConverted)}</td></tr>`)},
+    r:()=>{const ag=[],sr=[];
     return `<section class="ph"><div class="phm"><h1><i>📊</i>Lead Dashboard</h1><p>Today by agent and by source</p><div class="kps"><div><small>Domestic today</small><b>${n(L.daily.at(-1).domTotal)}</b></div><div><small>Converted</small><b>${n(L.daily.at(-1).dom.converted)}</b></div><div><small>Agents active</small><b>${n(L.agentsActiveToday)}</b></div></div></div><div class="phs"><small>Leads, 7 days</small><b>${n(L.lead7.domestic.total)}</b><a href="dashboard.html">Open dashboard</a></div></section>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr));gap:16px"><div class="tcard"><div class="tw"><table class="t"><thead><tr><th>User Name</th><th class="n">Total</th><th class="n">Domestic</th><th class="n">Intl</th><th class="n">Confirmed</th><th class="n">Pending</th><th class="n">Not conf.</th></tr></thead><tbody>${ag.map(a=>`<tr><td><b>${esc(a.agentName)}</b></td><td class="n">${n(a.total)}</td><td class="n">${n(a.domestic)}</td><td class="n">${n(a.international)}</td><td class="n"><b>${n(a.confirmed)}</b></td><td class="n">${n(a.pending)}</td><td class="n">${n(a.notConfirmed)}</td></tr>`).join("")}</tbody></table></div></div>
-    <div class="tcard"><div class="tw"><table class="t"><thead><tr><th>Source</th><th class="n">Total</th><th class="n">New</th><th class="n">Open</th><th class="n">Booked</th><th class="n">Not conv.</th></tr></thead><tbody>${sr.map(s=>`<tr><td><b>${esc(s.source)}</b></td><td class="n">${n(s.total)}</td><td class="n">${n(s.new)}</td><td class="n">${n(s.ongoing)}</td><td class="n"><b>${n(s.booked)}</b></td><td class="n">${n(s.notConverted)}</td></tr>`).join("")}</tbody></table></div></div></div>`}},
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr));gap:16px"><div class="tcard"><div class="tw"><table class="t"><thead><tr><th>User Name</th><th class="n">Total</th><th class="n">Domestic</th><th class="n">Intl</th><th class="n">Confirmed</th><th class="n">Pending</th><th class="n">Not conf.</th></tr></thead><tbody id="ldAg">${ag.map(a=>`<tr><td><b>${esc(a.agentName)}</b></td><td class="n">${n(a.total)}</td><td class="n">${n(a.domestic)}</td><td class="n">${n(a.international)}</td><td class="n"><b>${n(a.confirmed)}</b></td><td class="n">${n(a.pending)}</td><td class="n">${n(a.notConfirmed)}</td></tr>`).join("")}</tbody></table></div></div>
+    <div class="tcard"><div class="tw"><table class="t"><thead><tr><th>Source</th><th class="n">Total</th><th class="n">New</th><th class="n">Open</th><th class="n">Booked</th><th class="n">Not conv.</th></tr></thead><tbody id="ldSr">${sr.map(s=>`<tr><td><b>${esc(s.source)}</b></td><td class="n">${n(s.total)}</td><td class="n">${n(s.new)}</td><td class="n">${n(s.ongoing)}</td><td class="n"><b>${n(s.booked)}</b></td><td class="n">${n(s.notConverted)}</td></tr>`).join("")}</tbody></table></div></div></div>`}},
   "leads-new":{g:"Leads",t:"Domestic View Leads New",i:"🗂️",r:()=>`<section class="ph"><div class="phm"><h1><i>🗂️</i>Domestic View Leads New</h1><p>LMS leads by source, last 2 days</p></div><div class="phs"><small>All sources</small><b>${n((A.leadSources.find(s=>s.name==="All")||{}).count)}</b><button type="button" data-form="createLead">+ Create Lead</button></div></section>
     <div class="hg">${A.leadSources.filter(s=>s.name!=="All").map(s=>`<a class="hc" href="#/leads"><i>📥</i><span><b>${esc(s.name)}</b><small>${n(s.count)} leads</small></span><em>VIEW →</em></a>`).join("")}</div>`},
   "intl-booking":{g:"Table Booking",t:"International Booking",i:"🌍",r:()=>branchPage("International Booking","🌍","International outlets",A.intlBranches.map(b=>({name:b,sub:"International"})))},
@@ -337,6 +370,7 @@ function render(){
   const {key}=route(),pg=P[key]||PAGES[key]||PAGES.home,k=P[key]||PAGES[key]?key:"home";
   $("#view").innerHTML=P[k]?listPage(k):pg.r();
   if(P[k])bindList(k);
+  if(!P[k]&&pg.after)pg.after();
   $$("#view [data-form]").forEach(b=>b.onclick=()=>openForm(b.dataset.form));
   // header crumb + active menu
   const g=pg.g;$(".crumb").innerHTML=`<a href="dashboard.html">Dashboard</a>${g?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg><span>${esc(g)}</span>`:""}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg><b>${esc(pg.t)}</b>`;

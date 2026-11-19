@@ -4,7 +4,20 @@ const fs = require('fs');
 const a = require('./live/crawl2.json'), b = require('./live/crawl3.json');
 const cap = { ...a.cap, ...b.cap }, pages = { ...a.pages, ...b.pages };
 const rowsOf = j => { if (Array.isArray(j)) return j; if (!j || typeof j !== 'object') return null; for (const k of ['data', 'result', 'rows', 'items', 'list', 'offers', 'branchInstructions', 'leads', 'records']) if (j[k]) { const r = rowsOf(j[k]); if (r) return r; } for (const v of Object.values(j)) if (Array.isArray(v) && v.length && typeof v[0] === 'object') return v; return null; };
-const get = (page, re) => { const c = (cap[page] || []).filter(c => re.test(c.u)).pop(); if (!c) return { rows: [], raw: null }; const j = JSON.parse(c.body); return { rows: rowsOf(j) || [], raw: j }; };
+// pages.json (crawl4) holds pages 1..5 of each list; use them when present, de-duplicated, page-1 total kept.
+const P5 = fs.existsSync('./live/pages.json') ? require('./live/pages.json') : { api: {}, odcText: [] };
+const get = (page, re) => {
+  const c = (cap[page] || []).filter(c => re.test(c.u)).pop();
+  const raw = c ? JSON.parse(c.body) : null;
+  // only the page's own list API has extra pages (same patterns as crawl4.mjs); other calls on that page keep their single response
+  const LIST = { 'Manage Payment Links': 'payment-link-list', 'Coupon Issue Request': 'issue-coupon-list', 'Quotation List': 'QuotationMaster', 'Advance Collection': 'AdvanceCollection', 'Agent Call Review': 'AgentQuality\\/calls', 'Team Lead Call Review': 'team-leaders', 'Domestic View Leads': 'fetch-leads-data', 'International View Leads': 'FetchKnowlarityCalls', 'Offer Matrix': 'OfferMaster' };
+  const isList = LIST[page] && re.source.replace(/\\\//g, '/').includes(LIST[page].replace(/\\\//g, '/'));
+  const multi = (isList ? P5.api[page] || [] : []).map(t => { try { return rowsOf(JSON.parse(t)) || []; } catch { return []; } });
+  if (!multi.length) return { rows: raw ? rowsOf(raw) || [] : [], raw };
+  const seen = new Set(), rows = [];
+  for (const r of multi.flat()) { const k = JSON.stringify(r); if (!seen.has(k)) { seen.add(k); rows.push(r); } }
+  return { rows, raw: raw || JSON.parse(P5.api[page][0]) };
+};
 const totalOf = raw => { const s = JSON.stringify(raw || {}); const m = s.match(/"(?:totalRows|totalRecords|total_count|totalCount|recordsTotal|total)":\s*"?(\d+)/); return m ? +m[1] : null; };
 
 const phone = v => { const d = String(v ?? '').replace(/\D/g, ''); return d.length >= 8 ? d.slice(0, 2) + 'X'.repeat(d.length - 5) + d.slice(-3) : (v ?? ''); };
@@ -33,7 +46,7 @@ const out = {};
   out.dropdown = get('Domestic View Leads', /dropdown-data/).rows.map(r => r.name).slice(0, 45); }
 { const { rows, raw } = get('International View Leads', /FetchKnowlarityCalls/);
   out.intl = { total: totalOf(raw), rows: rows.map(r => ({ caller: phone(r.callerNumber), at: dt(r.call_date_time), outlet: r.storeName, status: r.agentStatus, dur: r.callDurationSec, category: r.callCategory, crs: r.crS_Actionable, crsRemark: scrub(r.crS_Actionable_Remark).slice(0, 160), bstatus: r.crsBookingStatus, bremark: scrub(r.crsBookingRemark).slice(0, 160), by: r.crsBookingStatusByUserName, booking: r.bookingid, times: r.noof_times_called, ai: scrub(r.aiTranscript).slice(0, 500) })) }; }
-{ const t = pages['Manage Cater Leads'].text.split('\n').filter(l => /^BNAT_\d+\t/.test(l));
+{ const t = [...new Set((P5.odcText.length ? P5.odcText : [pages['Manage Cater Leads'].text]).join('\n').split('\n').filter(l => /^BNAT_\d+\t/.test(l)))];
   out.odc = { rows: t.map(l => { const c = l.split('\t'); return { id: c[0], event: c[1].slice(0, 10), query: c[2].slice(0, 16), guest: name(c[3]), contact: phone(c[4]), pax: +c[5] || c[5], status: c[6], assigned: c[7], ack: c[8], loc: c[9] }; }), pages: 247 }; }
 { const { rows } = get('Branch Instruction', /BranchInstruction\/export/);
   out.instr = rows.map(r => ({ branch: r.branch_name, day: r.day_name, session: r.session_name, type: r.instruction_type, date: r.instruction_applicable_date ? String(r.instruction_applicable_date).slice(0, 10) : '', text: scrub(r.instruction_remarks).slice(0, 240) })); }
