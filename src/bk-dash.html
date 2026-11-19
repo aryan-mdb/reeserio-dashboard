@@ -83,7 +83,18 @@ main.wrap{padding-top:18px;padding-bottom:40px}
 .ag td{padding:8px 0;border-top:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
 .ag td:first-child{font-weight:700;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ag .rk{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:6px;background:var(--bg-2);font-size:11px;font-weight:800;margin-right:8px;color:var(--muted)}
-.ag tr:nth-child(1) .rk{background:var(--ember);color:#fff}
+.ag .rk.top{background:var(--ember);color:#fff}
+/* list pagination; fixed list heights so the panel doesn't jump between pages */
+.pn3 .pn{display:flex;flex-direction:column}
+#src{min-height:258px}
+.pgr{display:flex;align-items:center;justify-content:flex-end;gap:5px;margin-top:auto;padding-top:12px;border-top:1px dashed var(--line);font-size:12px;color:var(--muted)}
+.pgr span{margin-right:auto}
+.pgr em{font-style:normal;padding:0 2px}
+.pgr button{min-width:30px;height:30px;padding:0 6px;border:1.5px solid var(--line-2);background:#fff;border-radius:9px;font:inherit;font-size:12.5px;font-weight:800;color:#495057;cursor:pointer}
+.pgr button:hover:not(:disabled):not(.on){border-color:var(--ember);color:var(--ember)}
+.pn3 .pn .rows,.pn3 .pn .ag{margin-bottom:12px}
+.pgr button.on{background:var(--ember);border-color:var(--ember);color:#fff}
+.pgr button:disabled{opacity:.4;cursor:not-allowed}
 .foot{font-size:11.5px;color:var(--faint);text-align:center;margin-top:22px}
 
 /* big screens: use the width instead of leaving empty margins (page grows up to 2100px) */
@@ -212,13 +223,26 @@ function chart(){
 }
 new ResizeObserver(chart).observe($("#chart"));
 
+/* lists with pagination: 6 per page, "1–6 of N" and ‹ 1 2 … › under each list */
+function pager(el,items,per,draw){
+  let page=1;const pages=Math.max(1,Math.ceil(items.length/per));
+  const box=document.createElement("div");box.className="pgr";el.after(box);
+  const nums=()=>[...Array(pages)].map((_,i)=>i+1).filter(p=>pages<=5||p===1||p===pages||Math.abs(p-page)<=1);
+  function go(p){page=Math.min(pages,Math.max(1,p));const a=(page-1)*per;draw(items.slice(a,a+per),a);
+    if(pages<2){box.innerHTML=`<span>${items.length} shown</span>`;return}
+    let last=0;box.innerHTML=`<span>${a+1}–${Math.min(a+per,items.length)} of ${items.length}</span><button type="button" data-p="${page-1}" ${page===1?"disabled":""} aria-label="Previous page">‹</button>`+
+      nums().map(p=>{const gap=p-last>1?'<em>…</em>':"";last=p;return `${gap}<button type="button" data-p="${p}" class="${p===page?"on":""}" ${p===page?'aria-current="page"':""}>${p}</button>`}).join("")+
+      `<button type="button" data-p="${page+1}" ${page===pages?"disabled":""} aria-label="Next page">›</button>`}
+  box.onclick=e=>{const b=e.target.closest("[data-p]");if(b&&!b.disabled)go(+b.dataset.p)};
+  go(1);
+}
 /* top sources */
-const S=L.sourcesToday.filter(s=>s.source!=="(blank)").slice(0,6),smax=S[0].total;
-$("#src").innerHTML=S.map(s=>`<div class="rw"><div class="t"><span>${esc(s.source)}</span><b>${n(s.total)}</b></div><div class="bar" style="width:${s.total/smax*100}%"><i style="width:${s.booked/s.total*100}%;background:#e0611f"></i><i style="flex:1;background:#f6c9ad"></i></div></div>`).join("");
+const S=L.sourcesToday.filter(s=>s.source!=="(blank)"),smax=S[0].total;
+pager($("#src"),S,6,(rows)=>{$("#src").innerHTML=rows.map(s=>`<div class="rw"><div class="t"><span>${esc(s.source)}</span><b>${n(s.total)}</b></div><div class="bar" style="width:${s.total/smax*100}%"><i style="width:${s.booked/s.total*100}%;background:#e0611f"></i><i style="flex:1;background:#f6c9ad"></i></div></div>`).join("")});
 
-/* top agents */
-const AG=L.agentsToday.slice().sort((a,b)=>b.confirmed-a.confirmed||b.total-a.total).slice(0,6);
-$("#ag").innerHTML=`<tr><th>Agent</th><th>Leads</th><th>Confirmed</th></tr>`+AG.map((a,i)=>`<tr><td><span class="rk">${i+1}</span>${esc(a.agentName)}</td><td>${n(a.total)}</td><td><b>${n(a.confirmed)}</b></td></tr>`).join("");
+/* top agents (rank stays across pages) */
+const AG=L.agentsToday.slice().sort((a,b)=>b.confirmed-a.confirmed||b.total-a.total);
+pager($("#ag"),AG,6,(rows,off)=>{$("#ag").innerHTML=`<tr><th>Agent</th><th>Leads</th><th>Confirmed</th></tr>`+rows.map((a,i)=>`<tr><td><span class="rk ${off+i===0?"top":""}">${off+i+1}</span>${esc(a.agentName)}</td><td>${n(a.total)}</td><td><b>${n(a.confirmed)}</b></td></tr>`).join("")});
 $("#foot").textContent=`Read-only snapshot of reeserio.bnhl.in taken ${L.asOf}. Today's numbers cover the day up to that time.`;
 
 /* shell */
