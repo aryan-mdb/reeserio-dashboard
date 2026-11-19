@@ -1,7 +1,9 @@
 <style>
 /* Reeserio app prototype: every menu page as a hash route, one list-page pattern, one popup pattern.
    Data is a read-only snapshot of the live app with customer contact details masked. Nothing is saved. */
-main.wrap{max-width:1320px;padding-top:18px;padding-bottom:40px}
+main.wrap,.subbar .wrap{max-width:2100px;padding-left:clamp(20px,2.2vw,48px);padding-right:clamp(20px,2.2vw,48px)}
+main.wrap{padding-top:18px;padding-bottom:40px}
+@media (min-width:1600px){.ph{grid-template-columns:minmax(0,1fr) 320px}.ph .l{padding:22px 30px}.ph .r b{font-size:36px}.t td,.t th{padding-left:18px;padding-right:18px}}
 .crumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);flex:1;min-width:0}
 .crumb b{color:var(--fg);font-weight:600}
 .crumb a{color:var(--muted);text-decoration:none}
