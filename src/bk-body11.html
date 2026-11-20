@@ -54,6 +54,17 @@ select.u{appearance:none;cursor:pointer;padding-right:22px;background:url("data:
 .p .d{width:7px;height:7px;border-radius:50%;background:var(--s)}
 .s-ok{--s:#2fa36b;--s2:#1f7a4d}.s-fill{--s:#e8a317;--s2:#946200}.s-low{--s:#e35d6a;--s2:#b42335}.s-na{--s:#c9c9d1;--s2:var(--muted)}
 html[data-theme=dark] .s-ok{--s2:#5fd49a}html[data-theme=dark] .s-fill{--s2:#f0bf55}html[data-theme=dark] .s-low{--s2:#ff8a95}
+/* dine date cards (same family as the time-slot cards) */
+#days{display:flex;flex-wrap:wrap;gap:8px}
+#days .p.dy{flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:70px;padding:7px 10px 6px;border-radius:13px;border:1.5px solid var(--line-2);background:#fff;color:#343a40;transition:border-color .12s,box-shadow .12s,transform .12s}
+#days .p.dy:hover{border-color:var(--ember);transform:translateY(-1px);box-shadow:0 6px 14px rgba(16,24,40,.07)}
+#days .dy .w{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);line-height:1.2}
+#days .dy b{font-size:20px;font-weight:800;line-height:1.05;color:var(--fg);font-variant-numeric:tabular-nums}
+#days .dy .m{font-size:10.5px;font-weight:600;color:var(--faint);line-height:1.2}
+#days .dy.we .w{color:var(--ember)}
+#days .p.dy.on{background:var(--ember-soft);border-color:var(--ember);color:var(--ember);box-shadow:0 0 0 3px var(--ember-glow)}
+#days .dy.on b,#days .dy.on .w{color:var(--ember)}
+@media (max-width:640px){#days{display:grid;grid-template-columns:repeat(3,1fr)}#days .p.dy{min-width:0}}
 /* time slots: one small card per time — time, seats-left bar, seats + price */
 .sg{display:flex;flex-direction:column;gap:7px}
 .sg+.sg{margin-top:10px}
@@ -208,7 +219,7 @@ dialog.bt[open]{animation:tin .35s cubic-bezier(.2,.9,.3,1.2)}
     </div>
     <div class="tr b">
       <div class="f"><label for="outlet">Outlet</label><select class="u" id="outlet"></select></div>
-      <div class="f"><span class="l">Dine Date</span><div class="pl" id="days"></div></div>
+      <div class="f"><span class="l">Dine Date</span><div id="days"></div></div>
     </div>
     <div class="tr"><div class="f"><span class="l">Time <small id="tN"></small></span><div id="slots"></div><div id="tX"></div></div></div>
     <div class="tr d">
@@ -254,7 +265,9 @@ let S=fresh();
 
 $("#outlet").innerHTML=`<option value="">Select branch</option>`+BK.cities.slice().sort((a,b)=>b.l.length-a.l.length).map(c=>`<optgroup label="${esc(c.c)}">${c.l.map(o=>`<option ${o===S.outlet?"selected":""}>${esc(o)}</option>`).join("")}</optgroup>`).join("");
 $("#occ").innerHTML=`<option value="">—</option>`+BK.occasions.filter(o=>o!=="Not mentioned").map(o=>`<option>${esc(o)}</option>`).join("");
-$("#days").innerHTML=DAYS.map((d,i)=>`<button type="button" class="p" data-i="${i}">${i===0?"Today":i===1?"Tomorrow":d.toLocaleDateString("en-IN",{weekday:"short"})} <small>${d.getDate()}</small></button>`).join("");
+/* dine date: small calendar cards — day, big date, month; weekends marked because they fill first */
+$("#days").innerHTML=DAYS.map((d,i)=>{const wd=d.toLocaleDateString("en-IN",{weekday:"short"}),we=[0,6].includes(d.getDay());
+  return `<button type="button" class="p dy ${we?"we":""}" data-i="${i}" aria-label="${d.toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long"})}"><span class="w">${i===0?"Today":i===1?"Tomorrow":wd}</span><b>${d.getDate()}</b><span class="m">${i>1?"":wd+" · "}${d.toLocaleDateString("en-IN",{month:"short"})}</span></button>`}).join("");
 
 const hasData=()=>S.outlet===BK.outlet.branch_name&&S.day===0;
 const open=()=>BK.slots.filter(s=>!hasData()||(mins(s.from)>=SNAPMIN&&s.cap>0));
