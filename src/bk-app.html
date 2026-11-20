@@ -31,6 +31,26 @@ main.wrap{padding-top:18px;padding-bottom:40px}
 .ph .phs b{font-size:30px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
 .ph .phs button,.ph .phs a{height:42px;border:0;border-radius:12px;background:#1f2328;color:#fff;font:inherit;font-weight:800;font-size:14px;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px}
 .ph .phs button:hover,.ph .phs a:hover{background:#000}
+/* slim page header: one row — title + description | KPIs | total + action — so the list starts higher */
+.ph{grid-template-columns:minmax(0,1fr) auto;margin-bottom:12px;filter:drop-shadow(0 4px 12px rgba(16,24,40,.07))}
+.ph .phm{padding:12px 22px;display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;column-gap:26px;align-items:center}
+.ph h1{grid-column:1;grid-row:1;font-size:18px;gap:8px;white-space:nowrap}
+.ph h1 i{font-size:18px}
+.ph p{grid-column:1;grid-row:2;margin:1px 0 0;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:420px}
+.ph .kps{grid-column:2;grid-row:1/3;margin:0;padding:0 0 0 24px;border-top:0;border-left:1px dashed var(--line-2);gap:4px 26px;align-self:stretch;align-items:center}
+.kps div small{font-size:10px}
+.kps div b{font-size:17px;line-height:1.2}
+.ph .phs{display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto;column-gap:18px;row-gap:0;align-items:center;padding:12px 18px 12px 20px}
+.ph .phs small{grid-column:1;grid-row:1;font-size:10px}
+.ph .phs b{grid-column:1;grid-row:2;font-size:22px}
+.ph .phs button,.ph .phs a{grid-column:2;grid-row:1/3;height:38px;padding:0 16px;font-size:13.5px;white-space:nowrap}
+.note{margin:0 0 10px;padding:6px 12px;font-size:12px;border-radius:10px}
+.tb .cnt .lat{color:#1d4f91;cursor:help;white-space:nowrap}
+.atabs{margin:-2px 0 12px}
+.atabs a{padding:8px 14px}
+@media (min-width:1600px){.ph .phm{padding:12px 26px}.ph .phs b{font-size:24px}}
+@media (max-width:1100px){.ph .phm{grid-template-columns:1fr;grid-template-rows:auto}.ph h1,.ph p,.ph .kps{grid-column:1;grid-row:auto}.ph .kps{border-left:0;padding:8px 0 0;margin-top:8px;border-top:1px dashed var(--line-2)}.ph p{max-width:none;white-space:normal}}
+@media (max-width:640px){.ph .phs{grid-template-columns:1fr auto}}
 
 /* toolbar + table */
 .tb{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
@@ -385,10 +405,9 @@ function listPage(key){
   return `<section class="ph"><div class="phm"><h1><i>${C.i}</i>${esc(C.t)}</h1><p>${esc(C.d)}</p>${kp.length?`<div class="kps">${kp.map(([a,b,r])=>`<div><small>${esc(a)}</small><b class="${r?"neg":""}">${b}</b></div>`).join("")}</div>`:""}</div>
     <div class="phs"><small>${C.totalL?esc(C.totalL):"Total records"}</small><b>${n(C.total??C.rows().length)}</b>${C.btn?`<button type="button" data-form="${C.btn[1]}">${esc(C.btn[0])}</button>`:""}</div></section>
   ${C.sub?C.sub():""}
-  ${C.rows().length<(C.total||0)?`<div class="note">Showing the latest ${C.rows().length} of ${n(C.total)} from the live app. In the real page these load page by page from the API.</div>`:""}
-  <div class="tb"><div class="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="q" value="${esc(S.q)}" placeholder="Search keyword" autocomplete="off"></div>
+    <div class="tb"><div class="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="q" value="${esc(S.q)}" placeholder="Search keyword" autocomplete="off"></div>
     ${tabs.length>1?`<div class="tabs2"><button type="button" data-tab="" class="${!S.tab?"on":""}">All<b>${C.rows().length}</b></button>${tabs.slice(0,6).map(([k,v])=>`<button type="button" data-tab="${esc(k)}" class="${S.tab===k?"on":""}">${esc(k)}<b>${v}</b></button>`).join("")}</div>`:""}
-    <span class="cnt">${rows.length} shown</span><button class="ex" type="button" id="exp">Export</button></div>
+    <span class="cnt">${rows.length} shown${C.rows().length<(C.total||0)?` <span class="lat" title="The live app has ${n(C.total)}; this preview holds the latest ${C.rows().length}. The real page loads them page by page from the API.">· latest ${C.rows().length} of ${n(C.total)} ⓘ</span>`:""}</span><button class="ex" type="button" id="exp">Export</button></div>
   <div class="tcard"><div class="tw"><table class="t"><thead><tr>${C.cols.map(c=>`<th class="${c[2]==="n"?"n":""}">${esc(c[0])}</th>`).join("")}${C.acts?"<th></th>":""}</tr></thead>
   <tbody>${vis.map((r,i)=>`<tr data-i="${(S.page-1)*per+i}">${C.cols.map(c=>`<td class="${c[2]||""}">${c[1](r)}</td>`).join("")}${C.acts?`<td class="act">${C.acts(r).map((a,j)=>`<button type="button" class="${a[2]||""}" data-a="${j}">${esc(a[0])}</button>`).join("")}</td>`:""}</tr>`).join("")||`<tr><td colspan="${C.cols.length+1}"><div class="empty"><div class="i">🔍</div><b>No match</b>Try another keyword or tab.</div></td></tr>`}</tbody></table></div>
   ${pagerHtml(rows.length,per,pages)}</div>`;
