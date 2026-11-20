@@ -53,11 +53,18 @@ const out = {};
 { const { rows, raw } = get('Offer Matrix', /OfferMaster\/list/);
   out.offers = { total: totalOf(raw), rows: rows.map(r => ({ vh: r.voucherHeadId, name: r.offerName, type: r.offerType, from: String(r.fromDate || '').slice(0, 10), to: String(r.toDate || '').slice(0, 10), time: [r.fromTime, r.toTime].map(x => String(x || '').slice(0, 5)).join('–'), last: String(r.lastEntryTime || '').slice(0, 5), price: `${r.minPrice}–${r.maxPrice}`, pax: `${r.minPax}–${r.maxPax}`, gap: r.bookingGap, thr: r.thresHold, disc: r.discountAmount, desc: scrub(r.description), filter: r.outletFilterType, prio: r.priority, days: (r.days || []).map(d => d.dayName.slice(0, 3)).join(' '), outlets: (r.outlets || []).length })) }; }
 { const { rows } = get('Branch Slot Managment', /SlotDefinitionMaster/);
-  out.slots = rows.map(r => ({ branch: r.branch, day: r.weekDay, times: String(r.slotTimes || '').split(/[,|]/).map(s => s.trim()).filter(Boolean), from: String(r.fromDate || '').slice(0, 10), to: String(r.toDate || '').slice(0, 10), createdAt: dt(r.createdAt), by: r.createdBy, updatedAt: dt(r.updatedAt), updBy: r.updatedBy || '' })); }
+  // branch and weekDay come as objects ({branchName, cityName} / {dayName})
+  out.slots = rows.map(r => ({ branch: r.branch && typeof r.branch === 'object' ? r.branch.branchName : r.branch, city: r.branch && typeof r.branch === 'object' ? r.branch.cityName : '', day: r.weekDay && typeof r.weekDay === 'object' ? r.weekDay.dayName : r.weekDay, times: String(r.slotTimes || '').split(/[,|]/).map(s => s.trim()).filter(Boolean), from: String(r.fromDate || '').slice(0, 10), to: String(r.toDate || '').slice(0, 10), createdAt: dt(r.createdAt), by: r.createdBy, updatedAt: dt(r.updatedAt), updBy: r.updatedBy || '' })); }
 { out.did = get('DID Mapping', /DID\/getlist/).rows.map(r => ({ name: r.didName, number: r.didNumber, flow: r.flowType, proc: r.processName }));
   out.didProc = get('DID Mapping', /did-process-list/).rows.map(r => r.processName); }
 out.intlBranches = get('International Booking', /InterNationalBranchList/).rows.map(r => r.branchName);
 out.toscano = get('Toscano Salt Booking', /FetchToscanoSalt/).rows.map(r => ({ name: r.branchName, city: r.city, liquor: r.liquor }));
+// Filter options for Domestic View Leads, straight from the live "dropdown-data" API.
+// Agent names are user names = login IDs, so they are masked like on the users page.
+{ const c = (cap['Domestic View Leads'] || []).filter(c => /dropdown-data/.test(c.u)).pop();
+  if (c) { const j = JSON.parse(c.body); const nm = l => [...new Set((l || []).map(x => String(x.name || '').trim()).filter(Boolean))];
+    const mk = v => { const s = String(v || '').trim(); return s.length <= 3 ? s[0] + '••' : s.slice(0, 2) + '•'.repeat(Math.min(4, s.length - 3)) + s.slice(-1); };
+    out.leadDD = { source: nm(j.source), subSource: nm(j.sub_source), status: nm(j.status), subStatus: nm(j.sub_status), agent: nm(j.agent).map(mk), city: nm(j.city), outlet: nm(j.outlet) }; } }
 // Access Control & Administration (users, roles, permission matrix). Staff phone/email masked;
 // login IDs masked too, since a public list of real login IDs would help password guessing.
 if (fs.existsSync('./live/acct.json') && fs.existsSync('./live/admin.json')) {

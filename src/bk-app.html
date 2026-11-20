@@ -45,6 +45,37 @@ main.wrap{padding-top:18px;padding-bottom:40px}
 .ph .phs b{grid-column:1;grid-row:2;font-size:22px}
 .ph .phs button,.ph .phs a{grid-column:2;grid-row:1/3;height:38px;padding:0 16px;font-size:13.5px;white-space:nowrap}
 .note{margin:0 0 10px;padding:6px 12px;font-size:12px;border-radius:10px}
+/* filters: button in the page header, panel under it, chips in the toolbar */
+.ph .phm{grid-template-columns:auto minmax(0,1fr) auto}
+.fbtn{grid-column:3;grid-row:1/3;height:38px;display:flex;align-items:center;gap:8px;padding:0 14px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font:inherit;font-size:13.5px;font-weight:800;color:#343a40;cursor:pointer;white-space:nowrap}
+.fbtn svg{color:var(--ember)}
+.fbtn:hover,.fbtn.open{border-color:var(--ember);color:var(--ember)}
+.fbtn.has{border-color:var(--ember);background:var(--ember-soft);color:var(--ember)}
+.fbtn b{min-width:20px;height:20px;border-radius:99px;background:var(--ember);color:#fff;font-size:11px;display:grid;place-items:center;padding:0 6px}
+.fp{background:#fff;border:1px solid var(--line);border-radius:16px;margin:-4px 0 12px;box-shadow:0 10px 30px rgba(16,24,40,.08);animation:fpin .15s ease-out}
+@keyframes fpin{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.fph{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px dashed var(--line-2)}
+.fph b{font-size:15px}
+.fph small{color:var(--muted);font-size:12.5px}
+.fph .x{margin-left:auto;border:0;background:var(--bg-2);width:32px;height:32px;border-radius:10px;cursor:pointer;font-size:18px;color:#495057}
+.fg2{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px 14px;padding:14px 16px}
+.fi{display:flex;flex-direction:column;gap:5px;min-width:0}
+.fi>span{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+.fi select,.fi input{height:40px;border:1.5px solid var(--line-2);border-radius:10px;background:#fff;padding:0 10px;font:inherit;font-size:13.5px;width:100%;min-width:0}
+.fi select:focus,.fi input:focus{outline:none;border-color:var(--ember);box-shadow:0 0 0 3px var(--ember-glow)}
+.fi .dr{display:flex;align-items:center;gap:6px}
+.fi .dr em{font-style:normal;font-size:12px;color:var(--muted)}
+.fi .dr input{padding:0 6px;font-size:12.5px}
+.fpf{display:flex;justify-content:flex-end;gap:10px;padding:12px 16px;border-top:1px solid var(--line);background:var(--card-2);border-radius:0 0 16px 16px}
+.fpf button{height:40px;border-radius:11px;padding:0 18px;font:inherit;font-weight:800;font-size:13.5px;cursor:pointer}
+.fpf .c{border:1.5px solid var(--line-2);background:#fff;color:#495057}
+.fpf .s{border:0;background:var(--ember);color:#fff}
+.fchips{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0}
+.fchips span{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 4px 0 11px;border-radius:99px;background:var(--ember-soft);color:#7a3d10;font-size:12.5px;border:1px solid #ffd2b5}
+.fchips span b{color:var(--ember)}
+.fchips span button{width:24px;height:24px;border-radius:50%;border:0;background:#fff;color:var(--ember);cursor:pointer;font-size:15px;line-height:1}
+.fchips .clr{border:0;background:none;color:var(--muted);font:inherit;font-size:12.5px;font-weight:700;text-decoration:underline;cursor:pointer}
+@media (max-width:1100px){.fbtn{grid-column:1;grid-row:auto;justify-self:start;margin-top:10px}}
 .tb .cnt .lat{color:#1d4f91;cursor:help;white-space:nowrap}
 .atabs{margin:-2px 0 12px}
 .atabs a{padding:8px 14px}
@@ -394,32 +425,85 @@ function pagerHtml(total,per,pages){
   return `<div class="pg"><span class="info"><span><b>${a}–${b}</b> of <b>${total}</b></span><label>Rows <select data-per aria-label="Rows per page">${[10,25,50].map(v=>`<option ${v===per?"selected":""}>${v}</option>`).join("")}</select></label></span>
     <button type="button" data-p="${S.page-1}" ${S.page<=1?"disabled":""} aria-label="Previous page">‹</button>${btns}<button type="button" data-p="${S.page+1}" ${S.page>=pages?"disabled":""} aria-label="Next page">›</button></div>`;
 };
+/* ---------- filters (open from the page header) ----------
+   spec: [label, type, rowKey, options?]  type: sel | text | date2 (from–to) | max (number ≤) | static (shown, not applied: no such field in this snapshot) */
+const uniq=(key,rows)=>[...new Set(rows.map(r=>r[key]).filter(v=>v!==""&&v!=null&&v!=="N/A"))].map(String).sort((a,b)=>a.localeCompare(b));
+const DD=A.leadDD||{};
+const FILTERS={
+  "leads":[["Source","sel","source",()=>DD.source],["Sub Source","sel","stype",()=>uniq("stype",A.leads.rows)],["Contact Number","text","contact"],["Dine Date","date2","slot"],["Status","sel","status",()=>(DD.status||[]).filter(s=>s!=="All")],["Booking Id","text","booking"],["Agent By","static","",()=>["Acquired By","Assigned To"]],["Agent","sel","agent",()=>DD.agent],["Created Range","date2","created"],["City","sel","city",()=>DD.city],["Outlet","sel","outlet",()=>OUTLETS],["Lead Id","text","id"]],
+  "payment-links":[["Status","sel","status"],["Issued By","sel","by"],["Created","date2","created"],["Booking-ID","text","booking"],["Mobile","text","mobile"]],
+  "coupons":[["Coupon Status","sel","status"],["Payment Status","sel","pay"],["Coupon","sel","coupon"],["Outlet","sel","outlet"],["City","sel","city"],["Requested","date2","reqAt"],["Booking-ID","text","booking"]],
+  "quotations":[["Created By","sel","by"],["Created","date2","at"],["Lead ID","text","lead"]],
+  "advance":[["Status","sel","status"],["Channel","sel","channel"],["Source","sel","source"],["Branch","sel","branch"],["Reservation","date2","resAt"],["Booking","text","booking"]],
+  "call-review":[["Status","sel","status"],["Outcome","sel","outcome"],["Agent","sel","agent"],["Rating up to","max","rating"],["Call date","date2","at"]],
+  "intl-leads":[["Call Status","sel","status"],["Outlet","sel","outlet"],["CRS Status","sel","bstatus"],["Call Category","sel","category"],["Call date","date2","at"]],
+  "cater":[["Status","sel","status"],["Assigned To","sel","assigned"],["Event Date","date2","event"],["Location","text","loc"]],
+  "instructions":[["Instruction Type","sel","type"],["Branch","sel","branch"],["Session","sel","session"],["Day","sel","day"],["Date","date2","date"]],
+  "offers":[["Offer Type","sel","type"],["Priority up to","max","prio"]],
+  "slots":[["Branch","sel","branch"],["Week Day","sel","day"]],
+  "did":[["Process","sel","proc"],["Flow Type","sel","flow"]],
+  "users":[["Role","sel","role"],["Status","sel","status"],["User Type","sel","type"],["2FA Required","sel","twoFA"],["Public Access","sel","pub"],["Reports To","sel","tl"]],
+  "tl-review":[["Team Leader","sel","name"]],
+};
+const specFor=k=>FILTERS[k]||(P[k].tab?[["Status","sel",P[k].tab]]:[]);
+/* "19-11-2026 03:34" or "2026-11-19 15:34" -> 20261119 */
+const ymd=s=>{const m=String(s||"").match(/(\d{1,4})-(\d{1,2})-(\d{1,4})/);if(!m)return 0;const [a,b,c]=[m[1],m[2],m[3]];return a.length===4?+(a+b.padStart(2,"0")+c.padStart(2,"0")):+(c+b.padStart(2,"0")+a.padStart(2,"0"))};
+function applyFilters(k,rows){
+  const f=S.f||{};
+  for(const [l,t,key] of specFor(k)){const v=f[l];if(!v||t==="static")continue;
+    if(t==="sel")rows=rows.filter(r=>String(r[key]??"")===v);
+    if(t==="text"){const s=v.toLowerCase().replace(/\s/g,"");rows=rows.filter(r=>String(r[key]??"").toLowerCase().replace(/\s/g,"").includes(s))}
+    if(t==="max")rows=rows.filter(r=>+r[key]<=+v);
+    if(t==="date2"){const a=v.from?+v.from.replace(/-/g,""):0,b=v.to?+v.to.replace(/-/g,""):99999999;rows=rows.filter(r=>{const d=ymd(r[key]);return d&&d>=a&&d<=b})}}
+  return rows;
+}
+const fCount=k=>Object.entries(S.f||{}).filter(([l,v])=>v&&(typeof v!=="object"||v.from||v.to)).length;
+const fText=v=>typeof v==="object"?[v.from,v.to].map(x=>x?x.split("-").reverse().join("-"):"…").join(" → "):v;
+function filterPanel(k){
+  const sp=specFor(k),f=S.f||{};
+  const field=([l,t,key,opts])=>{const id="ff_"+l.replace(/\W+/g,"");
+    if(t==="sel"||t==="static"){const o=(opts?opts():uniq(key,P[k].rows()))||[];return `<label class="fi"><span>${esc(l)}</span><select data-f="${esc(l)}"><option value="">${t==="static"?esc(o[0]||"All"):"All"}</option>${(t==="static"?o.slice(1):o).map(x=>`<option ${f[l]===x?"selected":""}>${esc(x)}</option>`).join("")}</select></label>`}
+    if(t==="date2"){const v=f[l]||{};return `<div class="fi"><span>${esc(l)}</span><div class="dr"><input type="date" data-f="${esc(l)}" data-r="from" value="${esc(v.from||"")}" aria-label="${esc(l)} from"><em>to</em><input type="date" data-f="${esc(l)}" data-r="to" value="${esc(v.to||"")}" aria-label="${esc(l)} to"></div></div>`}
+    return `<label class="fi"><span>${esc(l)}</span><input ${t==="max"?'type="number" step="0.1"':""} data-f="${esc(l)}" value="${esc(f[l]||"")}" placeholder="${t==="max"?"e.g. 2":"Enter "+esc(l.toLowerCase())}"></label>`};
+  return `<section class="fp" id="fp"><div class="fph"><b>Filters</b><small>${sp.length} filters · matches update when you apply</small><button type="button" class="x" id="fpX" aria-label="Close filters">×</button></div>
+    <div class="fg2">${sp.map(field).join("")}</div>
+    <div class="fpf"><button type="button" class="c" id="fpClear">Clear all</button><button type="button" class="s" id="fpApply">Apply filters</button></div></section>`;
+}
 function listPage(key){
-  const C=P[key];let rows=C.rows();
-  const tabs=C.tab?Object.entries(rows.reduce((a,r)=>{const v=r[C.tab]||"—";a[v]=(a[v]||0)+1;return a},{})).sort((a,b)=>b[1]-a[1]):[];
-  if(S.tab)rows=rows.filter(r=>(r[C.tab]||"—")===S.tab);
+  const C=P[key];let rows=applyFilters(key,C.rows());
   if(S.q){const q=S.q.toLowerCase();rows=rows.filter(r=>C.q.some(k=>String(r[k]??"").toLowerCase().includes(q)))}
   const per=S.per||10,pages=Math.max(1,Math.ceil(rows.length/per));S.page=Math.min(S.page,pages);
   const vis=rows.slice((S.page-1)*per,S.page*per);
   const kp=C.kp?C.kp():[];
-  return `<section class="ph"><div class="phm"><h1><i>${C.i}</i>${esc(C.t)}</h1><p>${esc(C.d)}</p>${kp.length?`<div class="kps">${kp.map(([a,b,r])=>`<div><small>${esc(a)}</small><b class="${r?"neg":""}">${b}</b></div>`).join("")}</div>`:""}</div>
+  const fc=fCount(key),hasF=specFor(key).length>0;
+  const chips=Object.entries(S.f||{}).filter(([l,v])=>v&&(typeof v!=="object"||v.from||v.to));
+  return `<section class="ph"><div class="phm"><h1><i>${C.i}</i>${esc(C.t)}</h1><p>${esc(C.d)}</p>${kp.length?`<div class="kps">${kp.map(([a,b,r])=>`<div><small>${esc(a)}</small><b class="${r?"neg":""}">${b}</b></div>`).join("")}</div>`:""}
+      ${hasF?`<button type="button" class="fbtn ${S.fOpen?"open":""} ${fc?"has":""}" id="fbtn" aria-expanded="${!!S.fOpen}" aria-controls="fp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 5h18M6 12h12M10 19h4"/></svg>Filters${fc?`<b>${fc}</b>`:""}</button>`:""}</div>
     <div class="phs"><small>${C.totalL?esc(C.totalL):"Total records"}</small><b>${n(C.total??C.rows().length)}</b>${C.btn?`<button type="button" data-form="${C.btn[1]}">${esc(C.btn[0])}</button>`:""}</div></section>
+  ${S.fOpen&&hasF?filterPanel(key):""}
   ${C.sub?C.sub():""}
     <div class="tb"><div class="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="q" value="${esc(S.q)}" placeholder="Search keyword" autocomplete="off"></div>
-    ${tabs.length>1?`<div class="tabs2"><button type="button" data-tab="" class="${!S.tab?"on":""}">All<b>${C.rows().length}</b></button>${tabs.slice(0,6).map(([k,v])=>`<button type="button" data-tab="${esc(k)}" class="${S.tab===k?"on":""}">${esc(k)}<b>${v}</b></button>`).join("")}</div>`:""}
+    ${chips.length?`<div class="fchips">${chips.map(([l,v])=>`<span>${esc(l)}: <b>${esc(fText(v))}</b><button type="button" data-fx="${esc(l)}" aria-label="Remove ${esc(l)} filter">×</button></span>`).join("")}<button type="button" class="clr" id="fClrAll">Clear all</button></div>`:""}
     <span class="cnt">${rows.length} shown${C.rows().length<(C.total||0)?` <span class="lat" title="The live app has ${n(C.total)}; this preview holds the latest ${C.rows().length}. The real page loads them page by page from the API.">· latest ${C.rows().length} of ${n(C.total)} ⓘ</span>`:""}</span><button class="ex" type="button" id="exp">Export</button></div>
   <div class="tcard"><div class="tw"><table class="t"><thead><tr>${C.cols.map(c=>`<th class="${c[2]==="n"?"n":""}">${esc(c[0])}</th>`).join("")}${C.acts?"<th></th>":""}</tr></thead>
-  <tbody>${vis.map((r,i)=>`<tr data-i="${(S.page-1)*per+i}">${C.cols.map(c=>`<td class="${c[2]||""}">${c[1](r)}</td>`).join("")}${C.acts?`<td class="act">${C.acts(r).map((a,j)=>`<button type="button" class="${a[2]||""}" data-a="${j}">${esc(a[0])}</button>`).join("")}</td>`:""}</tr>`).join("")||`<tr><td colspan="${C.cols.length+1}"><div class="empty"><div class="i">🔍</div><b>No match</b>Try another keyword or tab.</div></td></tr>`}</tbody></table></div>
+  <tbody>${vis.map((r,i)=>`<tr data-i="${(S.page-1)*per+i}">${C.cols.map(c=>`<td class="${c[2]||""}">${c[1](r)}</td>`).join("")}${C.acts?`<td class="act">${C.acts(r).map((a,j)=>`<button type="button" class="${a[2]||""}" data-a="${j}">${esc(a[0])}</button>`).join("")}</td>`:""}</tr>`).join("")||`<tr><td colspan="${C.cols.length+1}"><div class="empty"><div class="i">🔍</div><b>No match</b>Try another keyword or change the filters.</div></td></tr>`}</tbody></table></div>
   ${pagerHtml(rows.length,per,pages)}</div>`;
 }
 function bindList(key){
   const C=P[key];
   const q=$("#q");q.oninput=()=>{S.q=q.value;S.page=1;const pos=q.selectionStart;render();const nq=$("#q");nq.focus();nq.setSelectionRange(pos,pos)};
-  $$("[data-tab]").forEach(b=>b.onclick=()=>{S.tab=b.dataset.tab;S.page=1;render()});
+  /* filters: toggle panel, apply, clear, remove one chip */
+  const fb=$("#fbtn");if(fb)fb.onclick=()=>{S.fOpen=!S.fOpen;render();if(S.fOpen)$("#fp select, #fp input")?.focus()};
+  const read=()=>{const f={};$$("#fp [data-f]").forEach(el=>{const l=el.dataset.f;if(el.dataset.r){f[l]=f[l]||{};if(el.value)f[l][el.dataset.r]=el.value}else if(el.value)f[l]=el.value});return f};
+  if($("#fp")){$("#fpApply").onclick=()=>{S.f=read();S.fOpen=false;S.page=1;render()};
+    $("#fpClear").onclick=()=>{S.f={};S.page=1;render()};$("#fpX").onclick=()=>{S.fOpen=false;render()};
+    $("#fp").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();$("#fpApply").click()}if(e.key==="Escape"){S.fOpen=false;render()}}}
+  $$("[data-fx]").forEach(b=>b.onclick=()=>{delete S.f[b.dataset.fx];S.page=1;render()});
+  const ca=$("#fClrAll");if(ca)ca.onclick=()=>{S.f={};S.page=1;render()};
   const ps=$("[data-per]");if(ps)ps.onchange=()=>{S.per=+ps.value;S.page=1;render()};
 $$("[data-p]").forEach(b=>b.onclick=()=>{S.page=+b.dataset.p;render()});
   $("#exp").onclick=()=>toast("Export: preview only.");
-  let rows=C.rows();if(S.tab)rows=rows.filter(r=>(r[C.tab]||"—")===S.tab);if(S.q){const s=S.q.toLowerCase();rows=rows.filter(r=>C.q.some(k=>String(r[k]??"").toLowerCase().includes(s)))}
+  let rows=applyFilters(key,C.rows());if(S.q){const s=S.q.toLowerCase();rows=rows.filter(r=>C.q.some(k=>String(r[k]??"").toLowerCase().includes(s)))}
   $$("tbody tr[data-i]").forEach(tr=>tr.onclick=e=>{const r=rows[+tr.dataset.i];const a=e.target.closest("[data-a]");if(a){C.acts(r)[+a.dataset.a][1]();return}if(C.det){const [t,p]=C.det(r);openDetail(t,C.i,p)}});
 }
 
@@ -479,7 +563,7 @@ function render(){
   document.title=`Reeserio · ${pg.t}`;
   $$("#side a").forEach(a=>{const on=a.getAttribute("href")===`#/${k}`;a.classList.toggle("on2",on);if(on){let d=a.closest("details");while(d){d.open=true;d=d.parentElement.closest("details")}}});
 }
-addEventListener("hashchange",()=>{const r=route();if(r.key!==cur){S.q="";S.tab="";S.page=1;cur=r.key;render();scrollTo(0,0)}if(r.open&&F[r.open])openForm(r.open,r.q)});
+addEventListener("hashchange",()=>{const r=route();if(r.key!==cur){S.q="";S.tab="";S.page=1;S.f={};S.fOpen=false;cur=r.key;render();scrollTo(0,0)}if(r.open&&F[r.open])openForm(r.open,r.q)});
 
 /* ---------- shell ---------- */
 const shell=$("#shell"),side=$("#side"),scrim=$("#scrim"),mq=matchMedia("(max-width:979px)");
