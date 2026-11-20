@@ -52,7 +52,29 @@ select.u{appearance:none;cursor:pointer;padding-right:22px;background:url("data:
 .p.on{background:var(--fg);border-color:var(--fg);color:#fff}
 .p.on small{color:rgba(255,255,255,.75)}
 .p .d{width:7px;height:7px;border-radius:50%;background:var(--s)}
-.s-ok{--s:#2fa36b}.s-fill{--s:#e8a317}.s-low{--s:#e35d6a}.s-na{--s:#c9c9d1}
+.s-ok{--s:#2fa36b;--s2:#1f7a4d}.s-fill{--s:#e8a317;--s2:#946200}.s-low{--s:#e35d6a;--s2:#b42335}.s-na{--s:#c9c9d1;--s2:var(--muted)}
+html[data-theme=dark] .s-ok{--s2:#5fd49a}html[data-theme=dark] .s-fill{--s2:#f0bf55}html[data-theme=dark] .s-low{--s2:#ff8a95}
+/* time slots: one small card per time — time, seats-left bar, seats + price */
+.sg{display:flex;flex-direction:column;gap:7px}
+.sg+.sg{margin-top:10px}
+.sgl{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.slt{display:grid;grid-template-columns:repeat(auto-fill,minmax(126px,148px));gap:10px}
+.st{position:relative;display:flex;flex-direction:column;gap:7px;text-align:left;border:1.5px solid var(--line-2);background:#fff;border-radius:13px;padding:10px 12px 9px;font:inherit;cursor:pointer;color:#343a40;transition:border-color .12s,box-shadow .12s,background .12s,transform .12s}
+.st:hover{border-color:var(--ember);transform:translateY(-1px);box-shadow:0 6px 14px rgba(16,24,40,.07)}
+.st:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ember-glow)}
+.st-t{display:flex;align-items:baseline;gap:4px}
+.st-t b{font-size:18px;font-weight:800;color:var(--fg);font-variant-numeric:tabular-nums;letter-spacing:-.01em;line-height:1}
+.st-t em{font-style:normal;font-size:10.5px;font-weight:800;color:var(--muted)}
+.st-ck{margin-left:auto;align-self:center;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line-2);display:grid;place-items:center;color:transparent;flex:none}
+.st-bar{height:4px;border-radius:4px;background:var(--bg-2);overflow:hidden}
+.st-bar i{display:block;height:100%;border-radius:4px;background:var(--s)}
+.st-m{display:flex;justify-content:space-between;align-items:baseline;gap:6px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.st-m .se{color:var(--s2)}
+.st-m .pr{color:var(--muted);font-weight:600}
+.st.on{border-color:var(--ember);background:var(--ember-soft);box-shadow:0 0 0 3px var(--ember-glow)}
+.st.on .st-ck{background:var(--ember);border-color:var(--ember);color:#fff}
+.st .lo{position:absolute;top:-9px;left:10px;background:#1f7a4d;color:#fff;font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;border-radius:99px;padding:2px 8px;line-height:1.4}
+@media (max-width:640px){.slt{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}.st{padding:9px 10px 8px}.st-t b{font-size:16px}}
 .lowp{font-size:12px;color:#1d4f91;font-weight:700;margin-top:6px}
 .nt{font-size:12px;color:#7a5408;margin-top:6px}
 
@@ -188,7 +210,7 @@ dialog.bt[open]{animation:tin .35s cubic-bezier(.2,.9,.3,1.2)}
       <div class="f"><label for="outlet">Outlet</label><select class="u" id="outlet"></select></div>
       <div class="f"><span class="l">Dine Date</span><div class="pl" id="days"></div></div>
     </div>
-    <div class="tr"><div class="f"><span class="l">Time <small id="tN"></small></span><div class="pl" id="slots"></div><div id="tX"></div></div></div>
+    <div class="tr"><div class="f"><span class="l">Time <small id="tN"></small></span><div id="slots"></div><div id="tX"></div></div></div>
     <div class="tr d">
       <div class="f"><label for="occ">Occasion <small style="font-weight:600;letter-spacing:0;text-transform:none">optional</small></label><select class="u sm" id="occ"></select></div>
       <div class="f"><label for="ins">Instruction to outlet <small style="font-weight:600;letter-spacing:0;text-transform:none">optional</small></label><input class="u sm" id="ins" placeholder="e.g. window seat" autocomplete="off"></div>
@@ -250,7 +272,7 @@ $("#nm").oninput=e=>{S.name=e.target.value;render()};
 $$(".cnt").forEach(c=>c.onclick=e=>{const b=e.target.closest("button");if(!b)return;const k=c.dataset.k;S[k]=Math.max(0,Math.min(99,S[k]+ +b.dataset.d));render()});
 $("#outlet").onchange=e=>{S.outlet=e.target.value;S.slot=null;render()};
 $("#days").onclick=e=>{const b=e.target.closest(".p");if(!b)return;S.day=+b.dataset.i;S.slot=null;render()};
-$("#slots").onclick=e=>{const b=e.target.closest(".p");if(!b)return;S.slot=b.dataset.k;render()};
+$("#slots").onclick=e=>{const b=e.target.closest(".st");if(!b)return;S.slot=b.dataset.k;render()};
 $("#deals").onclick=e=>{const b=e.target.closest(".dc");if(!b||b.disabled)return;S.pkg=b.dataset.k;S.manual=true;render()};
 $("#new").onclick=()=>{S=fresh();$("#mob").value=$("#nm").value=$("#ins").value="";$("#occ").value="";$("#outlet").value=S.outlet;render();$("#mob").focus()};
 
@@ -263,10 +285,20 @@ function render(){
   // time: only bookable slots, seats as a small number
   if(!S.outlet){$("#slots").innerHTML=`<span class="nt" style="color:var(--muted)">Select an outlet</span>`;$("#tX").innerHTML="";$("#tN").textContent=""}
   else{
-    $("#slots").innerHTML=open().map(x=>{const r=x.cap/x.tot,c=!hasData()?"s-na":r>.4?"s-ok":r>.15?"s-fill":"s-low";return `<button type="button" class="p ${c} ${S.slot===x.p+x.from?"on":""}" data-k="${x.p+x.from}"><span class="d"></span>${t12(x.from)}${hasData()?` <small>${x.cap}</small>`:""}</button>`}).join("");
     const low=BK.prices.filter(q=>q.ct==="Adult").reduce((a,b)=>b.amt<a.amt?b:a);
-    $("#tX").innerHTML=hasData()?`<div class="lowp">LOWEST PRICE ON: ${t12(low.from)} - ${t12(low.to)} @${low.amt}/-</div>`:`<div class="nt">Seat counts in this preview are for Atria Mall, Worli today; the live page loads them for every outlet and date.</div>`;
-    $("#tN").textContent=hasData()?"· seats left shown":"";
+    /* the per-person price this party would actually get at that time (same rule as best()), so the
+       agent can quote it straight from the slot; changes with the adult count */
+    const from=x=>{const t=mins(x.from),L=BK.prices.filter(p=>p.ct==="Adult"&&p.ft==="NON-VEG"&&S.adults>=p.min&&!/Student/.test(p.dn)&&mins(p.from)<=t&&t<=mins(p.to)).map(p=>p.amt);return L.length?Math.min(...L):0};
+    const tile=x=>{const r=x.cap/x.tot,c=!hasData()?"s-na":r>.4?"s-ok":r>.15?"s-fill":"s-low",k=x.p+x.from,on=S.slot===k,[hm,ap]=t12(x.from).split(" "),pr=from(x);
+      return `<button type="button" class="st ${c} ${on?"on":""}" data-k="${k}" aria-pressed="${on}">${pr&&pr===low.amt?`<span class="lo">Lowest price</span>`:""}
+        <span class="st-t"><b>${hm}</b><em>${ap}</em><span class="st-ck"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="M5 12l5 5L20 7"/></svg></span></span>
+        ${hasData()?`<span class="st-bar" title="${x.cap} of ${x.tot} seats left"><i style="width:${Math.max(6,Math.round(r*100))}%"></i></span>`:""}
+        <span class="st-m"><span class="se">${hasData()?`${x.cap} left`:"Seats on live"}</span>${pr?`<span class="pr">${inr(pr)}</span>`:""}</span></button>`};
+    const L=open(),G=[["Lunch",L.filter(x=>mins(x.from)<960)],["Dinner",L.filter(x=>mins(x.from)>=960)]].filter(g=>g[1].length);
+    $("#slots").innerHTML=L.length?G.map(([n,xs])=>`<div class="sg"><span class="sgl">${n} · ${xs.length} slot${xs.length>1?"s":""}</span><div class="slt">${xs.map(tile).join("")}</div></div>`).join(""):`<span class="nt">No open slots on this day — try another date.</span>`;
+    const lowShown=L.some(x=>from(x)===low.amt);
+    $("#tX").innerHTML=!hasData()?`<div class="nt">Seat counts in this preview are for Atria Mall, Worli today; the live page loads them for every outlet and date.</div>`:lowShown?"":`<div class="lowp">LOWEST PRICE ON: ${t12(low.from)} - ${t12(low.to)} @${low.amt}/-</div>`;
+    $("#tN").textContent=hasData()?`· seats left · price per person for ${S.adults} adult${S.adults===1?"":"s"}`:"";
   }
   // deals board
   const L=pkgs();$("#dN").textContent=s?L.length+1:"";
