@@ -6,7 +6,7 @@ for (const [n, w, h, scheme] of [[11, 1440, 900, 'light'], [11, 1440, 900, 'dark
   const p = await (await b.newContext({ viewport: { width: w, height: h }, colorScheme: scheme })).newPage();
   p.on('pageerror', e => errs.push(n + ': ' + e.message));
   await p.goto('file:///' + dir + '/booking-' + n + '.html'); await p.waitForTimeout(400);
-  await p.click('#slots .st >> nth=2'); await p.waitForTimeout(150);
+  await p.click('#days .dy >> nth=1'); await p.click('#slots .st >> nth=2'); await p.waitForTimeout(150);
   const box = await p.locator('#days').boundingBox();
   const info = await p.evaluate(() => ({ tiles: document.querySelectorAll('#slots .st').length, on: document.querySelector('#slots .st.on .st-t')?.innerText, groups: [...document.querySelectorAll('.sgl')].map(e => e.textContent), lowTag: document.querySelectorAll('#slots .lo').length, note: document.querySelector('#tX').innerText, o: document.documentElement.scrollWidth - innerWidth }));
   console.log(n, w, scheme, JSON.stringify(info));

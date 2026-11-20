@@ -54,17 +54,17 @@ select.u{appearance:none;cursor:pointer;padding-right:22px;background:url("data:
 .p .d{width:7px;height:7px;border-radius:50%;background:var(--s)}
 .s-ok{--s:#2fa36b;--s2:#1f7a4d}.s-fill{--s:#e8a317;--s2:#946200}.s-low{--s:#e35d6a;--s2:#b42335}.s-na{--s:#c9c9d1;--s2:var(--muted)}
 html[data-theme=dark] .s-ok{--s2:#5fd49a}html[data-theme=dark] .s-fill{--s2:#f0bf55}html[data-theme=dark] .s-low{--s2:#ff8a95}
-/* dine date cards (same family as the time-slot cards) */
-#days{display:flex;flex-wrap:wrap;gap:8px}
-#days .p.dy{flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:70px;padding:7px 10px 6px;border-radius:13px;border:1.5px solid var(--line-2);background:#fff;color:#343a40;transition:border-color .12s,box-shadow .12s,transform .12s}
-#days .p.dy:hover{border-color:var(--ember);transform:translateY(-1px);box-shadow:0 6px 14px rgba(16,24,40,.07)}
-#days .dy .w{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);line-height:1.2}
-#days .dy b{font-size:20px;font-weight:800;line-height:1.05;color:var(--fg);font-variant-numeric:tabular-nums}
-#days .dy .m{font-size:10.5px;font-weight:600;color:var(--faint);line-height:1.2}
+/* dine date: one joined strip, six equal days filling the field; picked day is solid orange */
+#days{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));padding:3px;gap:3px;border-radius:13px;background:var(--bg-2);border:1px solid var(--line)}
+#days .p.dy{flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:0;height:46px;padding:0 4px;border:0;border-radius:10px;background:transparent;color:#343a40;transition:background .12s,color .12s}
+#days .p.dy:hover{background:#fff}
+#days .dy .w{font-size:10.5px;font-weight:700;color:var(--muted);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+#days .dy b{font-size:15px;font-weight:800;line-height:1.2;color:var(--fg);font-variant-numeric:tabular-nums;white-space:nowrap}
+#days .dy b small{font-size:11px;font-weight:700;color:var(--muted);margin-left:2px}
 #days .dy.we .w{color:var(--ember)}
-#days .p.dy.on{background:var(--ember-soft);border-color:var(--ember);color:var(--ember);box-shadow:0 0 0 3px var(--ember-glow)}
-#days .dy.on b,#days .dy.on .w{color:var(--ember)}
-@media (max-width:640px){#days{display:grid;grid-template-columns:repeat(3,1fr)}#days .p.dy{min-width:0}}
+#days .p.dy.on{background:var(--ember);box-shadow:0 4px 12px rgba(255,98,0,.28)}
+#days .dy.on b,#days .dy.on .w,#days .dy.on b small{color:#fff}
+@media (max-width:640px){#days{grid-template-columns:repeat(3,minmax(0,1fr))}}
 /* time slots: one small card per time — time, seats-left bar, seats + price */
 .sg{display:flex;flex-direction:column;gap:7px}
 .sg+.sg{margin-top:10px}
@@ -267,7 +267,7 @@ $("#outlet").innerHTML=`<option value="">Select branch</option>`+BK.cities.slice
 $("#occ").innerHTML=`<option value="">—</option>`+BK.occasions.filter(o=>o!=="Not mentioned").map(o=>`<option>${esc(o)}</option>`).join("");
 /* dine date: small calendar cards — day, big date, month; weekends marked because they fill first */
 $("#days").innerHTML=DAYS.map((d,i)=>{const wd=d.toLocaleDateString("en-IN",{weekday:"short"}),we=[0,6].includes(d.getDay());
-  return `<button type="button" class="p dy ${we?"we":""}" data-i="${i}" aria-label="${d.toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long"})}"><span class="w">${i===0?"Today":i===1?"Tomorrow":wd}</span><b>${d.getDate()}</b><span class="m">${i>1?"":wd+" · "}${d.toLocaleDateString("en-IN",{month:"short"})}</span></button>`}).join("");
+  return `<button type="button" class="p dy ${we?"we":""}" data-i="${i}" aria-label="${d.toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long"})}"><span class="w">${i===0?"Today":i===1?"Tomorrow":wd}</span><b>${d.getDate()}<small>${d.toLocaleDateString("en-IN",{month:"short"})}</small></b></button>`}).join("");
 
 const hasData=()=>S.outlet===BK.outlet.branch_name&&S.day===0;
 const open=()=>BK.slots.filter(s=>!hasData()||(mins(s.from)>=SNAPMIN&&s.cap>0));
