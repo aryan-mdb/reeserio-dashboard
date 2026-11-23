@@ -1,8 +1,9 @@
 <style>
 /* Booking v16 — one screen, no steps.
-   Everything on one card, top to bottom in the order an agent asks the guest: who, how many, where, when.
-   A bar at the bottom of the card reads the booking back as one sentence with the total and Create booking.
-   Optional things (occasion, note, other deals, offers) stay out of the way until asked for. */
+   Left card: who, how many, where, when (in the order an agent asks). Right card: the deals for the picked
+   time, listed like the live page (radio row, deal tag, min pax, price with the struck-out regular price,
+   Regular booking last), then the booking read back, the estimate and Create booking.
+   Uses the full 2200px page width; below 1280px the right card moves under the left one. */
 main.wrap,.subbar .wrap{max-width:2200px;padding-left:clamp(16px,2.2vw,48px);padding-right:clamp(16px,2.2vw,48px)}
 main.wrap{padding-top:22px;padding-bottom:48px}
 .crumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);flex:1;min-width:0}
@@ -10,11 +11,11 @@ main.wrap{padding-top:22px;padding-bottom:48px}
 .crumb b{color:var(--fg);font-weight:600}
 .crumb svg{width:14px;height:14px;color:var(--faint)}
 
-.eb{max-width:1040px;margin:0 auto}
 .eh{display:flex;align-items:center;gap:12px;margin-bottom:14px}
 .eh h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.01em}
 .eh .again{margin-left:auto;border:0;background:none;color:var(--muted);font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:8px}
 .eh .again:hover{color:var(--ember);background:var(--ember-soft)}
+.lay{display:grid;grid-template-columns:minmax(0,1fr) minmax(400px,560px);gap:16px;align-items:start}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px}
 .in-pad{padding:20px 22px 6px}
 .blk{padding-bottom:18px}
@@ -47,20 +48,44 @@ select.in{appearance:none;cursor:pointer;padding-right:38px;background:var(--car
 .tg+.tg{margin-top:10px}
 .tg>b{flex:none;width:58px;padding-top:12px;font-size:13px;color:var(--muted);font-weight:700}
 .note{font-size:13px;color:var(--muted);margin-top:8px}
+.lowp{margin-top:10px;padding:8px 12px;border-radius:10px;background:var(--bg-2);font-size:13.5px;color:var(--fg-2)}
+.lowp b{color:var(--link)}
 .more{border:0;background:none;padding:0;font:inherit;font-size:13.5px;font-weight:700;color:var(--link);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .extra{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:14px;margin-top:10px}
 
-/* the bar: booking read back as one sentence, total, button */
-.bar{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 22px;border-top:1px solid var(--line);background:var(--card-2);border-radius:0 0 16px 16px}
-.sum{flex:1 1 360px;min-width:0;font-size:15px;line-height:1.5}
-.sum b{font-weight:800}
-.sum .miss{color:var(--muted)}
-.deal{display:flex;align-items:center;gap:8px;margin-top:2px;font-size:13.5px;color:var(--muted)}
-.deal select{height:30px;border:1px solid var(--line-2);border-radius:8px;background:var(--card);color:var(--fg);font:inherit;font-size:13px;padding:0 6px;max-width:100%}
-.tot{text-align:right}
-.tot small{display:block;font-size:12.5px;color:var(--muted)}
-.tot b{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
-.go{height:50px;border:0;border-radius:12px;background:var(--ember);color:#fff;font:inherit;font-size:16px;font-weight:800;padding:0 28px;cursor:pointer}
+/* right card: deals + estimate */
+.dside{position:sticky;top:84px}
+.sh2{display:flex;align-items:baseline;gap:8px;padding:18px 20px 10px}
+.sh2 h2{margin:0;font-size:16px;font-weight:800}
+.sh2 small{font-size:13px;color:var(--muted)}
+.dls{padding:0 20px;display:flex;flex-direction:column;gap:8px}
+.dr{display:flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:12px;padding:11px 14px;cursor:pointer}
+.dr:hover{border-color:var(--ember)}
+.dr.on{border-color:var(--ember);background:var(--ember-soft)}
+.dr.off{opacity:.5;cursor:not-allowed}
+.dr.off:hover{border-color:var(--line)}
+.dr input{width:18px;height:18px;accent-color:var(--ember);flex:none;margin:0}
+.dr .bd{flex:1;min-width:0}
+.dr .nm{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:14.5px;font-weight:700}
+.dr .tag{font-size:11.5px;font-weight:700;border-radius:6px;padding:1px 7px;background:var(--bg-2);color:var(--fg-2)}
+.dr .tag.deal{background:var(--ember-soft);color:var(--ember)}
+.dr .tag.best{background:var(--good-soft);color:var(--good)}
+.dr .dsub{font-size:12.5px;color:var(--muted);margin-top:2px}
+.dr .dsub.x{color:var(--red);font-weight:600}
+.dr .pr{text-align:right;white-space:nowrap}
+.dr .pr b{display:block;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+.dr .pr s{font-size:12px;color:var(--faint)}
+.veg{width:12px;height:12px;border:1.5px solid #198754;border-radius:2px;display:inline-grid;place-items:center;flex:none}
+.veg::after{content:"";width:6px;height:6px;border-radius:50%;background:#198754}
+.veg.nv{border-color:#a0410d}.veg.nv::after{background:#a0410d}
+.emp{margin:0 20px;padding:18px;border:1.5px dashed var(--line-2);border-radius:12px;color:var(--muted);font-size:13.5px;text-align:center}
+.rd{margin:16px 20px 0;padding-top:14px;border-top:1px solid var(--line);font-size:14.5px;line-height:1.55}
+.rd b{font-weight:800}
+.rd .miss{color:var(--faint)}
+.est{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:12px 20px 0}
+.est small{display:block;font-size:12.5px;color:var(--muted)}
+.est b{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+.go{display:block;width:calc(100% - 40px);margin:14px 20px 18px;height:52px;border:0;border-radius:12px;background:var(--ember);color:#fff;font:inherit;font-size:16px;font-weight:800;cursor:pointer}
 .go:hover{filter:brightness(.95)}
 .go:disabled{background:var(--bg-2);color:var(--faint);cursor:not-allowed;filter:none}
 .links{text-align:center;margin-top:16px}
@@ -77,55 +102,57 @@ dialog.of::backdrop{background:rgba(20,22,26,.5)}
 .ofb li{padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;list-style:none;display:flex;justify-content:space-between;gap:12px}
 .ofb ul{margin:0;padding:0}
 /*TICKETCSS*/
+@media (min-width:1800px){.lay{grid-template-columns:minmax(0,1fr) 620px}}
+@media (max-width:1279px){.lay{grid-template-columns:1fr}.dside{position:static}}
 @media (max-width:860px){.g1{grid-template-columns:1fr 1fr}.g1>div:nth-child(-n+2){grid-column:1/-1}.g2,.extra{grid-template-columns:1fr}}
 @media (max-width:640px){
   .hbtn.fill .plus{display:block!important}
   .crumb{display:none}
   main.wrap{padding-left:12px;padding-right:12px}
   .in-pad{padding:16px 14px 4px}
-  .bar{padding:12px 14px}
-  .tot{text-align:left}
-  .go{width:100%}
+  .sh2,.dls{padding-left:14px;padding-right:14px}.rd,.est{margin-left:14px;margin-right:14px}.emp{margin:0 14px}
+  .go{width:calc(100% - 28px);margin:14px 14px 16px}
   .pl{min-width:0;flex:1 1 calc(33% - 8px);padding:7px 6px}
   .tg{flex-direction:column;gap:6px}.tg>b{padding:0;width:auto}
 }
 </style>
 
-<div class="eb">
-  <div class="eh"><h1>Book a table</h1><button class="again" id="new" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 11a8 8 0 10-2.3 5.7M20 4v7h-7"/></svg>Clear</button></div>
-  <div class="card">
-    <div class="in-pad">
-      <div class="blk"><div class="g1">
-        <div><label class="lbl" for="mob">Mobile number</label><div class="ph"><span>+91</span><input class="in" id="mob" inputmode="numeric" maxlength="10" placeholder="10-digit mobile" autocomplete="off"></div></div>
-        <div><label class="lbl" for="nm">Guest name</label><input class="in" id="nm" placeholder="Full name" autocomplete="off"></div>
-        <div><span class="lbl">Adults</span><div class="cnt" data-k="adults"><button type="button" data-d="-1" aria-label="Fewer adults">−</button><output>2</output><button type="button" data-d="1" aria-label="More adults">+</button></div></div>
-        <div><span class="lbl">Kids 6–9</span><div class="cnt" data-k="kids"><button type="button" data-d="-1" aria-label="Fewer kids">−</button><output>0</output><button type="button" data-d="1" aria-label="More kids">+</button></div></div>
-      </div><div class="err" id="mobErr"></div></div>
+<div class="eh"><h1>Book a table</h1><button class="again" id="new" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 11a8 8 0 10-2.3 5.7M20 4v7h-7"/></svg>Clear</button></div>
+<div class="lay">
+  <div class="card"><div class="in-pad">
+    <div class="blk"><div class="g1">
+      <div><label class="lbl" for="mob">Mobile number</label><div class="ph"><span>+91</span><input class="in" id="mob" inputmode="numeric" maxlength="10" placeholder="10-digit mobile" autocomplete="off"></div></div>
+      <div><label class="lbl" for="nm">Guest name</label><input class="in" id="nm" placeholder="Full name" autocomplete="off"></div>
+      <div><span class="lbl">Adults</span><div class="cnt" data-k="adults"><button type="button" data-d="-1" aria-label="Fewer adults">−</button><output>2</output><button type="button" data-d="1" aria-label="More adults">+</button></div></div>
+      <div><span class="lbl">Kids 6–9</span><div class="cnt" data-k="kids"><button type="button" data-d="-1" aria-label="Fewer kids">−</button><output>0</output><button type="button" data-d="1" aria-label="More kids">+</button></div></div>
+    </div><div class="err" id="mobErr"></div></div>
 
-      <div class="blk"><div class="g2">
-        <div><label class="lbl" for="outlet">Outlet</label><select class="in" id="outlet"></select></div>
-        <div><span class="lbl">Date</span><div class="pills" id="days"></div></div>
-      </div></div>
+    <div class="blk"><div class="g2">
+      <div><label class="lbl" for="outlet">Outlet</label><select class="in" id="outlet"></select></div>
+      <div><span class="lbl">Date</span><div class="pills" id="days"></div></div>
+    </div></div>
 
-      <div class="blk"><span class="lbl">Time <span class="op" id="tN"></span></span><div id="slots"></div><div class="note" id="tX"></div></div>
+    <div class="blk"><span class="lbl">Time <span class="op" id="tN"></span></span><div id="slots"></div><div id="tX"></div></div>
 
-      <div class="blk">
-        <button class="more" id="exBtn" type="button">+ Add occasion or note for outlet</button>
-        <div class="extra" id="extra" hidden>
-          <div><label class="lbl" for="occ">Occasion <span class="op">(optional)</span></label><select class="in" id="occ"></select></div>
-          <div><label class="lbl" for="ins">Note for outlet <span class="op">(optional)</span></label><input class="in" id="ins" placeholder="e.g. window seat" autocomplete="off"></div>
-        </div>
+    <div class="blk">
+      <button class="more" id="exBtn" type="button">+ Add occasion or note for outlet</button>
+      <div class="extra" id="extra" hidden>
+        <div><label class="lbl" for="occ">Occasion <span class="op">(optional)</span></label><select class="in" id="occ"></select></div>
+        <div><label class="lbl" for="ins">Note for outlet <span class="op">(optional)</span></label><input class="in" id="ins" placeholder="e.g. window seat" autocomplete="off"></div>
       </div>
     </div>
-    <div class="bar">
-      <div class="sum"><div id="sum"></div><div class="deal" id="deal"></div></div>
-      <div class="tot"><small id="eS">Estimated bill</small><b id="eT">—</b></div>
-      <button class="go" id="create" type="button" disabled>Create booking</button>
-    </div>
-  </div>
-  <p class="links"><button class="more" id="ofBtn" type="button">See outlet offers &amp; Happiness Cards</button></p>
-  <p class="foot">Preview built from the live booking page for Atria Mall, Worli, 18 Nov 2026, 3:50 PM IST. Nothing is saved.</p>
+  </div></div>
+
+  <aside class="card dside" aria-label="Deal and estimate">
+    <div class="sh2"><h2>Deal</h2><small id="dS"></small></div>
+    <div id="dls"></div>
+    <div class="rd" id="rd"></div>
+    <div class="est"><div><small id="eS">Estimated bill</small><b id="eT">—</b></div></div>
+    <button class="go" id="create" type="button" disabled>Create booking</button>
+  </aside>
 </div>
+<p class="links"><button class="more" id="ofBtn" type="button">See outlet offers &amp; Happiness Cards</button></p>
+<p class="foot">Preview built from the live booking page for Atria Mall, Worli, 18 Nov 2026, 3:50 PM IST. Nothing is saved.</p>
 <dialog class="of" id="of" aria-label="Offers"><div class="ofh"><b>Offers you can share</b><button type="button" id="ofX" aria-label="Close">×</button></div><div class="ofb" id="ofb"></div></dialog>
 <dialog class="bt" id="bt" aria-label="Booking confirmed"></dialog>
 </main>
@@ -166,8 +193,8 @@ $$(".cnt").forEach(c=>c.onclick=e=>{const b=e.target.closest("button");if(!b)ret
 /* a new outlet or date clears the time, and with it any deal the agent picked by hand */
 $("#outlet").onchange=e=>{S.outlet=e.target.value;S.slot=null;S.manual=false;render()};
 $("#days").onclick=e=>{const b=e.target.closest(".pl");if(!b)return;S.day=+b.dataset.i;S.slot=null;S.manual=false;render()};
-$("#slots").onclick=e=>{const b=e.target.closest(".pl");if(!b)return;S.slot=b.dataset.k;render();$("#create").disabled||$("#create").focus()};
-$("#deal").onchange=e=>{S.pkg=e.target.value;S.manual=true;render()};
+$("#slots").onclick=e=>{const b=e.target.closest(".pl");if(!b)return;S.slot=b.dataset.k;render()};
+$("#dls").onchange=e=>{S.pkg=e.target.value;S.manual=true;render()};
 $("#exBtn").onclick=()=>{$("#extra").hidden=false;$("#exBtn").hidden=true;$("#occ").focus()};
 $("#new").onclick=()=>{S=fresh();$("#mob").value=$("#nm").value=$("#ins").value="";$("#occ").value="";$("#outlet").value=S.outlet;$("#extra").hidden=true;$("#exBtn").hidden=false;render();$("#mob").focus()};
 
@@ -179,27 +206,32 @@ function render(){
   $$("#days .pl").forEach((b,i)=>{b.classList.toggle("on",i===S.day);b.setAttribute("aria-pressed",i===S.day)});
 
   // time: every open time, price per person for this party; seats only when few are left
-  if(!S.outlet){$("#slots").innerHTML=`<p class="note">Select an outlet to see times.</p>`;$("#tX").textContent="";$("#tN").textContent=""}
+  if(!S.outlet){$("#slots").innerHTML=`<p class="note">Select an outlet to see times.</p>`;$("#tX").innerHTML="";$("#tN").textContent=""}
   else{
     const L=open(),G=[["Lunch",L.filter(x=>mins(x.from)<960)],["Dinner",L.filter(x=>mins(x.from)>=960)]].filter(g=>g[1].length);
     const pill=x=>{const k=x.p+x.from,few=hasData()&&x.cap<=10,pr=from(x);
       return `<button type="button" class="pl ${S.slot===k?"on":""}" data-k="${k}" aria-pressed="${S.slot===k}">${t12(x.from)}<small class="${few?"few":""}">${few?`Only ${x.cap} seats`:pr?inr(pr):"&nbsp;"}</small></button>`};
     $("#slots").innerHTML=L.length?G.map(([n,xs])=>`<div class="tg"><b>${n}</b><div class="pills">${xs.map(pill).join("")}</div></div>`).join(""):`<p class="note">No open times on this day. Pick another date.</p>`;
     $("#tN").textContent=L.length?`· price per person for ${S.adults} adult${S.adults===1?"":"s"}`:"";
-    $("#tX").textContent=L.length&&!hasData()?"Seat counts in this preview are for Atria Mall, Worli today; the live page loads them for every outlet and date.":"";
+    /* same hint as the live page: the cheapest buffet of the day and when it runs */
+    const low=BK.prices.filter(q=>q.ct==="Adult").reduce((a,b)=>b.amt<a.amt?b:a);
+    $("#tX").innerHTML=(L.length?`<div class="lowp">Lowest price: <b>${inr(low.amt)}</b> per person between ${t12(low.from)} and ${t12(low.to)}${low.min>1?` (for ${low.min}+ adults)`:""}</div>`:"")+(L.length&&!hasData()?`<p class="note">Seat counts in this preview are for Atria Mall, Worli today; the live page loads them for every outlet and date.</p>`:"");
   }
 
-  // the bar: one sentence, gaps shown in grey
+  // deals, as on the live page: one radio row each, Regular booking last
+  const b=best();
+  $("#dS").textContent=s?`for ${t12(s.from)} · best price picked for ${S.adults} adult${S.adults===1?"":"s"}`:"";
+  $("#dls").innerHTML=!s?`<div class="emp">Pick a time to see the deals for it.</div>`:`<div class="dls">${pkgs().map(q=>{const off=S.adults<q.min,on=S.pkg===q.dn;
+      return `<label class="dr ${on?"on":""} ${off?"off":""}"><input type="radio" name="dl" value="${esc(q.dn)}" ${on?"checked":""} ${off?"disabled":""}><span class="bd"><span class="nm"><span class="veg ${q.ft==="VEG"?"":"nv"}"></span>${esc(q.dn)}${q.rib?`<span class="tag deal">${esc(q.rib)}</span>`:""}</span><span class="dsub ${off?"x":""}">${off?`Needs ${q.min}+ adults`:`Per person · minimum ${q.min} pax${/Student/.test(q.dn)?" · student ID at outlet":""}`}</span></span><span class="pr"><b>${inr(q.amt)}</b>${q.orig>q.amt?`<s>${inr(q.orig)}</s>`:""}</span></label>`}).join("")}
+    <label class="dr ${S.pkg==="REG"?"on":""}"><input type="radio" name="dl" value="REG" ${S.pkg==="REG"?"checked":""}><span class="bd"><span class="nm">Regular booking<span class="tag">Amount not fixed</span></span><span class="dsub">Standard menu pricing · pay as per actual order</span></span></label></div>`;
+
+  // the booking read back, gaps in grey
   const miss=t=>`<span class="miss">${t}</span>`;
   const dl=DAYS[S.day].toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"});
-  $("#sum").innerHTML=`${nm?`<b>${esc(nm)}</b>`:miss("Guest name")} · ${mobOk()?fmtMob():miss("mobile")} · ${S.adults} adult${S.adults===1?"":"s"}${S.kids?` + ${S.kids} kid${S.kids===1?"":"s"}`:""}<br>${S.outlet?`<b>${esc(S.outlet)}</b>`:miss("Outlet")} · ${dl} · ${s?`<b>${t12(s.from)}</b>`:miss("pick a time")}`;
-  if(s){
-    const b=best();
-    $("#deal").innerHTML=`Deal <select aria-label="Deal">${pkgs().map(q=>{const off=S.adults<q.min;return `<option value="${esc(q.dn)}" ${S.pkg===q.dn?"selected":""} ${off?"disabled":""}>${esc(q.dn)} · ${inr(q.amt)}${b&&b.dn===q.dn?" (best)":""}${off?` · needs ${q.min}+`:""}</option>`}).join("")}<option value="REG" ${S.pkg==="REG"?"selected":""}>Regular booking · pay as per order</option></select>`;
-  }else $("#deal").innerHTML="";
+  $("#rd").innerHTML=`${nm?`<b>${esc(nm)}</b>`:miss("Guest name")} · ${mobOk()?fmtMob():miss("mobile")} · ${S.adults} adult${S.adults===1?"":"s"}${S.kids?` + ${S.kids} kid${S.kids===1?"":"s"}`:""}<br>${S.outlet?`<b>${esc(S.outlet)}</b>`:miss("Outlet")} · ${dl} · ${s?`<b>${t12(s.from)}</b>`:miss("pick a time")}`;
   const tot=p&&!p.reg?p.amt*S.adults+kidPrice()*S.kids:0;
-  $("#eT").textContent=!p?"—":p.reg?"At outlet":inr(tot);
-  $("#eS").textContent=p&&!p.reg?`Estimated bill · ${S.adults} × ${inr(p.amt)}${S.kids?` + ${S.kids} × ${inr(kidPrice())}`:""}`:"Estimated bill";
+  $("#eT").textContent=!p?"—":p.reg?"Pay at outlet":inr(tot);
+  $("#eS").textContent=p&&!p.reg?`Estimated bill · ${S.adults} × ${inr(p.amt)}${S.kids?` + ${S.kids} kid${S.kids===1?"":"s"} × ${inr(kidPrice())}`:""}`:"Estimated bill";
   $("#create").disabled=!(mobOk()&&nm&&S.adults>0&&S.outlet&&s&&p);
 }
 
