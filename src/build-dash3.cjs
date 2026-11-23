@@ -10,5 +10,7 @@ if (cut < 0) throw new Error('ticket body marker not found');
 const pre = ref.slice(0, cut).replace(/<title>[^<]*<\/title>/, '<title>Reeserio Dashboard</title>');
 const D = rd(G + 'index.html').match(/const D=(\{.*?\});\n/s)[1];
 const out = pre + rd('bk-dash-simple.html').replace('/*DASH*/null', () => D) + '</body></html>';
+// The simple dashboard is the main dashboard now; dashboard-ticket.html keeps the old design.
 fs.writeFileSync(G + 'dashboard-simple.html', out);
+fs.writeFileSync(G + 'dashboard.html', out);
 console.log('simple dashboard ->', out.length);
