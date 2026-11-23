@@ -82,9 +82,15 @@ select.in{appearance:none;cursor:pointer;padding-right:38px;background:var(--car
 .rd{margin:16px 20px 0;padding-top:14px;border-top:1px solid var(--line);font-size:14.5px;line-height:1.55}
 .rd b{font-weight:800}
 .rd .miss{color:var(--faint)}
-.est{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:12px 20px 0}
-.est small{display:block;font-size:12.5px;color:var(--muted)}
-.est b{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+/* estimate summary, as on the live page but without the Calculate button: it recalculates on every change */
+.est{margin:14px 20px 0;border:1px solid var(--line);border-radius:12px;background:var(--card-2);padding:12px 14px}
+.est h3{margin:0 0 6px;font-size:14.5px;font-weight:800;display:flex;align-items:baseline;gap:8px}
+.est h3 small{font-size:12px;font-weight:500;color:var(--muted)}
+.est .r{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;padding:3px 0;color:var(--fg-2)}
+.est .r span:last-child{font-variant-numeric:tabular-nums;font-weight:600}
+.est .t{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-top:1px solid var(--line);margin-top:6px;padding-top:8px}
+.est .t span{font-size:14px;font-weight:700}
+.est .t b{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
 .go{display:block;width:calc(100% - 40px);margin:14px 20px 18px;height:52px;border:0;border-radius:12px;background:var(--ember);color:#fff;font:inherit;font-size:16px;font-weight:800;cursor:pointer}
 .go:hover{filter:brightness(.95)}
 .go:disabled{background:var(--bg-2);color:var(--faint);cursor:not-allowed;filter:none}
@@ -193,7 +199,7 @@ dialog.bt[open]{animation:tin .35s cubic-bezier(.2,.9,.3,1.2)}
     <div class="sh2"><h2>Deal</h2><small id="dS"></small></div>
     <div id="dls"></div>
     <div class="rd" id="rd"></div>
-    <div class="est"><div><small id="eS">Estimated bill</small><b id="eT">—</b></div></div>
+    <div class="est" id="est"></div>
     <button class="go" id="create" type="button" disabled>Create booking</button>
   </aside>
 </div>
@@ -276,8 +282,10 @@ function render(){
   const dl=DAYS[S.day].toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"});
   $("#rd").innerHTML=`${nm?`<b>${esc(nm)}</b>`:miss("Guest name")} · ${mobOk()?fmtMob():miss("mobile")} · ${S.adults} adult${S.adults===1?"":"s"}${S.kids?` + ${S.kids} kid${S.kids===1?"":"s"}`:""}<br>${S.outlet?`<b>${esc(S.outlet)}</b>`:miss("Outlet")} · ${dl} · ${s?`<b>${t12(s.from)}</b>`:miss("pick a time")}`;
   const tot=p&&!p.reg?p.amt*S.adults+kidPrice()*S.kids:0;
-  $("#eT").textContent=!p?"—":p.reg?"Pay at outlet":inr(tot);
-  $("#eS").textContent=p&&!p.reg?`Estimated bill · ${S.adults} × ${inr(p.amt)}${S.kids?` + ${S.kids} kid${S.kids===1?"":"s"} × ${inr(kidPrice())}`:""}`:"Estimated bill";
+  const fixed=p&&!p.reg,row=(k,n,rate)=>`<div class="r"><span>${k}</span><span>${n}${fixed?` × ${inr(rate)} = ${inr(n*rate)}`:""}</span></div>`;
+  $("#est").innerHTML=`<h3>Estimate summary <small>${!p?"shows once you pick a time":"updates by itself"}</small></h3>`+
+    row("Adult guests",S.adults,fixed?p.amt:0)+row("Child guests (6–9)",S.kids,kidPrice())+
+    `<div class="t"><span>${fixed?"Estimated bill":"Bill"}</span><b id="eT">${!p?"—":p.reg?"As per order":inr(tot)}</b></div>`;
   $("#create").disabled=!(mobOk()&&nm&&S.adults>0&&S.outlet&&s&&p);
 }
 
