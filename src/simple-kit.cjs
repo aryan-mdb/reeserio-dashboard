@@ -3,7 +3,7 @@
 // - page headers flat: no orange ticket stub, one orange action button (totals are in the pager already)
 // - no tiny UPPERCASE letter-spaced labels: sentence case at a readable size
 // - solid hairlines instead of dashed ones, "Open" tags on module cards become a plain chevron
-// - menus and "Create Booking" open the simple booking page (booking-15) and the simple dashboard
+// - menus and "Create Booking" open the simple booking page (booking-16) and the simple dashboard
 const fs = require('fs');
 const G = '../ghpages/';
 const CSS = `<style id="simplecss">
@@ -36,13 +36,19 @@ main th,main small,main label,main span,main em,main b,main div,main p,main a,ma
 .hc:hover{transform:none!important;border-color:var(--ember)!important}
 .hc i{background:var(--bg-2)!important}
 </style>`;
-let k = 0;
-for (const f of fs.readdirSync(G).filter(f => /\.html$/.test(f) && f !== 'index.html')) {
+// The booking page every link opens: booking-16 (one screen, deals and estimate on the right).
+// Older designs stay reachable by their own URL.
+const BOOK = 'booking-16.html';
+let k = 0, links = 0;
+for (const f of fs.readdirSync(G).filter(f => /\.html$/.test(f))) {
   let t = fs.readFileSync(G + f, 'utf8').replace(/\r\n/g, '\n');
-  if (!/--bg:#f6f6f6/.test(t)) continue;
-  t = t.replace(/<style id="simplecss">[\s\S]*?<\/style>\n?/, '');
-  t = t.replace(/<\/body>/, CSS + '\n</body>');
-  t = t.split('href="booking-11.html"').join('href="booking-15.html"');
-  fs.writeFileSync(G + f, t); k++;
+  const before = t;
+  t = t.replace(/href="booking-(11|15)\.html"/g, () => { links++; return `href="${BOOK}"`; });
+  if (f !== 'index.html' && /--bg:#f6f6f6/.test(t)) {
+    t = t.replace(/<style id="simplecss">[\s\S]*?<\/style>\n?/, '');
+    t = t.replace(/<\/body>/, CSS + '\n</body>');
+    k++;
+  }
+  if (t !== before) fs.writeFileSync(G + f, t);
 }
-console.log('simple look on', k, 'pages');
+console.log('simple look on', k, 'pages;', links, 'booking links ->', BOOK);
