@@ -1,0 +1,167 @@
+<style>
+/* Dashboard — simple. Four plain numbers for today, one compact "Go to" list for the modules (one line
+   each, the whole line is the link), and two small panels: leads this week and today's top agents.
+   No ticket, no per-card "Open" strips, no pagination. */
+main.wrap,.subbar .wrap{max-width:2100px;padding-left:clamp(16px,2.2vw,48px);padding-right:clamp(16px,2.2vw,48px)}
+main.wrap{padding-top:22px;padding-bottom:48px}
+.ds{max-width:1240px;margin:0 auto}
+.dh{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.dh h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.01em}
+.dh small{font-size:13.5px;color:var(--muted)}
+.dh .bk{margin-left:auto;height:42px;border-radius:11px;background:var(--ember);color:#fff;font-weight:800;font-size:14.5px;padding:0 18px;display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+.dh .bk:hover{filter:brightness(.95)}
+
+.kp{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.k{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;text-decoration:none;color:inherit;display:block}
+a.k:hover{border-color:var(--ember)}
+.k small{display:block;font-size:13.5px;color:var(--muted);font-weight:600}
+.k b{display:block;font-size:28px;font-weight:800;margin:2px 0 2px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.k span{font-size:13px;color:var(--muted)}
+.k .r{color:var(--red);font-weight:700}
+.k.warn b{color:var(--red)}
+
+.st{display:flex;align-items:baseline;gap:10px;margin:26px 0 10px}
+.st h2{margin:0;font-size:16px;font-weight:800}
+.st small{font-size:13px;color:var(--muted)}
+.go{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.go a{display:flex;align-items:center;gap:12px;padding:12px 16px;text-decoration:none;color:inherit;border-top:1px solid var(--line);border-left:1px solid var(--line);min-width:0}
+.go a:nth-child(-n+3){border-top:0}
+.go a:nth-child(3n+1){border-left:0}
+.go a:hover{background:var(--card-2)}
+.go a:hover .nm{color:var(--ember)}
+.go i{width:32px;height:32px;border-radius:9px;background:var(--bg-2);display:grid;place-items:center;font-style:normal;font-size:16px;flex:none}
+.go .tx{flex:1;min-width:0}
+.go .nm{display:block;font-size:14.5px;font-weight:700}
+.go .sb{display:block;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.go .v{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.go .v.r{color:var(--red)}
+.go svg{color:var(--faint);flex:none}
+
+.two{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:12px;margin-top:26px}
+.pn{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.pn h3{margin:0;font-size:16px;font-weight:800}
+.pn .d{font-size:13px;color:var(--muted);margin-top:2px}
+.leg{display:flex;gap:16px;font-size:12.5px;color:var(--muted);margin-top:10px}
+.leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.chart{margin-top:6px}
+.chart svg{display:block;width:100%;height:auto}
+.chart .gl{stroke:var(--line)}
+.chart .ax{fill:var(--muted);font-size:10.5px}
+.chart .ax.now{fill:var(--fg);font-weight:700}
+.chart .cv{fill:var(--ember)}
+.chart .ot{fill:var(--ember);opacity:.26}
+.chart g:hover .ot{opacity:.42}
+.leg .ot{background:var(--ember);opacity:.35}
+.ag{margin-top:8px}
+.ag div{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:14.5px}
+.ag div:first-child{border-top:0}
+.ag .rk{width:24px;height:24px;border-radius:50%;background:var(--bg-2);display:grid;place-items:center;font-size:12px;font-weight:800;color:var(--muted);flex:none}
+.ag .rk.top{background:var(--ember);color:#fff}
+.ag .n{flex:1;min-width:0;font-weight:600}
+.ag .c{font-weight:800;font-variant-numeric:tabular-nums}
+.ag .c small{font-weight:500;color:var(--muted);font-size:12.5px}
+.more{display:inline-block;margin-top:10px;font-size:13.5px;font-weight:700;color:var(--link)}
+.foot{font-size:11.5px;color:var(--faint);text-align:center;margin-top:22px}
+
+@media (max-width:1100px){.go{grid-template-columns:repeat(2,minmax(0,1fr))}.go a:nth-child(n){border-top:1px solid var(--line);border-left:1px solid var(--line)}.go a:nth-child(-n+2){border-top:0}.go a:nth-child(2n+1){border-left:0}.two{grid-template-columns:1fr}}
+@media (max-width:760px){.kp{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){
+  .hbtn.fill .plus{display:block!important}
+  .crumb{display:none}
+  main.wrap{padding-left:12px;padding-right:12px}
+  .dh .bk{margin-left:0;width:100%;justify-content:center}
+  .k b{font-size:24px}
+  .go{grid-template-columns:1fr}.go a:nth-child(n){border-left:0;border-top:1px solid var(--line)}.go a:first-child{border-top:0}
+}
+</style>
+
+<div class="ds">
+  <div class="dh"><h1>Dashboard</h1><small id="asof"></small><a class="bk" href="booking-15.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg>Book a table</a></div>
+  <div class="kp" id="kp"></div>
+
+  <div class="st"><h2>Go to</h2><small>Click any line to open it</small></div>
+  <nav class="go" id="go" aria-label="Modules"></nav>
+
+  <div class="two">
+    <section class="pn"><h3>Leads this week</h3><div class="d" id="chD"></div>
+      <div class="leg"><span><i style="background:var(--ember)"></i>Converted</span><span><i class="ot"></i>Not converted yet</span></div>
+      <div class="chart" id="chart"></div></section>
+    <section class="pn"><h3>Top agents today</h3><div class="d">By confirmed bookings</div><div class="ag" id="ag"></div><a class="more" href="app.html#/lead-dashboard">See all agents →</a></section>
+  </div>
+  <p class="foot" id="foot"></p>
+</div>
+</main>
+</div></div>
+
+<script>
+const D=/*DASH*/null;
+const $=s=>document.querySelector(s);
+const n=v=>Math.round(v).toLocaleString("en-IN");
+const inr=v=>"₹"+n(v);
+const pct=(a,b)=>b?(a/b*100).toFixed(1)+"%":"—";
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const L=D.lead, today=L.daily.at(-1), prev=L.daily.slice(0,-1);
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+$("#asof").textContent="Today so far · "+L.asOf.replace(/^(\d{4})-(\d\d)-(\d\d) (\d\d:\d\d).*/,(m,y,mo,d,t)=>`${+d} ${MON[mo-1]}, ${t}`);
+
+/* today: four numbers, one line under each */
+const avgConv=prev.reduce((a,d)=>a+d.dom.converted,0)/prev.reduce((a,d)=>a+d.domTotal,0), convToday=today.dom.converted/today.domTotal;
+$("#kp").innerHTML=[
+  ["","Leads today",n(today.domTotal+today.intl),`${n(today.domTotal)} domestic · ${n(today.intl)} international`],
+  ["","Converted",n(today.dom.converted),`<span class="${convToday<avgConv?"r":""}">${pct(today.dom.converted,today.domTotal)}</span> · usual ${(avgConv*100).toFixed(1)}%`],
+  ["app.html#/followups","Overdue follow-ups",n(L.followup.overdueFollowUps),`${n(L.followup.upcomingFollowUps)} coming up next →`],
+  ["","Agents working",n(L.agentsActiveToday),`of ${n(L.agentsTotal)} agents`],
+].map(([h,a,b,c],i)=>`<${h?`a href="${h}"`:"div"} class="k ${i===2?"warn":""}"><small>${a}</small><b>${b}</b><span>${c}</span></${h?"a":"div"}>`).join("");
+
+/* modules: one line each */
+const A=D.adv,Q=D.quality,O=D.odc;
+const M=[
+  ["📊","Lead Dashboard",n(L.lead7.domestic.total+L.lead7.international.total),"leads in 7 days","","app.html#/lead-dashboard"],
+  ["⏰","Follow-ups",n(L.followup.overdueFollowUps),"overdue","r","app.html#/followups"],
+  ["💳","Advance Collection",inr(A.st.all.unpaidAmount),`unpaid · ${n(A.total)} bookings`,"","app.html#/advance"],
+  ["🔗","Payment Links",n(D.pay.today),"sent today","","app.html#/payment-links"],
+  ["🎟️","Coupon Issue",n(D.coupons.total),"coupons requested","","app.html#/coupons"],
+  ["🧾","Quotation List",n(D.quotes.total),"quotations","","app.html#/quotations"],
+  ["🎧","Call Quality",Q.dash.overallRating+" / 5",`${n(Q.dash.toAcknowledge)} to acknowledge`,"","app.html#/call-review"],
+  ["🍽️","Catering (ODC)",n(O.total),`${n(O.upcoming)} upcoming events`,"","app.html#/cater"],
+  ["📌","Branch Instruction",n(D.instr.upcomingCount),`upcoming · ${n(D.instr.byType[0][1])} stop booking`,"","app.html#/instructions"],
+  ["🏷️","Offer Matrix",n(D.offers.total),"offers running","","app.html#/offers"],
+  ["☎️","DID Mapping",n(D.did.total),"numbers","","app.html#/did"],
+  ["📍","Outlets",n(D.net.dom),`in ${D.net.cities} cities`,"","app.html#/home"],
+];
+const CHEV='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>';
+$("#go").innerHTML=M.map(([i,t,v,s,w,h])=>`<a href="${h}"><i>${i}</i><span class="tx"><span class="nm">${t}</span><span class="sb">${s}</span></span><span class="v ${w}">${v}</span>${CHEV}</a>`).join("");
+
+/* leads this week: stacked bars, colours from theme tokens so dark mode works */
+function chart(){
+  const el=$("#chart"),w=el.clientWidth||520,h=180,pl=34,pb=22,pt=6,days=L.daily,max=Math.ceil(Math.max(...days.map(d=>d.domTotal))/2000)*2000;
+  const bw=Math.min(40,(w-pl)/days.length-16),x=i=>pl+(i+.5)*(w-pl)/days.length,y=v=>pt+(h-pt-pb)*(1-v/max);
+  let s=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Domestic leads per day this week">`;
+  for(let v=0;v<=max;v+=max/2)s+=`<line class="gl" x1="${pl}" x2="${w}" y1="${y(v)}" y2="${y(v)}"/><text class="ax" x="${pl-6}" y="${y(v)+4}" text-anchor="end">${v>=1000?v/1000+"k":v}</text>`;
+  days.forEach((d,i)=>{const c=d.dom.converted,cx=x(i),last=i===days.length-1,lbl=last?"Today":new Date(d.date).toLocaleDateString("en-IN",{weekday:"short"});
+    s+=`<g><title>${lbl}${last?" (so far)":""}: ${n(d.domTotal)} leads, ${n(c)} converted (${pct(c,d.domTotal)})</title>`+
+      `<rect class="ot" x="${cx-bw/2}" y="${y(d.domTotal)}" width="${bw}" height="${Math.max(0,y(c)-y(d.domTotal)-2)}" rx="4"/>`+
+      `<rect class="cv" x="${cx-bw/2}" y="${y(c)}" width="${bw}" height="${h-pb-y(c)}" rx="4"/>`+
+      `<text class="ax ${last?"now":""}" x="${cx}" y="${h-5}" text-anchor="middle">${lbl}</text></g>`});
+  el.innerHTML=s+"</svg>";
+  $("#chD").textContent=`Domestic leads per day · about ${n(prev.reduce((a,d)=>a+d.domTotal,0)/prev.length)} on a usual day`;
+}
+new ResizeObserver(chart).observe($("#chart"));
+
+/* top 5 agents; login IDs are masked because this preview is public */
+const mask=s=>s.length<=3?s[0]+"••":s.slice(0,2)+"•".repeat(Math.min(5,s.length-3))+s.slice(-1);
+$("#ag").innerHTML=L.agentsToday.slice().sort((a,b)=>b.confirmed-a.confirmed||b.total-a.total).slice(0,5)
+  .map((a,i)=>`<div><span class="rk ${i?"":"top"}">${i+1}</span><span class="n">${esc(mask(a.agentName))}</span><span class="c">${n(a.confirmed)} <small>of ${n(a.total)}</small></span></div>`).join("");
+$("#foot").textContent=`Read-only snapshot of reeserio.bnhl.in taken ${L.asOf}. Today's numbers cover the day up to that time.`;
+
+/* shell */
+const shell=$("#shell"),side=$("#side"),scrim=$("#scrim"),mq=matchMedia("(max-width:979px)");
+const closeDrawer=()=>{side.classList.remove("open");scrim.classList.remove("show")};
+$("#ham").onclick=()=>{if(mq.matches){side.classList.toggle("open");scrim.classList.toggle("show")}else shell.classList.toggle("collapsed")};
+$("#sideClose").onclick=closeDrawer;scrim.onclick=closeDrawer;
+addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer()});
+$("#envLive").onclick=()=>{$("#envLive").classList.add("on");$("#envTest").classList.remove("on")};
+$("#envTest").onclick=()=>{$("#envTest").classList.add("on");$("#envLive").classList.remove("on")};
+$("#fuN").textContent=L.followup.upcomingFollowUps;$("#fuO").textContent=L.followup.overdueFollowUps;
+if(!mq.matches)shell.classList.add("collapsed");
+</script>
