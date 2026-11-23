@@ -1,0 +1,293 @@
+<style>
+/* Booking v16 — one screen, no steps.
+   Everything on one card, top to bottom in the order an agent asks the guest: who, how many, where, when.
+   A bar at the bottom of the card reads the booking back as one sentence with the total and Create booking.
+   Optional things (occasion, note, other deals, offers) stay out of the way until asked for. */
+main.wrap,.subbar .wrap{max-width:2200px;padding-left:clamp(16px,2.2vw,48px);padding-right:clamp(16px,2.2vw,48px)}
+main.wrap{padding-top:22px;padding-bottom:48px}
+.crumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);flex:1;min-width:0}
+.crumb a{color:var(--muted);text-decoration:none}.crumb a:hover{color:var(--ember)}
+.crumb b{color:var(--fg);font-weight:600}
+.crumb svg{width:14px;height:14px;color:var(--faint)}
+
+.eb{max-width:1040px;margin:0 auto}
+.eh{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.eh h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.01em}
+.eh .again{margin-left:auto;border:0;background:none;color:var(--muted);font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:8px}
+.eh .again:hover{color:var(--ember);background:var(--ember-soft)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px}
+.in-pad{padding:20px 22px 6px}
+.blk{padding-bottom:18px}
+.blk+.blk{border-top:1px solid var(--line);padding-top:16px}
+.lbl{display:block;font-size:13.5px;font-weight:700;color:var(--fg-2);margin-bottom:7px}
+.lbl .op{font-weight:500;color:var(--faint)}
+.g1{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.2fr) auto auto;gap:14px;align-items:start}
+.g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:14px;align-items:start}
+.in{height:46px;border:1.5px solid var(--line-2);border-radius:11px;background:var(--card);font:inherit;font-size:16px;color:var(--fg);padding:0 14px;width:100%;min-width:0;outline:none}
+.in::placeholder{color:var(--faint);font-weight:400}
+.in:focus{border-color:var(--ember);box-shadow:0 0 0 3px var(--ember-glow)}
+select.in{appearance:none;cursor:pointer;padding-right:38px;background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23868e96' stroke-width='2.4'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center}
+.ph{box-sizing:border-box;display:flex;align-items:center;height:46px;border:1.5px solid var(--line-2);border-radius:11px;background:var(--card);overflow:hidden}
+.ph:focus-within{border-color:var(--ember);box-shadow:0 0 0 3px var(--ember-glow)}
+.ph span{padding:0 4px 0 14px;font-size:16px;color:var(--muted)}
+.ph .in{border:0;height:100%;box-shadow:none!important;padding-left:6px}
+.err{font-size:12.5px;color:var(--red);font-weight:600;margin-top:4px;min-height:0}
+.cnt{display:flex;align-items:center;height:46px;border:1.5px solid var(--line-2);border-radius:11px;width:max-content;overflow:hidden}
+.cnt button{width:42px;height:100%;border:0;background:var(--card);font-size:20px;cursor:pointer;color:var(--fg-2)}
+.cnt button:hover{background:var(--ember-soft);color:var(--ember)}
+.cnt output{min-width:36px;text-align:center;font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pl{border:1.5px solid var(--line-2);background:var(--card);border-radius:11px;padding:7px 14px;font:inherit;font-size:14.5px;font-weight:700;color:var(--fg);cursor:pointer;text-align:center;min-width:88px}
+.pl small{display:block;font-size:12px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+.pl small.few{color:var(--red);font-weight:700}
+.pl:hover{border-color:var(--ember)}
+.pl.on{background:var(--ember);border-color:var(--ember);color:#fff}
+.pl.on small{color:#fff}
+.tg{display:flex;gap:12px;align-items:flex-start}
+.tg+.tg{margin-top:10px}
+.tg>b{flex:none;width:58px;padding-top:12px;font-size:13px;color:var(--muted);font-weight:700}
+.note{font-size:13px;color:var(--muted);margin-top:8px}
+.more{border:0;background:none;padding:0;font:inherit;font-size:13.5px;font-weight:700;color:var(--link);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.extra{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:14px;margin-top:10px}
+
+/* the bar: booking read back as one sentence, total, button */
+.bar{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 22px;border-top:1px solid var(--line);background:var(--card-2);border-radius:0 0 16px 16px}
+.sum{flex:1 1 360px;min-width:0;font-size:15px;line-height:1.5}
+.sum b{font-weight:800}
+.sum .miss{color:var(--muted)}
+.deal{display:flex;align-items:center;gap:8px;margin-top:2px;font-size:13.5px;color:var(--muted)}
+.deal select{height:30px;border:1px solid var(--line-2);border-radius:8px;background:var(--card);color:var(--fg);font:inherit;font-size:13px;padding:0 6px;max-width:100%}
+.tot{text-align:right}
+.tot small{display:block;font-size:12.5px;color:var(--muted)}
+.tot b{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+.go{height:50px;border:0;border-radius:12px;background:var(--ember);color:#fff;font:inherit;font-size:16px;font-weight:800;padding:0 28px;cursor:pointer}
+.go:hover{filter:brightness(.95)}
+.go:disabled{background:var(--bg-2);color:var(--faint);cursor:not-allowed;filter:none}
+.links{text-align:center;margin-top:16px}
+.foot{font-size:11.5px;color:var(--faint);text-align:center;margin-top:12px}
+
+/* offers popup */
+dialog.of{border:0;border-radius:16px;padding:0;width:min(560px,calc(100vw - 24px));max-height:86dvh;background:var(--card);color:var(--fg);box-shadow:0 24px 60px rgba(0,0,0,.3)}
+dialog.of::backdrop{background:rgba(20,22,26,.5)}
+.ofh{display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--card)}
+.ofh b{font-size:16px}
+.ofh button{margin-left:auto;border:0;background:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1}
+.ofb{padding:6px 18px 16px;overflow:auto}
+.ofb h3{font-size:13.5px;margin:14px 0 6px;color:var(--fg-2)}
+.ofb li{padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;list-style:none;display:flex;justify-content:space-between;gap:12px}
+.ofb ul{margin:0;padding:0}
+/* booking-created ticket popup (same as v11) */
+dialog.bt{border:0;background:none;padding:12px;width:min(784px,96vw);max-height:96dvh;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+dialog.bt::-webkit-scrollbar{display:none}
+dialog.bt::backdrop{background:rgba(20,22,26,.55);backdrop-filter:blur(3px)}
+dialog.bt[open]{animation:tin .35s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes tin{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:none}}
+.btk{display:grid;grid-template-columns:minmax(0,1fr) 230px;filter:drop-shadow(0 24px 50px rgba(0,0,0,.35))}
+.bm2{background:#fff;border-radius:20px 0 0 20px;padding:22px 24px;
+  -webkit-mask:radial-gradient(circle 14px at 100% 0,#0000 98%,#000) top right/100% 51% no-repeat,radial-gradient(circle 14px at 100% 100%,#0000 98%,#000) bottom right/100% 51% no-repeat;
+          mask:radial-gradient(circle 14px at 100% 0,#0000 98%,#000) top right/100% 51% no-repeat,radial-gradient(circle 14px at 100% 100%,#0000 98%,#000) bottom right/100% 51% no-repeat}
+.bs2{background:linear-gradient(160deg,#ff7a1f,#ff5a00);color:#fff;border-radius:0 20px 20px 0;padding:22px 20px;border-left:2.5px dashed rgba(255,255,255,.6);display:flex;flex-direction:column;
+  -webkit-mask:radial-gradient(circle 14px at 0 0,#0000 98%,#000) top left/100% 51% no-repeat,radial-gradient(circle 14px at 0 100%,#0000 98%,#000) bottom left/100% 51% no-repeat;
+          mask:radial-gradient(circle 14px at 0 0,#0000 98%,#000) top left/100% 51% no-repeat,radial-gradient(circle 14px at 0 100%,#0000 98%,#000) bottom left/100% 51% no-repeat}
+.bh2{display:flex;align-items:center;gap:12px}
+.bh2 img{width:34px;height:36px;object-fit:contain}
+.bh2 b{display:block;font-size:20px;font-weight:800}
+.bh2 small{display:block;font-size:12.5px;color:var(--muted)}
+.bh2 i{margin-left:auto;width:42px;height:42px;border-radius:50%;background:var(--good);color:#fff;display:grid;place-items:center;font-style:normal;font-size:22px;font-weight:800;box-shadow:0 0 0 6px var(--good-soft)}
+.bid{display:flex;align-items:baseline;gap:10px;margin:18px 0 6px;padding:12px 14px;border-radius:12px;background:var(--card-2);border:1.5px dashed var(--line-2)}
+.bid small{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.bid b{font-size:20px;font-weight:800;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.bid em{margin-left:auto;font-style:normal;font-size:11px;font-weight:800;color:var(--muted);background:var(--bg-2);border-radius:99px;padding:2px 8px}
+.bg2{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.bg2 div{display:flex;flex-direction:column;gap:2px;padding:9px 0;border-bottom:1px dashed var(--line);min-width:0}
+.bg2 span{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.bg2 b{font-size:14.5px;overflow-wrap:anywhere}
+.ad{margin:10px 0 0;font-size:12.5px;color:var(--muted)}
+.bs2 small{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.85}
+.bs2 .tm2{font-size:38px;font-weight:800;line-height:1.05;margin-top:2px}
+.bs2>span{font-size:13.5px;font-weight:700;opacity:.92}
+.bs2 .px2{margin-top:12px;font-size:13.5px;opacity:.95}
+.bs2 .px2 b{font-size:18px}
+.bs2 .tt2{margin-top:12px;background:rgba(255,255,255,.18);border-radius:12px;padding:10px 12px}
+.bs2 .tt2 b{display:block;font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+.bc2{margin-top:auto;height:46px;border-radius:6px;background:#fff;padding:6px 8px;background-clip:content-box;
+  background-image:repeating-linear-gradient(90deg,#1f2328 0 2px,transparent 2px 4px,#1f2328 4px 7px,transparent 7px 9px,#1f2328 9px 10px,transparent 10px 13px);background-color:#fff}
+.bcn{display:block;text-align:center;margin-top:4px;letter-spacing:.2em!important}
+.ba2{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:16px}
+.ba2 button{height:44px;border:0;border-radius:12px;padding:0 16px;background:#fff;color:#343a40;font:inherit;font-weight:800;font-size:14px;cursor:pointer}
+.ba2 button:hover{background:var(--ember-soft);color:var(--ember)}
+.ba2 button.pri{background:var(--ember);color:#fff}
+.bn2{text-align:center;color:rgba(255,255,255,.85);font-size:12px;margin:10px 0 0}
+@media (max-width:640px){.btk{grid-template-columns:1fr}.bm2{border-radius:20px 20px 0 0;-webkit-mask:none;mask:none}.bs2{border-radius:0 0 20px 20px;border-left:0;border-top:2.5px dashed rgba(255,255,255,.6);-webkit-mask:none;mask:none}.bc2{margin-top:14px;height:38px}.bm2{padding:16px}.bs2{padding:16px}.bs2 .tm2{font-size:30px}.bid b{font-size:17px}.bh2 b{font-size:17px}.ad{display:none}.ba2 button{flex:1 1 45%}}
+@media print{body *{visibility:hidden}dialog.bt,dialog.bt *{visibility:visible}dialog.bt{position:fixed;inset:0;margin:auto}.ba2,.bn2{display:none}}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:#1f2328;color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:all .25s;z-index:60;max-width:calc(100vw - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:860px){.g1{grid-template-columns:1fr 1fr}.g1>div:nth-child(-n+2){grid-column:1/-1}.g2,.extra{grid-template-columns:1fr}}
+@media (max-width:640px){
+  .hbtn.fill .plus{display:block!important}
+  .crumb{display:none}
+  main.wrap{padding-left:12px;padding-right:12px}
+  .in-pad{padding:16px 14px 4px}
+  .bar{padding:12px 14px}
+  .tot{text-align:left}
+  .go{width:100%}
+  .pl{min-width:0;flex:1 1 calc(33% - 8px);padding:7px 6px}
+  .tg{flex-direction:column;gap:6px}.tg>b{padding:0;width:auto}
+}
+</style>
+
+<div class="eb">
+  <div class="eh"><h1>Book a table</h1><button class="again" id="new" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 11a8 8 0 10-2.3 5.7M20 4v7h-7"/></svg>Clear</button></div>
+  <div class="card">
+    <div class="in-pad">
+      <div class="blk"><div class="g1">
+        <div><label class="lbl" for="mob">Mobile number</label><div class="ph"><span>+91</span><input class="in" id="mob" inputmode="numeric" maxlength="10" placeholder="10-digit mobile" autocomplete="off"></div></div>
+        <div><label class="lbl" for="nm">Guest name</label><input class="in" id="nm" placeholder="Full name" autocomplete="off"></div>
+        <div><span class="lbl">Adults</span><div class="cnt" data-k="adults"><button type="button" data-d="-1" aria-label="Fewer adults">−</button><output>2</output><button type="button" data-d="1" aria-label="More adults">+</button></div></div>
+        <div><span class="lbl">Kids 6–9</span><div class="cnt" data-k="kids"><button type="button" data-d="-1" aria-label="Fewer kids">−</button><output>0</output><button type="button" data-d="1" aria-label="More kids">+</button></div></div>
+      </div><div class="err" id="mobErr"></div></div>
+
+      <div class="blk"><div class="g2">
+        <div><label class="lbl" for="outlet">Outlet</label><select class="in" id="outlet"></select></div>
+        <div><span class="lbl">Date</span><div class="pills" id="days"></div></div>
+      </div></div>
+
+      <div class="blk"><span class="lbl">Time <span class="op" id="tN"></span></span><div id="slots"></div><div class="note" id="tX"></div></div>
+
+      <div class="blk">
+        <button class="more" id="exBtn" type="button">+ Add occasion or note for outlet</button>
+        <div class="extra" id="extra" hidden>
+          <div><label class="lbl" for="occ">Occasion <span class="op">(optional)</span></label><select class="in" id="occ"></select></div>
+          <div><label class="lbl" for="ins">Note for outlet <span class="op">(optional)</span></label><input class="in" id="ins" placeholder="e.g. window seat" autocomplete="off"></div>
+        </div>
+      </div>
+    </div>
+    <div class="bar">
+      <div class="sum"><div id="sum"></div><div class="deal" id="deal"></div></div>
+      <div class="tot"><small id="eS">Estimated bill</small><b id="eT">—</b></div>
+      <button class="go" id="create" type="button" disabled>Create booking</button>
+    </div>
+  </div>
+  <p class="links"><button class="more" id="ofBtn" type="button">See outlet offers &amp; Happiness Cards</button></p>
+  <p class="foot">Preview built from the live booking page for Atria Mall, Worli, 18 Nov 2026, 3:50 PM IST. Nothing is saved.</p>
+</div>
+<dialog class="of" id="of" aria-label="Offers"><div class="ofh"><b>Offers you can share</b><button type="button" id="ofX" aria-label="Close">×</button></div><div class="ofb" id="ofb"></div></dialog>
+<dialog class="bt" id="bt" aria-label="Booking confirmed"></dialog>
+</main>
+</div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const BK=/*BOOK*/null, FU=/*FU*/null;
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const inr=n=>"₹"+Math.round(n).toLocaleString("en-IN");
+const t12=h=>{let [a,b]=h.split(":").map(Number);const p=a>=12?"PM":"AM";a=a%12||12;return a+":"+String(b).padStart(2,"0")+" "+p};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const SNAP=new Date(BK.snap), SNAPMIN=SNAP.getHours()*60+SNAP.getMinutes(), mins=h=>{const [a,b]=h.split(":").map(Number);return a*60+b};
+const DAYS=[...Array(6)].map((_,i)=>{const d=new Date(SNAP);d.setDate(d.getDate()+i);return d});
+const fresh=()=>({mobile:"",name:"",adults:2,kids:0,outlet:BK.outlet.branch_name,day:0,slot:null,pkg:null,manual:false});
+let S=fresh();
+
+$("#outlet").innerHTML=`<option value="">Select outlet</option>`+BK.cities.slice().sort((a,b)=>b.l.length-a.l.length).map(c=>`<optgroup label="${esc(c.c)}">${c.l.map(o=>`<option ${o===S.outlet?"selected":""}>${esc(o)}</option>`).join("")}</optgroup>`).join("");
+$("#occ").innerHTML=`<option value="">None</option>`+BK.occasions.filter(o=>o!=="Not mentioned").map(o=>`<option>${esc(o)}</option>`).join("");
+$("#days").innerHTML=DAYS.map((d,i)=>`<button type="button" class="pl" data-i="${i}">${i===0?"Today":i===1?"Tomorrow":d.toLocaleDateString("en-IN",{weekday:"short"})}<small>${d.getDate()} ${d.toLocaleDateString("en-IN",{month:"short"})}</small></button>`).join("");
+
+const hasData=()=>S.outlet===BK.outlet.branch_name&&S.day===0;
+const open=()=>BK.slots.filter(s=>!hasData()||(mins(s.from)>=SNAPMIN&&s.cap>0));
+const slotObj=()=>S.slot&&BK.slots.find(s=>s.p+s.from===S.slot);
+const pkgs=()=>{const s=slotObj();if(!s)return[];const t=mins(s.from);return BK.prices.filter(p=>p.ct==="Adult"&&mins(p.from)<=t&&t<=mins(p.to))};
+const kidPrice=()=>{const s=slotObj();if(!s)return 0;const t=mins(s.from);const k=BK.prices.find(p=>p.ct==="Child"&&mins(p.from)<=t&&t<=mins(p.to));return k?k.amt:0};
+const pkObj=()=>S.pkg==="REG"?{dn:"Regular booking",reg:true}:pkgs().find(p=>p.dn===S.pkg);
+/* best deal = cheapest non-veg buffet the party qualifies for; Student needs an ID so it is never auto-picked */
+const best=()=>pkgs().filter(p=>p.ft==="NON-VEG"&&S.adults>=p.min&&!/Student/.test(p.dn)).sort((a,b)=>a.amt-b.amt)[0];
+function autoPick(){if(!slotObj()){S.pkg=null;return}const cur=pkObj();if(S.manual&&cur&&(cur.reg||S.adults>=cur.min))return;S.manual=false;const b=best();S.pkg=b?b.dn:"REG"}
+const from=x=>{const t=mins(x.from),L=BK.prices.filter(p=>p.ct==="Adult"&&p.ft==="NON-VEG"&&S.adults>=p.min&&!/Student/.test(p.dn)&&mins(p.from)<=t&&t<=mins(p.to)).map(p=>p.amt);return L.length?Math.min(...L):0};
+const mobOk=()=>/^[6-9]\d{9}$/.test(S.mobile);
+const fmtMob=()=>"+91 "+S.mobile.replace(/(\d{5})(\d{5})/,"$1 $2");
+
+$("#mob").oninput=e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,10);S.mobile=e.target.value;if(mobOk()&&!S.name)$("#nm").focus();render()};
+$("#nm").oninput=e=>{S.name=e.target.value;render()};
+$$(".cnt").forEach(c=>c.onclick=e=>{const b=e.target.closest("button");if(!b)return;const k=c.dataset.k;S[k]=Math.max(k==="adults"?1:0,Math.min(99,S[k]+ +b.dataset.d));render()});
+/* a new outlet or date clears the time, and with it any deal the agent picked by hand */
+$("#outlet").onchange=e=>{S.outlet=e.target.value;S.slot=null;S.manual=false;render()};
+$("#days").onclick=e=>{const b=e.target.closest(".pl");if(!b)return;S.day=+b.dataset.i;S.slot=null;S.manual=false;render()};
+$("#slots").onclick=e=>{const b=e.target.closest(".pl");if(!b)return;S.slot=b.dataset.k;render();$("#create").disabled||$("#create").focus()};
+$("#deal").onchange=e=>{S.pkg=e.target.value;S.manual=true;render()};
+$("#exBtn").onclick=()=>{$("#extra").hidden=false;$("#exBtn").hidden=true;$("#occ").focus()};
+$("#new").onclick=()=>{S=fresh();$("#mob").value=$("#nm").value=$("#ins").value="";$("#occ").value="";$("#outlet").value=S.outlet;$("#extra").hidden=true;$("#exBtn").hidden=false;render();$("#mob").focus()};
+
+function render(){
+  autoPick();
+  const s=slotObj(),p=pkObj(),nm=S.name.trim();
+  $$(".cnt").forEach(c=>c.querySelector("output").textContent=S[c.dataset.k]);
+  $("#mobErr").textContent=S.mobile.length===10&&!mobOk()?"Mobile number should start with 6, 7, 8 or 9":"";
+  $$("#days .pl").forEach((b,i)=>{b.classList.toggle("on",i===S.day);b.setAttribute("aria-pressed",i===S.day)});
+
+  // time: every open time, price per person for this party; seats only when few are left
+  if(!S.outlet){$("#slots").innerHTML=`<p class="note">Select an outlet to see times.</p>`;$("#tX").textContent="";$("#tN").textContent=""}
+  else{
+    const L=open(),G=[["Lunch",L.filter(x=>mins(x.from)<960)],["Dinner",L.filter(x=>mins(x.from)>=960)]].filter(g=>g[1].length);
+    const pill=x=>{const k=x.p+x.from,few=hasData()&&x.cap<=10,pr=from(x);
+      return `<button type="button" class="pl ${S.slot===k?"on":""}" data-k="${k}" aria-pressed="${S.slot===k}">${t12(x.from)}<small class="${few?"few":""}">${few?`Only ${x.cap} seats`:pr?inr(pr):"&nbsp;"}</small></button>`};
+    $("#slots").innerHTML=L.length?G.map(([n,xs])=>`<div class="tg"><b>${n}</b><div class="pills">${xs.map(pill).join("")}</div></div>`).join(""):`<p class="note">No open times on this day. Pick another date.</p>`;
+    $("#tN").textContent=L.length?`· price per person for ${S.adults} adult${S.adults===1?"":"s"}`:"";
+    $("#tX").textContent=L.length&&!hasData()?"Seat counts in this preview are for Atria Mall, Worli today; the live page loads them for every outlet and date.":"";
+  }
+
+  // the bar: one sentence, gaps shown in grey
+  const miss=t=>`<span class="miss">${t}</span>`;
+  const dl=DAYS[S.day].toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"});
+  $("#sum").innerHTML=`${nm?`<b>${esc(nm)}</b>`:miss("Guest name")} · ${mobOk()?fmtMob():miss("mobile")} · ${S.adults} adult${S.adults===1?"":"s"}${S.kids?` + ${S.kids} kid${S.kids===1?"":"s"}`:""}<br>${S.outlet?`<b>${esc(S.outlet)}</b>`:miss("Outlet")} · ${dl} · ${s?`<b>${t12(s.from)}</b>`:miss("pick a time")}`;
+  if(s){
+    const b=best();
+    $("#deal").innerHTML=`Deal <select aria-label="Deal">${pkgs().map(q=>{const off=S.adults<q.min;return `<option value="${esc(q.dn)}" ${S.pkg===q.dn?"selected":""} ${off?"disabled":""}>${esc(q.dn)} · ${inr(q.amt)}${b&&b.dn===q.dn?" (best)":""}${off?` · needs ${q.min}+`:""}</option>`}).join("")}<option value="REG" ${S.pkg==="REG"?"selected":""}>Regular booking · pay as per order</option></select>`;
+  }else $("#deal").innerHTML="";
+  const tot=p&&!p.reg?p.amt*S.adults+kidPrice()*S.kids:0;
+  $("#eT").textContent=!p?"—":p.reg?"At outlet":inr(tot);
+  $("#eS").textContent=p&&!p.reg?`Estimated bill · ${S.adults} × ${inr(p.amt)}${S.kids?` + ${S.kids} × ${inr(kidPrice())}`:""}`:"Estimated bill";
+  $("#create").disabled=!(mobOk()&&nm&&S.adults>0&&S.outlet&&s&&p);
+}
+
+$("#ofb").innerHTML=`<h3>Outlet offers</h3><ul>${BK.promos.map(p=>`<li>${esc(p.trim())}</li>`).join("")}</ul><h3>Happiness Cards (sold separately)</h3><ul>${BK.cards.map(c=>`<li><span>${esc(c.n)}${c.pax?` · ${c.pax} pax`:""}</span><b>${inr(c.price)}</b></li>`).join("")}</ul>`;
+$("#ofBtn").onclick=()=>$("#of").showModal();$("#ofX").onclick=()=>$("#of").close();
+const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("show"),2800)};
+function showTicket(){
+  const s=slotObj(),p=pkObj(),d=DAYS[S.day],nm=S.name.trim(),tot=p&&!p.reg?p.amt*S.adults+kidPrice()*S.kids:0;
+  const id="BN"+d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0")+String(Math.floor(1000+Math.random()*9000));
+  const occ=$("#occ").value,ins=$("#ins").value.trim(),addr=S.outlet===BK.outlet.branch_name?BK.outlet.address:"";
+  const row=(k,v)=>v?`<div><span>${k}</span><b>${esc(v)}</b></div>`:"";
+  const bt=$("#bt");
+  bt.innerHTML=`<div class="btk"><div class="bm2">
+      <div class="bh2"><img src="data:image/png;base64,LOGO_B64" alt=""><span><b>Booking confirmed</b><small>Barbeque Nation · Table booking</small></span><i aria-hidden="true">✓</i></div>
+      <div class="bid"><small>Booking ID</small><b>${id}</b><em>preview</em></div>
+      <div class="bg2">${row("Guest",nm)}${row("Mobile","+91 "+S.mobile.replace(/(\d{5})(\d{5})/,"$1 $2"))}${row("Outlet",S.outlet)}${row("Booking type",p?p.dn:"")}${row("Occasion",occ)}${row("Instruction",ins)}</div>
+      ${addr?`<p class="ad">📍 ${esc(addr)}</p>`:""}
+    </div><div class="bs2">
+      <small>Dine</small><b class="tm2">${t12(s.from)}</b><span>${d.toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"short"})}</span>
+      <div class="px2"><b>${S.adults}</b> adult${S.adults===1?"":"s"}${S.kids?` · <b>${S.kids}</b> kid${S.kids===1?"":"s"}`:""}</div>
+      <div class="tt2"><small>Estimate</small><b>${p&&!p.reg?inr(tot):"Pay at outlet"}</b></div>
+      <div class="bc2" aria-hidden="true"></div><small class="bcn">${id}</small>
+    </div></div>
+    <div class="ba2"><button type="button" data-a="wa">💬 Share on WhatsApp</button><button type="button" data-a="pr">🖨️ Print</button><button type="button" data-a="nb">+ New booking</button><button type="button" class="pri" data-a="x">Done</button></div>
+    <p class="bn2">Preview only: on the live page this is where CRS creates the booking and sends the confirmation.</p>`;
+  bt.querySelector(".ba2").onclick=e=>{const a=e.target.closest("[data-a]")?.dataset.a;if(!a)return;
+    if(a==="x")bt.close();if(a==="pr")window.print();if(a==="wa")toast("WhatsApp share: preview only, nothing was sent.");
+    if(a==="nb"){bt.close();$("#new").click()}};
+  bt.showModal();
+}
+$("#create").onclick=showTicket;
+
+/* shell: side menu starts closed like the live app */
+const shell=$("#shell"),side=$("#side"),scrim=$("#scrim"),mq=matchMedia("(max-width:979px)");
+const closeDrawer=()=>{side.classList.remove("open");scrim.classList.remove("show")};
+$("#ham").onclick=()=>{if(mq.matches){side.classList.toggle("open");scrim.classList.toggle("show")}else shell.classList.toggle("collapsed")};
+$("#sideClose").onclick=closeDrawer;scrim.onclick=closeDrawer;
+addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer()});
+$("#envLive").onclick=()=>{$("#envLive").classList.add("on");$("#envTest").classList.remove("on")};
+$("#envTest").onclick=()=>{$("#envTest").classList.add("on");$("#envLive").classList.remove("on")};
+$("#fuN").textContent=FU.upcomingFollowUps;$("#fuO").textContent=FU.overdueFollowUps;
+if(!mq.matches)shell.classList.add("collapsed");
+
+render();$("#mob").focus();
+</script>
