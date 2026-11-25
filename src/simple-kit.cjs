@@ -36,14 +36,14 @@ main th,main small,main label,main span,main em,main b,main div,main p,main a,ma
 .hc:hover{transform:none!important;border-color:var(--ember)!important}
 .hc i{background:var(--bg-2)!important}
 </style>`;
-// The booking page every link opens: booking-16 (one screen, deals and estimate on the right).
-// Older designs stay reachable by their own URL.
-const BOOK = 'booking-16.html';
+// The booking page every link opens: booking-17 (calm one-screen page with the live price hints).
+// Older designs stay reachable by their own URL; links between booking pages themselves are left alone.
+const BOOK = 'booking-17.html';
 let k = 0, links = 0;
 for (const f of fs.readdirSync(G).filter(f => /\.html$/.test(f))) {
   let t = fs.readFileSync(G + f, 'utf8').replace(/\r\n/g, '\n');
   const before = t;
-  t = t.replace(/href="booking-(11|15)\.html"/g, () => { links++; return `href="${BOOK}"`; });
+  t = t.replace(/href="booking-(11|15|16)\.html"/g, () => { links++; return `href="${BOOK}"`; });
   if (f !== 'index.html' && /--bg:#f6f6f6/.test(t)) {
     t = t.replace(/<style id="simplecss">[\s\S]*?<\/style>\n?/, '');
     t = t.replace(/<\/body>/, CSS + '\n</body>');

@@ -1,0 +1,241 @@
+<style>
+/* Booking v17 — calm, one screen, with the live page's price hints.
+   Left: Guest · Outlet & date · Time (each meal shows its cheapest band). Right: "Price & offers" — a hint card
+   (cheapest time before a time is picked, best offer after), every offer ranked by what the guest pays with the
+   saving, then the booking read back, the estimate with GST and Create booking. Soft surfaces, few borders. */
+main.wrap,.subbar .wrap{max-width:2200px;padding-left:clamp(16px,2.2vw,44px);padding-right:clamp(16px,2.2vw,44px)}
+main.wrap{padding-top:20px;padding-bottom:40px}
+.crumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);flex:1;min-width:0}
+.crumb a{color:var(--muted);text-decoration:none}.crumb a:hover{color:var(--ember)}
+.crumb b{color:var(--fg);font-weight:600}
+.crumb svg{width:14px;height:14px;color:var(--faint)}
+
+.eh{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.eh h1{margin:0;font-size:21px;font-weight:800;letter-spacing:-.01em}
+.eh small{color:var(--muted);font-size:13px}
+.eh .again{margin-left:auto;border:0;background:none;color:var(--muted);font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:9px}
+.eh .again:hover{color:var(--ember);background:var(--ember-soft)}
+.lay{display:grid;grid-template-columns:minmax(0,1fr) minmax(380px,440px);gap:16px;align-items:start}
+@media (min-width:1600px){.lay{grid-template-columns:minmax(0,1fr) 500px}}
+@media (min-width:1900px){.lay{grid-template-columns:minmax(0,1fr) 580px}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.sec2{padding:18px 22px}
+.sec2+.sec2{border-top:1px solid var(--line)}
+.sh3{display:flex;align-items:baseline;gap:10px;margin-bottom:12px}
+.sh3 h2{margin:0;font-size:15px;font-weight:800}
+.sh3 small{font-size:12.5px;color:var(--muted)}
+.sh3 .rt{margin-left:auto}
+.lbl{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.lbl .op{font-weight:500;color:var(--faint)}
+.g1{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) auto auto;gap:12px;align-items:start}
+.in{box-sizing:border-box;height:44px;border:1px solid var(--line-2);border-radius:12px;background:var(--card);font:inherit;font-size:15.5px;color:var(--fg);padding:0 13px;width:100%;min-width:0;outline:none;transition:border-color .12s,box-shadow .12s}
+.in::placeholder{color:var(--faint);font-weight:400}
+.in:focus{border-color:var(--ember);box-shadow:0 0 0 3px var(--ember-glow)}
+select.in{appearance:none;cursor:pointer;padding-right:38px;background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23868e96' stroke-width='2.4'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center}
+.ph{box-sizing:border-box;display:flex;align-items:center;height:44px;border:1px solid var(--line-2);border-radius:12px;background:var(--card);overflow:hidden}
+.ph:focus-within{border-color:var(--ember);box-shadow:0 0 0 3px var(--ember-glow)}
+.ph span{padding:0 4px 0 13px;font-size:15.5px;color:var(--muted)}
+.ph .in{border:0;height:100%;box-shadow:none!important;padding-left:6px}
+.err{font-size:12.5px;color:var(--red);font-weight:600;margin-top:4px}
+.cnt{display:flex;align-items:center;height:44px;border:1px solid var(--line-2);border-radius:12px;width:max-content;overflow:hidden;background:var(--card)}
+.cnt button{width:40px;height:100%;border:0;background:none;font-size:19px;cursor:pointer;color:var(--fg-2)}
+.cnt button:hover{background:var(--ember-soft);color:var(--ember)}
+.cnt output{min-width:32px;text-align:center;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+
+/* guest line */
+.cu{display:flex;align-items:center;gap:10px;margin-top:12px;padding:9px 10px 9px 12px;border-radius:12px;background:var(--card-2);font-size:13.5px}
+.cu .av{width:30px;height:30px;border-radius:50%;background:var(--ember-soft);color:var(--ember);display:grid;place-items:center;font-weight:800;flex:none}
+.cu .who{flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cu .who b{font-size:14px}
+.cu .who span{color:var(--muted)}
+.cu .chip{font-size:12px;font-weight:700;border-radius:99px;padding:3px 9px;background:var(--bg-2);color:var(--fg-2);white-space:nowrap;flex:none}
+.cu .chip.t{background:#fff4d6;color:#8a5a00}
+html[data-theme=dark] .cu .chip.t{background:#3a2f12;color:#f0bf55}
+.cu.new{color:var(--muted)}
+@media (max-width:860px){.cu{flex-wrap:wrap}.cu .who{flex-basis:100%;white-space:normal}}
+
+/* soft chips (actions) */
+.lk{border:0;background:var(--bg-2);color:var(--fg);font:inherit;font-size:13px;font-weight:700;border-radius:99px;padding:7px 13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:background .12s,color .12s}
+.lk:hover{background:var(--ember-soft);color:var(--ember)}
+.lk:disabled{opacity:.5;cursor:not-allowed}
+.lk .cn{min-width:19px;height:19px;border-radius:99px;background:var(--ember);color:#fff;font-size:11px;display:inline-grid;place-items:center;padding:0 5px}
+.wai{color:#25d366;flex:none}
+.btn .wai,.go .wai{color:currentColor}
+.acts{display:flex;flex-wrap:wrap;align-items:center;column-gap:18px;row-gap:8px;margin-top:10px}
+.agrp{display:flex;flex-wrap:wrap;gap:6px}
+.orow{display:flex;gap:12px;align-items:center}
+.orow .in{max-width:520px}
+
+/* dates: soft two-line chips */
+.days{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.dp{border:0;background:var(--bg-2);border-radius:12px;padding:7px 12px;font:inherit;font-size:14px;font-weight:800;color:var(--fg);cursor:pointer;text-align:center;min-width:72px;line-height:1.25;transition:background .12s}
+.dp small{display:block;font-size:11.5px;font-weight:600;color:var(--muted)}
+.dp:hover{background:var(--ember-soft)}
+.dp.on{background:var(--ember);color:#fff;box-shadow:0 4px 12px rgba(255,98,0,.22)}
+.dp.on small{color:#fff;opacity:.85}
+.dp.oth{position:relative}
+.dp.oth input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+
+/* time: meal rows with their price hint */
+.tg2+.tg2{margin-top:14px}
+.mh{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.mn{font-size:13px;font-weight:800;color:var(--fg-2)}
+.hint{border:0;font:inherit;font-size:12.5px;font-weight:700;border-radius:99px;padding:4px 11px;cursor:pointer;background:var(--bg-2);color:var(--fg-2)}
+.hint.lo{background:#e7f6ee;color:#1f7a4d}
+html[data-theme=dark] .hint.lo{background:#173326;color:#5fd49a}
+.hint:hover{filter:brightness(.96)}
+.tps{display:flex;flex-wrap:wrap;gap:8px}
+.tp{position:relative;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:7px 12px;font:inherit;cursor:pointer;color:var(--fg);text-align:left;min-width:92px;transition:border-color .12s,background .12s,box-shadow .12s}
+.tp b{display:flex;align-items:center;gap:6px;font-size:14.5px;font-weight:800;font-variant-numeric:tabular-nums}
+.tp small{display:block;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:1px}
+.tp small.few{color:var(--red);font-weight:700}
+.tp .dot{width:7px;height:7px;border-radius:50%;background:var(--s,transparent);flex:none}
+.tp.ch{border-color:#bfe5cf;background:#f4fbf7}
+.tp.ch small{color:#1f7a4d;font-weight:700}
+html[data-theme=dark] .tp.ch{border-color:#2a5a40;background:#14241b}
+html[data-theme=dark] .tp.ch small{color:#5fd49a}
+.tp:hover{border-color:var(--ember)}
+.tp.on{background:var(--ember);border-color:var(--ember);color:#fff;box-shadow:0 4px 12px rgba(255,98,0,.22)}
+.tp.on small{color:#fff}
+.tp.on .dot{background:#fff}
+.tp.so{opacity:.45;cursor:not-allowed}
+.tp.so b{text-decoration:line-through}
+.s-ok{--s:#2fa36b}.s-fill{--s:#e8a317}.s-low{--s:#e35d6a}
+.leg{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;font-size:12px;color:var(--muted)}
+.leg i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}
+.note{font-size:12.5px;color:var(--muted);margin:8px 0 0}
+.more{border:0;background:none;padding:0;font:inherit;font-size:13.5px;font-weight:700;color:var(--link);cursor:pointer}
+.more:hover{text-decoration:underline}
+.extra{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:12px;margin-top:10px}
+
+/* price & offers panel */
+.dside{position:sticky;top:84px;max-height:calc(100dvh - 148px);display:flex;flex-direction:column;overflow:hidden}
+.ph2{display:flex;align-items:baseline;gap:8px;padding:16px 18px 10px}
+.ph2 h2{margin:0;font-size:15px;font-weight:800}
+.ph2 small{font-size:12.5px;color:var(--muted)}
+#insight{padding:0 14px}
+.ins{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:14px;background:#fff6e5;color:#5c4200;font-size:13px;line-height:1.45}
+.ins>span{font-size:17px;line-height:1.2}
+.ins b{color:inherit}
+.ins small{display:block;font-size:12.5px;opacity:.9;margin-top:2px}
+.ins .lk{margin-top:8px;background:rgba(255,255,255,.75);color:inherit}
+.ins.ok{background:#e9f7ef;color:#16613d}
+.ins.mute{background:var(--bg-2);color:var(--muted)}
+.ins .sv{color:#16613d}
+html[data-theme=dark] .ins{background:#33280f;color:#f3d48a}
+html[data-theme=dark] .ins.ok{background:#14301f;color:#8fe0b5}
+html[data-theme=dark] .ins .lk{background:rgba(255,255,255,.08)}
+.dside>#dls{flex:1 1 auto;min-height:120px;overflow:auto;overscroll-behavior:contain;padding:10px 14px 4px}
+.dside>:not(#dls){flex:none}
+.emp{padding:16px;border:1.5px dashed var(--line-2);border-radius:12px;color:var(--muted);font-size:13px;text-align:center}
+.ofl{display:flex;flex-direction:column;gap:6px}
+.of{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:12px;border:1px solid var(--line);cursor:pointer;transition:border-color .12s,background .12s}
+.of:hover{border-color:var(--ember)}
+.of.on{border-color:var(--ember);background:var(--ember-soft)}
+.of.off{opacity:.55;cursor:not-allowed}
+.of.off:hover{border-color:var(--line)}
+.of input{width:17px;height:17px;accent-color:var(--ember);flex:none;margin:0}
+.of .bd{flex:1;min-width:0}
+.of .nm{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:14px;font-weight:700}
+.tag{font-size:11px;font-weight:800;border-radius:6px;padding:1px 6px;background:var(--bg-2);color:var(--fg-2)}
+.tag.best{background:#1f7a4d;color:#fff}
+.tag.cp{background:#e8f0fe;color:#1d4f91}
+html[data-theme=dark] .tag.cp{background:#1b2a44;color:#8ab4ff}
+.dsub{display:block;font-size:12px;color:var(--muted);margin-top:1px}
+.dsub.x{color:var(--red);font-weight:600}
+.ds{display:block;font-size:12.5px;color:var(--fg-2);margin-top:6px;line-height:1.45}
+.inf{border:0;background:none;color:var(--link);font:inherit;font-size:12px;font-weight:700;cursor:pointer;padding:0}
+.of .pr{text-align:right;white-space:nowrap}
+.of .pr b{display:block;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+.of .pr small{font-size:11.5px;color:var(--muted)}
+.of .pr .sv,.sv{color:#1f7a4d;font-weight:800}
+html[data-theme=dark] .of .pr .sv,html[data-theme=dark] .sv{color:#5fd49a}
+.fine{font-size:11.5px;color:var(--faint);margin:8px 2px 4px}
+.rd{margin:8px 18px 0;padding-top:12px;border-top:1px solid var(--line);font-size:13.5px;line-height:1.55}
+.rd b{font-weight:800}
+.miss{color:var(--faint)}
+.est{margin:10px 18px 0}
+.er{display:flex;justify-content:space-between;gap:12px;font-size:13px;color:var(--fg-2);padding:2px 0}
+.er span:last-child{font-variant-numeric:tabular-nums}
+.et{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px;padding-top:8px;border-top:1px dashed var(--line-2)}
+.et span{font-size:13.5px;font-weight:700}
+.et b{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+.es{font-size:12.5px;font-weight:700;color:#1f7a4d;text-align:right;margin-top:2px}
+.es.mute{color:var(--muted);font-weight:500}
+html[data-theme=dark] .es{color:#5fd49a}
+.loy{margin-top:8px;font-size:12px;color:#8a5a00;background:#fff8e6;border-radius:9px;padding:6px 9px}
+html[data-theme=dark] .loy{background:#2e2610;color:#f0bf55}
+.go{display:block;width:calc(100% - 36px);margin:12px 18px 16px;height:50px;border:0;border-radius:14px;background:var(--ember);color:#fff;font:inherit;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 6px 16px rgba(255,98,0,.25)}
+.go:hover{filter:brightness(.96)}
+.go:disabled{background:var(--bg-2);color:var(--faint);cursor:not-allowed;box-shadow:none;filter:none}
+.foot{font-size:11.5px;color:var(--faint);text-align:center;margin-top:14px}
+.pr2{display:flex;flex-direction:column;align-items:flex-end;font-size:12.5px;color:var(--muted);white-space:nowrap}
+.pr2 b{color:var(--fg)}
+/*REUSECSS*/
+/*TICKETCSS*/
+@media (max-width:1279px){.lay{grid-template-columns:1fr}.dside{position:static;max-height:none;overflow:visible}.dside>#dls{overflow:visible}}
+@media (max-width:860px){.g1{grid-template-columns:1fr 1fr}.g1>div:nth-child(-n+2){grid-column:1/-1}.extra{grid-template-columns:1fr}.orow{flex-direction:column;align-items:stretch}}
+@media (max-width:640px){
+  .hbtn.fill .plus{display:block!important}
+  .crumb{display:none}
+  main.wrap{padding-left:12px;padding-right:12px}
+  .sec2{padding:16px 14px}
+  .dp{min-width:0;flex:1 1 calc(25% - 6px);padding:7px 4px}
+  .tp{min-width:0;flex:1 1 calc(33% - 8px);padding:7px 8px}
+  .ph2,#insight,.dside>#dls{padding-left:12px;padding-right:12px}.rd,.est{margin-left:14px;margin-right:14px}
+  .go{width:calc(100% - 28px);margin:12px 14px 14px}
+}
+</style>
+
+<div class="eh"><h1>Book a table</h1><small>Barbeque Nation</small><button class="again" id="new" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 11a8 8 0 10-2.3 5.7M20 4v7h-7"/></svg>Clear</button></div>
+<div class="lay">
+  <div class="card">
+    <section class="sec2">
+      <div class="sh3"><h2>Guest</h2><small>Number first: a known guest fills in by itself</small></div>
+      <div class="g1">
+        <div><label class="lbl" for="mob">Mobile number</label><div class="ph"><span>+91</span><input class="in" id="mob" inputmode="numeric" maxlength="10" placeholder="10-digit mobile" autocomplete="off"></div></div>
+        <div><label class="lbl" for="nm">Guest name</label><input class="in" id="nm" placeholder="Full name" autocomplete="off"></div>
+        <div><span class="lbl">Adults</span><div class="cnt" data-k="adults"><button type="button" data-d="-1" aria-label="Fewer adults">−</button><output>2</output><button type="button" data-d="1" aria-label="More adults">+</button></div></div>
+        <div><span class="lbl">Kids 6–9</span><div class="cnt" data-k="kids"><button type="button" data-d="-1" aria-label="Fewer kids">−</button><output>0</output><button type="button" data-d="1" aria-label="More kids">+</button></div></div>
+      </div>
+      <div class="err" id="mobErr"></div><div id="cust"></div>
+    </section>
+
+    <section class="sec2">
+      <div class="sh3"><h2>Outlet &amp; date</h2></div>
+      <div class="orow"><select class="in" id="outlet" aria-label="Outlet"></select></div>
+      <div class="acts"><span class="agrp">
+          <button class="lk" type="button" id="oInfo">ⓘ Outlet info</button>
+          <button class="lk" type="button" id="oMenu">📖 Menu</button>
+        </span><span class="agrp">
+          <button class="lk" type="button" id="sendOut" data-send="outlet">WAICON Send outlet</button>
+          <button class="lk" type="button" id="sendMenu" data-send="menu">WAICON Send menu</button>
+        </span><span class="agrp">
+          <button class="lk" type="button" id="ofBtn">🎁 Offers <b class="cn" id="ofN"></b></button>
+          <button class="lk" type="button" id="hcBtn">💳 Cards <b class="cn" id="hcN"></b></button>
+        </span></div>
+      <div class="days" id="days"></div>
+    </section>
+
+    <section class="sec2">
+      <div class="sh3"><h2>Time</h2><small id="tN"></small><span class="rt leg"><span><i style="background:#2fa36b"></i>Available</span><span><i style="background:#e8a317"></i>Filling</span><span><i style="background:#e35d6a"></i>Almost full</span></span></div>
+      <div id="slots"></div><div id="tX"></div>
+      <div class="acts" style="margin-top:12px"><button class="lk" type="button" id="avBtn">🪑 Seats, next day &amp; nearby</button><button class="lk" type="button" data-prices="1">₹ Buffet prices</button><button class="more" id="exBtn" type="button">+ Occasion or note for outlet</button></div>
+      <div class="extra" id="extra" hidden>
+        <div><label class="lbl" for="occ">Occasion <span class="op">(optional)</span></label><select class="in" id="occ"></select></div>
+        <div><label class="lbl" for="ins">Note for outlet <span class="op">(optional)</span></label><input class="in" id="ins" placeholder="e.g. window seat" autocomplete="off"></div>
+      </div>
+    </section>
+  </div>
+
+  <aside class="card dside" aria-label="Price and offers">
+    <div class="ph2"><h2>Price &amp; offers</h2><small id="dS"></small></div>
+    <div id="insight"></div>
+    <div id="dls"></div>
+    <div class="rd" id="rd"></div>
+    <div class="est" id="est"></div>
+    <button class="go" id="create" type="button" disabled>Create booking</button>
+  </aside>
+</div>
+<p class="foot">Preview built from the live booking page for Atria Mall, Worli, 18 Nov 2026, 3:50 PM IST. Guest history: one test number read from the live page, plus a made-up sample (98765 43210). Nothing is saved or sent.</p>
+<!--REUSEDLG-->
