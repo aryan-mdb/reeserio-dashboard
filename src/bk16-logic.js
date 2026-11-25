@@ -58,6 +58,8 @@ $("#dls").onclick=e=>{const b=e.target.closest(".inf");if(!b)return;e.preventDef
 $("#exBtn").onclick=()=>{$("#extra").hidden=false;$("#exBtn").hidden=true;$("#occ").focus()};
 $("#new").onclick=()=>{S=fresh();$("#mob").value=$("#nm").value=$("#ins").value=$("#oth").value="";$("#occ").value="";$("#outlet").value=S.outlet;$("#extra").hidden=true;$("#exBtn").hidden=false;render();$("#mob").focus()};
 
+/* WhatsApp mark on every button that sends to the guest on WhatsApp */
+const WAI='<svg class="wai" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>';
 /* ---------- side drawer ---------- */
 const dw=$("#dw");
 function drawer(title,sub,tabs,pick,start){
@@ -85,13 +87,13 @@ const nearRows=k=>nearList().slice(0,k).map(x=>`<div class="li"><div class="m"><
 const thumbs=(list,kind)=>`<div class="thg ${kind}">${list.map((u,i)=>`<button type="button" class="th" data-lb="${kind}" data-i="${i}" aria-label="Open ${kind} ${i+1}"><img src="${esc(u)}" alt="" loading="lazy"></button>`).join("")}</div>`;
 function outletBody(k){
   const o=OUT[S.outlet];
-  if(!o)return `<p class="note">Photos, menu, address, phone, hours and facilities for ${esc(S.outlet)} load from CRS on the live page; this preview has them for Atria Mall, Worli.</p><div class="dwf"><button class="btn p" type="button" data-send="outlet">Send outlet details</button><button class="btn" type="button" data-send="menu">Send menu</button></div><div class="sec">Nearby outlets</div>${nearRows(8)}`;
-  if(k==="m")return `<p class="note" style="margin-top:0">${o.menu.length} menu pages · tap one to open it full size.</p>${thumbs(o.menu,"menu")}<div class="dwf"><button class="btn p" type="button" data-send="menu">Send menu to guest</button></div>`;
+  if(!o)return `<p class="note">Photos, menu, address, phone, hours and facilities for ${esc(S.outlet)} load from CRS on the live page; this preview has them for Atria Mall, Worli.</p><div class="dwf"><button class="btn p" type="button" data-send="outlet">${WAI}Send outlet details</button><button class="btn" type="button" data-send="menu">${WAI}Send menu</button></div><div class="sec">Nearby outlets</div>${nearRows(8)}`;
+  if(k==="m")return `<p class="note" style="margin-top:0">${o.menu.length} menu pages · tap one to open it full size.</p>${thumbs(o.menu,"menu")}<div class="dwf"><button class="btn p" type="button" data-send="menu">${WAI}Send menu to guest</button></div>`;
   if(k==="d")return `<p class="note" style="margin-top:0">${o.deals.length} online deals for this outlet on the website &amp; app.</p>`+o.deals.slice(0,S.allDeals?999:12).map(x=>`<div class="li">${x.img?`<img class="dimg" src="${esc(x.img)}" alt="" loading="lazy">`:""}<div class="m"><b>${esc(x.t)}</b> ${x.rib?`<span class="st2 o" style="display:inline">${esc(x.rib)}</span>`:""}<span>${esc(x.d)}</span><span>Min ${x.min} guest${x.min>1?"s":""} · ${esc(x.time)}</span></div></div>`).join("")+(o.deals.length>12&&!S.allDeals?`<div class="dwf"><button class="btn" type="button" data-alldeals="1">Show all ${o.deals.length} deals</button></div>`:"");
   if(k==="n")return nearRows(10);
   return `<img class="hero" src="${esc(o.img)}" alt="${esc(o.name)}">
     <div class="kv2" style="margin-top:14px"><span>Address</span><b>${esc(o.addr)}<br><a href="${esc(o.map)}" target="_blank" rel="noopener">Open in Google Maps ↗</a></b><span>Phone</span><b><a href="tel:${esc(o.phone.replace(/\s/g,""))}">${esc(o.phone)}</a></b><span>Lunch</span><b>${esc(o.hours[0])}</b><span>Dinner</span><b>${esc(o.hours[1])}</b><span>Outlet page</span><b><a href="${esc(o.url)}" target="_blank" rel="noopener">${esc(o.url.replace(/^https?:\/\//,""))} ↗</a></b></div>
-    <div class="dwf"><button class="btn p" type="button" data-send="outlet">Send outlet details</button><button class="btn" type="button" data-send="menu">Send menu</button><button class="btn" type="button" data-send="location">Send location</button></div>
+    <div class="dwf"><button class="btn p" type="button" data-send="outlet">${WAI}Send outlet details</button><button class="btn" type="button" data-send="menu">${WAI}Send menu</button><button class="btn" type="button" data-send="location">${WAI}Send location</button></div>
     <div class="sec">Facilities</div><div class="feat">${o.feat.map(f=>`<span><img src="${esc(f.img)}" alt="" loading="lazy">${esc(f.n)}</span>`).join("")}</div>
     <div class="sec">Menu <button class="inf" type="button" data-tab="m">see all ${o.menu.length} pages</button></div>${thumbs(o.menu.slice(0,6),"menu")}
     <div class="sec">Photos</div>${thumbs(o.gallery,"photo")}
@@ -114,7 +116,7 @@ $("#avBtn").onclick=()=>{if(!S.outlet){toast("Select an outlet first");return}
     k==="a"?(hasData()?`<table class="tb2"><tr><th>Slot</th><th class="n">Capacity</th><th class="n">Available</th></tr>${daySlots().map(x=>`<tr><td>${t12(x.from)} – ${t12(x.to)}</td><td class="n">${x.tot}</td><td class="n" style="color:${x.cap?"var(--good)":"var(--red)"};font-weight:700">${x.cap||"Sold out"}</td></tr>`).join("")}</table>`:`<p class="note">Seat counts for this outlet and date load from CRS on the live page; this preview has them for Atria Mall, Worli today.</p>`):
     k==="n"?`<p class="note" style="margin-top:0">Same outlet, ${DAYS[Math.min(5,(S.cdate?0:S.day)+1)].toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"short"})}.</p><div class="dwf"><button class="btn p" type="button" data-nextday="1">Switch to next day</button></div>`:
     nearRows(10))};
-const sendBtn=(kind,arg)=>`<button class="lk wa" type="button" data-send="${kind}" data-arg="${esc(arg)}">Send</button>`;
+const sendBtn=(kind,arg)=>`<button class="lk wa" type="button" data-send="${kind}" data-arg="${esc(arg)}">${WAI}Send</button>`;
 /* offers: the live promotions (picture, text, link) for the outlet in the snapshot, else the titles */
 const promos=()=>OUT[S.outlet]?OUT[S.outlet].promos:BK.promos.map(t=>({t:t.trim()}));
 $("#ofBtn").onclick=()=>drawer("Offers to share",S.outlet||"",[["o",""]],()=>promos().map((p,i)=>`<div class="li">${p.img?`<img class="dimg" src="${esc(p.img)}" alt="" loading="lazy">`:""}<div class="m"><b>${esc(p.t)}</b>${p.d?`<span>${esc(p.d.slice(0,140))}…</span>`:""}${p.url?`<span><a href="${esc(p.url)}" target="_blank" rel="noopener">Open offer page ↗</a></span>`:""}</div>${sendBtn("offer",i)}</div>`).join(""));
@@ -188,7 +190,7 @@ function render(){
   $(".pl.oth").classList.toggle("on",!!S.cdate);$("#othL").textContent=S.cdate?S.cdate.toLocaleDateString("en-IN",{weekday:"short"}):"Other date";$("#othS").textContent=S.cdate?S.cdate.toLocaleDateString("en-IN",{day:"numeric",month:"short"}):"calendar";
 
   // guest strip
-  $("#cust").innerHTML=!mobOk()?"":c?`<div class="cu"><span class="av">${esc(c.name[0])}</span><div class="who"><b>${esc(c.name)}</b> <span>· ${c.total} past booking${c.total===1?"":"s"}${c.bookings[0]?` · last: ${esc(c.bookings[0].o)}, ${esc(c.bookings[0].w.split(" · ")[0])}`:""}${c.lastCall?` · last call ${esc(c.lastCall)}`:""}</span></div><span class="chip t">★ ${esc(c.tier)} · ${c.coins} coins</span>${c.toNext?`<span class="chip">⏳ ${esc(c.toNext)}</span>`:""}<button class="lk" type="button" id="hist">Booking history &amp; calls</button></div>`:
+  $("#cust").innerHTML=!mobOk()?"":c?`<div class="cu"><span class="av">${esc(c.name[0])}</span><div class="who"><b>${esc(c.name)}</b> <span>· ${c.total} past booking${c.total===1?"":"s"}${c.bookings[0]?` · last: ${esc(c.bookings[0].o)}, ${esc(c.bookings[0].w.split(" · ")[0])}`:""}</span></div><span class="chip t">★ ${esc(c.tier)} · ${c.coins} coins</span>${c.toNext?`<span class="chip">⏳ ${esc(c.toNext)}</span>`:""}<button class="lk" type="button" id="hist">Booking history &amp; calls</button></div>`:
     `<div class="cu new"><span class="av">+</span><div class="who">New guest · no past bookings for this number</div></div>`;
   if($("#hist"))$("#hist").onclick=openHistory;
   ["#sendOut","#sendMenu"].forEach(id=>$(id).title=mobOk()?"":"Enter the guest's mobile number first");

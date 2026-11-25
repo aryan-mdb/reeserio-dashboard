@@ -15,7 +15,7 @@ main.wrap{padding-top:22px;padding-bottom:48px}
 .eh h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.01em}
 .eh .again{margin-left:auto;border:0;background:none;color:var(--muted);font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:8px}
 .eh .again:hover{color:var(--ember);background:var(--ember-soft)}
-.lay{display:grid;grid-template-columns:minmax(0,1fr) minmax(400px,560px);gap:16px;align-items:start}
+.lay{display:grid;grid-template-columns:minmax(0,1fr) minmax(380px,460px);gap:16px;align-items:start}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px}
 .in-pad{padding:20px 22px 6px}
 .blk{padding-bottom:18px}
@@ -54,7 +54,11 @@ select.in{appearance:none;cursor:pointer;padding-right:38px;background:var(--car
 .extra{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:14px;margin-top:10px}
 
 /* right card: deals + estimate */
-.dside{position:sticky;top:84px}
+.dside{position:sticky;top:84px;max-height:calc(100dvh - 148px);display:flex;flex-direction:column}
+.dside>#dls{flex:1 1 auto;min-height:140px;overflow:auto;overscroll-behavior:contain;padding-bottom:4px}
+.dside>:not(#dls){flex:none}
+.dr{padding:9px 12px}
+.est{padding:10px 12px}
 .sh2{display:flex;align-items:baseline;gap:8px;padding:18px 20px 10px}
 .sh2 h2{margin:0;font-size:16px;font-weight:800}
 .sh2 small{font-size:13px;color:var(--muted)}
@@ -110,7 +114,9 @@ dialog.of::backdrop{background:rgba(20,22,26,.5)}
 /* guest strip: who this number is (past bookings, tier, last call) right under the mobile */
 .cu{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card-2);font-size:13.5px}
 .cu .av{width:34px;height:34px;border-radius:50%;background:var(--ember-soft);color:var(--ember);display:grid;place-items:center;font-weight:800;flex:none}
-.cu .who{flex:1 1 260px;min-width:0;line-height:1.45}
+.cu .who{flex:1 1 0;min-width:0;line-height:1.45;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cu{flex-wrap:nowrap}
+@media (max-width:860px){.cu{flex-wrap:wrap}.cu .who{flex-basis:100%;white-space:normal}}
 .cu .who b{font-size:14.5px}
 .cu .who span{color:var(--muted)}
 .cu .chip{font-size:12px;font-weight:700;border-radius:99px;padding:2px 9px;background:var(--bg-2);color:var(--fg-2);white-space:nowrap}
@@ -121,7 +127,13 @@ html[data-theme=dark] .cu .chip.t{background:#3a2f12;color:#f0bf55}
 .lk:hover{border-color:var(--ember);color:var(--ember)}
 .lk:disabled{opacity:.5;cursor:not-allowed;border-color:var(--line-2);color:var(--fg)}
 .lk.wa svg{color:#1faa55}
-.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;align-items:center}
+.orow .in{max-width:560px}
+.drow{margin-top:16px}
+.acts .lk.wa{color:var(--fg)}
+.wai{color:#25d366;flex:none}
+.btn .wai,.go .wai{color:currentColor}
+.btn{display:inline-flex;align-items:center;gap:8px;justify-content:center}
 .acts .lk{padding:6px 10px}
 /* date: other date */
 .pl.oth{position:relative}
@@ -255,8 +267,9 @@ dialog.lb::backdrop{background:rgba(10,11,13,.86)}
 #lbN{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);color:#fff;font-size:13px;font-weight:700;background:rgba(0,0,0,.4);border-radius:99px;padding:3px 12px}
 .btn:hover{filter:brightness(.97)}
 /*TICKETCSS*/
-@media (min-width:1800px){.lay{grid-template-columns:minmax(0,1fr) 620px}}
-@media (max-width:1279px){.lay{grid-template-columns:1fr}.dside{position:static}}
+@media (min-width:1600px){.lay{grid-template-columns:minmax(0,1fr) 520px}}
+@media (min-width:1900px){.lay{grid-template-columns:minmax(0,1fr) 600px}}
+@media (max-width:1279px){.lay{grid-template-columns:1fr}.dside{position:static;max-height:none}.dside>#dls{overflow:visible}}
 @media (max-width:860px){.g1{grid-template-columns:1fr 1fr}.g1>div:nth-child(-n+2){grid-column:1/-1}.g2,.extra{grid-template-columns:1fr}}
 @media (max-width:640px){
   .hbtn.fill .plus{display:block!important}
@@ -280,17 +293,18 @@ dialog.lb::backdrop{background:rgba(10,11,13,.86)}
       <div><span class="lbl">Kids 6–9</span><div class="cnt" data-k="kids"><button type="button" data-d="-1" aria-label="Fewer kids">−</button><output>0</output><button type="button" data-d="1" aria-label="More kids">+</button></div></div>
     </div><div class="err" id="mobErr"></div><div id="cust"></div></div>
 
-    <div class="blk"><div class="g2">
-      <div><label class="lbl" for="outlet">Outlet</label><select class="in" id="outlet"></select></div>
-      <div><span class="lbl">Date</span><div class="pills" id="days"></div></div>
-    </div>
-    <div class="acts"><span class="agrp">
-          <button class="lk" type="button" id="oInfo">ⓘ Outlet details</button>
+    <div class="blk">
+      <label class="lbl" for="outlet">Outlet</label><div class="orow"><select class="in" id="outlet"></select></div>
+      <div class="acts"><span class="agrp">
+          <button class="lk" type="button" id="oInfo">ⓘ Outlet info</button>
           <button class="lk" type="button" id="oMenu">📖 Menu</button>
-          <button class="lk wa" type="button" id="sendOut" data-send="outlet"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>Send outlet details</button>
-          <button class="lk wa" type="button" id="sendMenu" data-send="menu"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>Send menu</button>
-          </span><span class="agrp g2b"><button class="lk" type="button" id="ofBtn">🎁 Offers <b class="cn" id="ofN"></b></button><button class="lk" type="button" id="hcBtn">💳 Happiness Cards <b class="cn" id="hcN"></b></button></span>
-        </div></div>
+          </span><span class="agrp">
+          <button class="lk wa" type="button" id="sendOut" data-send="outlet"><svg class="wai" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>Send outlet</button>
+          <button class="lk wa" type="button" id="sendMenu" data-send="menu"><svg class="wai" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>Send menu</button>
+          </span><span class="agrp g2b"><button class="lk" type="button" id="ofBtn">🎁 Offers <b class="cn" id="ofN"></b></button><button class="lk" type="button" id="hcBtn">💳 Cards <b class="cn" id="hcN"></b></button></span>
+        </div>
+      <div class="drow"><span class="lbl">Date</span><div class="pills" id="days"></div></div>
+    </div>
 
     <div class="blk"><span class="lbl">Time <span class="op" id="tN"></span></span><div id="slots"></div>
       <div class="leg"><span><i style="background:#2fa36b"></i>Available</span><span><i style="background:#e8a317"></i>Filling fast</span><span><i style="background:#e35d6a"></i>Almost full</span><span><i style="background:var(--line-2)"></i>Sold out</span><button class="lk" type="button" id="avBtn">Seats, next day &amp; nearby outlets</button></div>
@@ -315,7 +329,7 @@ dialog.lb::backdrop{background:rgba(10,11,13,.86)}
 </div>
 <p class="foot">Preview built from the live booking page for Atria Mall, Worli, 18 Nov 2026, 3:50 PM IST. Guest history: one test number read from the live page, plus a made-up sample (98765 43210). Nothing is saved or sent.</p>
 <dialog class="dw" id="dw" aria-labelledby="dwT"><div class="dwh"><div><b id="dwT"></b><small id="dwS"></small></div><button type="button" class="x" id="dwX" aria-label="Close">×</button></div><div class="dwb" id="dwB"></div></dialog>
-<dialog class="sd" id="sd" aria-labelledby="sdT"><div class="dwh"><div><b id="sdT">Send to guest</b><small>This is how it looks on the guest's WhatsApp</small></div><button type="button" class="x" id="sdX" aria-label="Close">×</button></div><div class="sdw"><div class="wap"><div class="wa-top"><span class="wa-av"><img src="data:image/png;base64,LOGO_B64" alt=""></span><div><b>Barbeque Nation <i title="Verified business">✓</i></b><small id="waTo"></small></div></div><div class="wa-chat"><div class="wa-day">Today</div><div class="wa-msg" id="waB"></div></div></div><div class="sdr"><div class="to" id="sdTo"></div><div class="tpl" id="sdTpl"></div><div class="dwf"><button class="btn p" type="button" data-ch="WhatsApp">Send on WhatsApp</button><button class="btn" type="button" data-ch="SMS">Send SMS</button><button class="btn" type="button" data-ch="copy">Copy text</button></div><textarea id="sdM" hidden></textarea></div></div></dialog>
+<dialog class="sd" id="sd" aria-labelledby="sdT"><div class="dwh"><div><b id="sdT">Send to guest</b><small>This is how it looks on the guest's WhatsApp</small></div><button type="button" class="x" id="sdX" aria-label="Close">×</button></div><div class="sdw"><div class="wap"><div class="wa-top"><span class="wa-av"><img src="data:image/png;base64,LOGO_B64" alt=""></span><div><b>Barbeque Nation <i title="Verified business">✓</i></b><small id="waTo"></small></div></div><div class="wa-chat"><div class="wa-day">Today</div><div class="wa-msg" id="waB"></div></div></div><div class="sdr"><div class="to" id="sdTo"></div><div class="tpl" id="sdTpl"></div><div class="dwf"><button class="btn p" type="button" data-ch="WhatsApp"><svg class="wai" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>Send on WhatsApp</button><button class="btn" type="button" data-ch="SMS">Send SMS</button><button class="btn" type="button" data-ch="copy">Copy text</button></div><textarea id="sdM" hidden></textarea></div></div></dialog>
 <dialog class="lb" id="lb" aria-label="Picture viewer"><div class="lbw"><img id="lbImg" alt=""><button type="button" id="lbP" aria-label="Previous">‹</button><button type="button" id="lbN2" aria-label="Next">›</button><button type="button" id="lbX" aria-label="Close">×</button><span id="lbN"></span></div></dialog>
 <dialog class="bt" id="bt" aria-label="Booking confirmed"></dialog>
 </main>
@@ -390,6 +404,8 @@ $("#dls").onclick=e=>{const b=e.target.closest(".inf");if(!b)return;e.preventDef
 $("#exBtn").onclick=()=>{$("#extra").hidden=false;$("#exBtn").hidden=true;$("#occ").focus()};
 $("#new").onclick=()=>{S=fresh();$("#mob").value=$("#nm").value=$("#ins").value=$("#oth").value="";$("#occ").value="";$("#outlet").value=S.outlet;$("#extra").hidden=true;$("#exBtn").hidden=false;render();$("#mob").focus()};
 
+/* WhatsApp mark on every button that sends to the guest on WhatsApp */
+const WAI='<svg class="wai" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>';
 /* ---------- side drawer ---------- */
 const dw=$("#dw");
 function drawer(title,sub,tabs,pick,start){
@@ -417,13 +433,13 @@ const nearRows=k=>nearList().slice(0,k).map(x=>`<div class="li"><div class="m"><
 const thumbs=(list,kind)=>`<div class="thg ${kind}">${list.map((u,i)=>`<button type="button" class="th" data-lb="${kind}" data-i="${i}" aria-label="Open ${kind} ${i+1}"><img src="${esc(u)}" alt="" loading="lazy"></button>`).join("")}</div>`;
 function outletBody(k){
   const o=OUT[S.outlet];
-  if(!o)return `<p class="note">Photos, menu, address, phone, hours and facilities for ${esc(S.outlet)} load from CRS on the live page; this preview has them for Atria Mall, Worli.</p><div class="dwf"><button class="btn p" type="button" data-send="outlet">Send outlet details</button><button class="btn" type="button" data-send="menu">Send menu</button></div><div class="sec">Nearby outlets</div>${nearRows(8)}`;
-  if(k==="m")return `<p class="note" style="margin-top:0">${o.menu.length} menu pages · tap one to open it full size.</p>${thumbs(o.menu,"menu")}<div class="dwf"><button class="btn p" type="button" data-send="menu">Send menu to guest</button></div>`;
+  if(!o)return `<p class="note">Photos, menu, address, phone, hours and facilities for ${esc(S.outlet)} load from CRS on the live page; this preview has them for Atria Mall, Worli.</p><div class="dwf"><button class="btn p" type="button" data-send="outlet">${WAI}Send outlet details</button><button class="btn" type="button" data-send="menu">${WAI}Send menu</button></div><div class="sec">Nearby outlets</div>${nearRows(8)}`;
+  if(k==="m")return `<p class="note" style="margin-top:0">${o.menu.length} menu pages · tap one to open it full size.</p>${thumbs(o.menu,"menu")}<div class="dwf"><button class="btn p" type="button" data-send="menu">${WAI}Send menu to guest</button></div>`;
   if(k==="d")return `<p class="note" style="margin-top:0">${o.deals.length} online deals for this outlet on the website &amp; app.</p>`+o.deals.slice(0,S.allDeals?999:12).map(x=>`<div class="li">${x.img?`<img class="dimg" src="${esc(x.img)}" alt="" loading="lazy">`:""}<div class="m"><b>${esc(x.t)}</b> ${x.rib?`<span class="st2 o" style="display:inline">${esc(x.rib)}</span>`:""}<span>${esc(x.d)}</span><span>Min ${x.min} guest${x.min>1?"s":""} · ${esc(x.time)}</span></div></div>`).join("")+(o.deals.length>12&&!S.allDeals?`<div class="dwf"><button class="btn" type="button" data-alldeals="1">Show all ${o.deals.length} deals</button></div>`:"");
   if(k==="n")return nearRows(10);
   return `<img class="hero" src="${esc(o.img)}" alt="${esc(o.name)}">
     <div class="kv2" style="margin-top:14px"><span>Address</span><b>${esc(o.addr)}<br><a href="${esc(o.map)}" target="_blank" rel="noopener">Open in Google Maps ↗</a></b><span>Phone</span><b><a href="tel:${esc(o.phone.replace(/\s/g,""))}">${esc(o.phone)}</a></b><span>Lunch</span><b>${esc(o.hours[0])}</b><span>Dinner</span><b>${esc(o.hours[1])}</b><span>Outlet page</span><b><a href="${esc(o.url)}" target="_blank" rel="noopener">${esc(o.url.replace(/^https?:\/\//,""))} ↗</a></b></div>
-    <div class="dwf"><button class="btn p" type="button" data-send="outlet">Send outlet details</button><button class="btn" type="button" data-send="menu">Send menu</button><button class="btn" type="button" data-send="location">Send location</button></div>
+    <div class="dwf"><button class="btn p" type="button" data-send="outlet">${WAI}Send outlet details</button><button class="btn" type="button" data-send="menu">${WAI}Send menu</button><button class="btn" type="button" data-send="location">${WAI}Send location</button></div>
     <div class="sec">Facilities</div><div class="feat">${o.feat.map(f=>`<span><img src="${esc(f.img)}" alt="" loading="lazy">${esc(f.n)}</span>`).join("")}</div>
     <div class="sec">Menu <button class="inf" type="button" data-tab="m">see all ${o.menu.length} pages</button></div>${thumbs(o.menu.slice(0,6),"menu")}
     <div class="sec">Photos</div>${thumbs(o.gallery,"photo")}
@@ -446,7 +462,7 @@ $("#avBtn").onclick=()=>{if(!S.outlet){toast("Select an outlet first");return}
     k==="a"?(hasData()?`<table class="tb2"><tr><th>Slot</th><th class="n">Capacity</th><th class="n">Available</th></tr>${daySlots().map(x=>`<tr><td>${t12(x.from)} – ${t12(x.to)}</td><td class="n">${x.tot}</td><td class="n" style="color:${x.cap?"var(--good)":"var(--red)"};font-weight:700">${x.cap||"Sold out"}</td></tr>`).join("")}</table>`:`<p class="note">Seat counts for this outlet and date load from CRS on the live page; this preview has them for Atria Mall, Worli today.</p>`):
     k==="n"?`<p class="note" style="margin-top:0">Same outlet, ${DAYS[Math.min(5,(S.cdate?0:S.day)+1)].toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"short"})}.</p><div class="dwf"><button class="btn p" type="button" data-nextday="1">Switch to next day</button></div>`:
     nearRows(10))};
-const sendBtn=(kind,arg)=>`<button class="lk wa" type="button" data-send="${kind}" data-arg="${esc(arg)}">Send</button>`;
+const sendBtn=(kind,arg)=>`<button class="lk wa" type="button" data-send="${kind}" data-arg="${esc(arg)}">${WAI}Send</button>`;
 /* offers: the live promotions (picture, text, link) for the outlet in the snapshot, else the titles */
 const promos=()=>OUT[S.outlet]?OUT[S.outlet].promos:BK.promos.map(t=>({t:t.trim()}));
 $("#ofBtn").onclick=()=>drawer("Offers to share",S.outlet||"",[["o",""]],()=>promos().map((p,i)=>`<div class="li">${p.img?`<img class="dimg" src="${esc(p.img)}" alt="" loading="lazy">`:""}<div class="m"><b>${esc(p.t)}</b>${p.d?`<span>${esc(p.d.slice(0,140))}…</span>`:""}${p.url?`<span><a href="${esc(p.url)}" target="_blank" rel="noopener">Open offer page ↗</a></span>`:""}</div>${sendBtn("offer",i)}</div>`).join(""));
@@ -520,7 +536,7 @@ function render(){
   $(".pl.oth").classList.toggle("on",!!S.cdate);$("#othL").textContent=S.cdate?S.cdate.toLocaleDateString("en-IN",{weekday:"short"}):"Other date";$("#othS").textContent=S.cdate?S.cdate.toLocaleDateString("en-IN",{day:"numeric",month:"short"}):"calendar";
 
   // guest strip
-  $("#cust").innerHTML=!mobOk()?"":c?`<div class="cu"><span class="av">${esc(c.name[0])}</span><div class="who"><b>${esc(c.name)}</b> <span>· ${c.total} past booking${c.total===1?"":"s"}${c.bookings[0]?` · last: ${esc(c.bookings[0].o)}, ${esc(c.bookings[0].w.split(" · ")[0])}`:""}${c.lastCall?` · last call ${esc(c.lastCall)}`:""}</span></div><span class="chip t">★ ${esc(c.tier)} · ${c.coins} coins</span>${c.toNext?`<span class="chip">⏳ ${esc(c.toNext)}</span>`:""}<button class="lk" type="button" id="hist">Booking history &amp; calls</button></div>`:
+  $("#cust").innerHTML=!mobOk()?"":c?`<div class="cu"><span class="av">${esc(c.name[0])}</span><div class="who"><b>${esc(c.name)}</b> <span>· ${c.total} past booking${c.total===1?"":"s"}${c.bookings[0]?` · last: ${esc(c.bookings[0].o)}, ${esc(c.bookings[0].w.split(" · ")[0])}`:""}</span></div><span class="chip t">★ ${esc(c.tier)} · ${c.coins} coins</span>${c.toNext?`<span class="chip">⏳ ${esc(c.toNext)}</span>`:""}<button class="lk" type="button" id="hist">Booking history &amp; calls</button></div>`:
     `<div class="cu new"><span class="av">+</span><div class="who">New guest · no past bookings for this number</div></div>`;
   if($("#hist"))$("#hist").onclick=openHistory;
   ["#sendOut","#sendMenu"].forEach(id=>$(id).title=mobOk()?"":"Enter the guest's mobile number first");
