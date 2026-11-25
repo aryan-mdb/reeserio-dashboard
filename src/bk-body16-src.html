@@ -121,7 +121,8 @@ html[data-theme=dark] .cu .chip.t{background:#3a2f12;color:#f0bf55}
 .lk:hover{border-color:var(--ember);color:var(--ember)}
 .lk:disabled{opacity:.5;cursor:not-allowed;border-color:var(--line-2);color:var(--fg)}
 .lk.wa svg{color:#1faa55}
-.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.acts .lk{padding:6px 10px}
 /* date: other date */
 .pl.oth{position:relative}
 .pl.oth input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
@@ -138,7 +139,11 @@ html[data-theme=dark] .cu .chip.t{background:#3a2f12;color:#f0bf55}
 .dr .ds{display:block;font-size:12.5px;color:var(--fg-2);margin-top:6px;line-height:1.45}
 .est .loy{margin-top:8px;padding:8px 10px;border-radius:9px;background:#fff8e6;color:#7a5408;font-size:12.5px;line-height:1.4}
 html[data-theme=dark] .est .loy{background:#2e2610;color:#f0bf55}
-.shr{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px}
+.acts{column-gap:22px;row-gap:8px}
+.agrp{display:flex;flex-wrap:wrap;gap:6px}
+.agrp.g2b{padding-left:0}
+.lk .cn{min-width:20px;height:20px;border-radius:99px;background:var(--ember);color:#fff;font-size:11.5px;display:inline-grid;place-items:center;padding:0 6px}
+@media (max-width:640px){.agrp.g2b{padding-left:0;border-left:0}}
 
 /* side drawer for details: history, outlet, seats, offers */
 dialog.dw{margin:0 0 0 auto;height:100dvh;max-height:100dvh;width:min(560px,100vw);border:0;padding:0;background:var(--card);color:var(--fg);box-shadow:-20px 0 50px rgba(0,0,0,.25)}
@@ -279,11 +284,12 @@ dialog.lb::backdrop{background:rgba(10,11,13,.86)}
       <div><label class="lbl" for="outlet">Outlet</label><select class="in" id="outlet"></select></div>
       <div><span class="lbl">Date</span><div class="pills" id="days"></div></div>
     </div>
-    <div class="acts">
+    <div class="acts"><span class="agrp">
           <button class="lk" type="button" id="oInfo">ⓘ Outlet details</button>
-          <button class="lk" type="button" id="oMenu">📖 View menu</button>
+          <button class="lk" type="button" id="oMenu">📖 Menu</button>
           <button class="lk wa" type="button" id="sendOut" data-send="outlet"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>Send outlet details</button>
           <button class="lk wa" type="button" id="sendMenu" data-send="menu"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>Send menu</button>
+          </span><span class="agrp g2b"><button class="lk" type="button" id="ofBtn">🎁 Offers <b class="cn" id="ofN"></b></button><button class="lk" type="button" id="hcBtn">💳 Happiness Cards <b class="cn" id="hcN"></b></button></span>
         </div></div>
 
     <div class="blk"><span class="lbl">Time <span class="op" id="tN"></span></span><div id="slots"></div>
@@ -307,7 +313,6 @@ dialog.lb::backdrop{background:rgba(10,11,13,.86)}
     <button class="go" id="create" type="button" disabled>Create booking</button>
   </aside>
 </div>
-<div class="shr"><button class="lk" type="button" id="ofBtn">🎁 Offers to share <b id="ofN"></b></button><button class="lk" type="button" id="hcBtn">💳 Happiness Cards <b id="hcN"></b></button></div>
 <p class="foot">Preview built from the live booking page for Atria Mall, Worli, 18 Nov 2026, 3:50 PM IST. Guest history: one test number read from the live page, plus a made-up sample (98765 43210). Nothing is saved or sent.</p>
 <dialog class="dw" id="dw" aria-labelledby="dwT"><div class="dwh"><div><b id="dwT"></b><small id="dwS"></small></div><button type="button" class="x" id="dwX" aria-label="Close">×</button></div><div class="dwb" id="dwB"></div></dialog>
 <dialog class="sd" id="sd" aria-labelledby="sdT"><div class="dwh"><div><b id="sdT">Send to guest</b><small>This is how it looks on the guest's WhatsApp</small></div><button type="button" class="x" id="sdX" aria-label="Close">×</button></div><div class="sdw"><div class="wap"><div class="wa-top"><span class="wa-av"><img src="data:image/png;base64,LOGO_B64" alt=""></span><div><b>Barbeque Nation <i title="Verified business">✓</i></b><small id="waTo"></small></div></div><div class="wa-chat"><div class="wa-day">Today</div><div class="wa-msg" id="waB"></div></div></div><div class="sdr"><div class="to" id="sdTo"></div><div class="tpl" id="sdTpl"></div><div class="dwf"><button class="btn p" type="button" data-ch="WhatsApp">Send on WhatsApp</button><button class="btn" type="button" data-ch="SMS">Send SMS</button><button class="btn" type="button" data-ch="copy">Copy text</button></div><textarea id="sdM" hidden></textarea></div></div></dialog>
