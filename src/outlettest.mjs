@@ -24,7 +24,7 @@ for (const [w, h, scheme] of [[1600, 1000, 'light'], [1600, 1000, 'dark'], [390,
   await p.click('#oMenu'); console.log('  View menu opens tab:', await p.$eval('#dwB .tabs .on', e => e.textContent)); await p.click('#dwX');
   await p.fill('#mob', '9876543210'); await p.waitForTimeout(100);
   await p.click('#sendMenu'); await p.waitForTimeout(1500);
-  console.log('  send menu:', await p.textContent('#sdA small'), '| thumbs', await p.$$eval('#sdA img', e => e.length), '| msg', (await p.inputValue('#sdM')).replace(/\n/g, ' / '));
+  console.log('  send menu:', await p.textContent('#sdTpl .tg'), '| images', await p.$$eval('#waB img', e => e.length), '| msg', (await p.inputValue('#sdM')).replace(/\n/g, ' / '));
   await p.screenshot({ path: `${out}/o16-${tag}-sendmenu.png` }); await p.click('#sdX');
   await p.click('#sendOut'); console.log('  send outlet msg:', (await p.inputValue('#sdM')).replace(/\n/g, ' / ')); await p.click('#sdX');
   await p.click('#ofBtn'); console.log('  offers:', JSON.stringify(await imgs()), (await p.$$eval('#dwB .li .m b', e => e.map(x => x.textContent))).slice(0, 2).join(' | '));

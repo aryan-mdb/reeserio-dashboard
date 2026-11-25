@@ -129,29 +129,52 @@ dw.addEventListener("click",e=>{
 
 /* ---------- send to guest: the agent sees the exact message first ---------- */
 const sd=$("#sd");
-function compose(kind,arg){
-  const hi=`Hi ${S.name.trim()||"there"},\n`,o=OUT[S.outlet],s=slotObj();
-  const table=s?`\nYour table: ${dayLabel()}, ${t12(s.from)} for ${S.adults+S.kids} guest${S.adults+S.kids>1?"s":""}.\n`:"";
-  if(kind==="outlet")return hi+`Here are the details of Barbeque Nation, ${S.outlet}:\n📍 ${o?o.addr:S.outlet}\n${o?`🗺️ ${o.map}\n📞 ${o.phone}\n🕒 Lunch ${o.hours[0]} · Dinner ${o.hours[1]}\n🍽️ Menu & photos: ${o.url}\n`:""}${table}\nSee you soon!`;
-  if(kind==="location")return hi+`Barbeque Nation, ${S.outlet}\n📍 ${o?o.addr:S.outlet}\n${o?`🗺️ Directions: ${o.map}\n`:""}${table}`;
-  if(kind==="menu")return hi+`Here is the menu for Barbeque Nation, ${S.outlet}:\n${o?`🍽️ ${o.url}\n\n${o.menu.length} menu pages are attached.`:"(menu link from CRS)"}${table}`;
-  if(kind==="offer"){const p=promos()[arg];return hi+`An offer for you at Barbeque Nation, ${S.outlet}:\n${p.t}${p.url?`\n${p.url}`:""}`}
-  if(kind==="card"){const c=BK.cards[arg];return hi+`Gift a Barbeque Nation Happiness Card – ${c.n}${c.pax?` (${c.pax} pax)`:""} for ${inr(c.price)}.\n(payment link from CRS)`}
+/* What the guest gets on WhatsApp, drawn like the chat. Live templates (LMS send_whatsapp_link → Nextel):
+   OD = lead_branch_info (outlet photo + button to the outlet page), HC = lead_hc_1 (gift card picture + button
+   to the voucher page). Their exact wording lives in Nextel/Meta; the text here is a stand-in. */
+const WA_OD="https://leadmanagement-lms.s3.ap-south-1.amazonaws.com/whatsappimages/Whatsapp+creative.jpg";
+const WA_HC="https://leadmanagement-lms.s3.ap-south-1.amazonaws.com/whatsappimages/happy_card.jpg";
+function waMsg(kind,arg){
+  const o=OUT[S.outlet],s=slotObj(),nm=S.name.trim().split(" ")[0]||"there",web="https://www.barbequenation.com/";
+  const when=s?`\n\n🗓️ *Your table:* ${dayLabel()}, ${t12(s.from)} · ${S.adults+S.kids} guest${S.adults+S.kids>1?"s":""}`:"";
+  if(kind==="outlet")return {live:"lead_branch_info",img:WA_OD,
+    body:`Hi ${nm} 👋\nThank you for choosing *Barbeque Nation, ${S.outlet}*.\n\n📍 ${o?o.addr:S.outlet}${o?`\n📞 ${o.phone}\n🕒 Lunch ${o.hours[0]} · Dinner ${o.hours[1]}`:""}${when}\n\nTap below for the menu, photos and directions.`,
+    btns:[["↗","View outlet",o?o.url:web]]};
+  if(kind==="menu")return {live:"",reuse:"lead_branch_info",img:o?o.menu[0]:WA_OD,more:o?o.menu.length-1:0,
+    body:`Hi ${nm} 👋\nHere is the menu for *Barbeque Nation, ${S.outlet}* — unlimited grills, starters, mains and desserts.${when}\n\nTap below to see all ${o?o.menu.length:""} menu pages.`,
+    btns:[["📖","View full menu",o?o.url:web]]};
+  if(kind==="location")return {live:"",loc:o||{addr:S.outlet},
+    body:`Hi ${nm} 👋\nHere is how to reach *Barbeque Nation, ${S.outlet}*.${when}`,
+    btns:[["📍","Get directions",o?o.map:web],...(o?[["📞","Call outlet","tel:"+o.phone.replace(/\s/g,"")]]:[])]};
+  if(kind==="offer"){const p=promos()[arg];return {live:"",img:p.img||"",
+    body:`Hi ${nm} 👋\n*${p.t}*${p.d?`\n\n${p.d.slice(0,170)}…`:""}`,btns:[["↗","View offer",p.url||web]]}}
+  if(kind==="card"){const c=BK.cards[arg];return {live:"lead_hc_1",img:WA_HC,
+    body:`Hi ${nm} 👋\nShare the joy of unlimited buffet with a *Barbeque Nation Happiness Card*.\n\n🎁 *${c.n}*${c.pax?` · ${c.pax} guests`:""} · *${inr(c.price)}* all inclusive`,
+    btns:[["🛒","Buy gift card",`${web}vouchers?branch_id=…`]]}}
 }
+/* WhatsApp-style text: *bold*, line breaks */
+const waText=t=>esc(t).replace(/\*([^*\n]+)\*/g,"<b>$1</b>");
+const waTime=()=>new Date().toLocaleTimeString("en-IN",{hour:"numeric",minute:"2-digit"});
 document.addEventListener("click",e=>{
   const b=e.target.closest("[data-send]");if(!b||b.closest("#sd"))return;
   if(!mobOk()){toast("Enter the guest's mobile number first");$("#mob").focus();return}
   if(!S.outlet&&/outlet|menu|location/.test(b.dataset.send)){toast("Select an outlet first");return}
-  const k=b.dataset.send,o=OUT[S.outlet];
+  const k=b.dataset.send,m=waMsg(k,b.dataset.arg);
   $("#sdT").textContent={outlet:"Send outlet details",menu:"Send menu",location:"Send location",offer:"Send offer",card:"Send Happiness Card"}[k];
-  $("#sdTo").innerHTML=`To <b>${esc(S.name.trim()||"guest")}</b> · ${fmtMob()}`;
-  /* what goes with the text: the menu pages, or the outlet photo */
-  $("#sdA").innerHTML=k==="menu"&&o?`<small>Attached: ${o.menu.length} menu pages</small><div class="thg mini">${o.menu.map(u=>`<img src="${esc(u)}" alt="" loading="lazy">`).join("")}</div>`:
-    k==="outlet"&&o?`<small>Attached: outlet photo</small><div class="thg mini"><img src="${esc(o.img)}" alt="" loading="lazy"></div>`:
-    k==="offer"&&promos()[b.dataset.arg]?.img?`<small>Attached: offer picture</small><div class="thg mini"><img src="${esc(promos()[b.dataset.arg].img)}" alt="" loading="lazy"></div>`:"";
-  $("#sdM").value=compose(k,b.dataset.arg);sd.showModal();
+  $("#waTo").textContent=(S.name.trim()||"Guest")+" · "+fmtMob();
+  $("#sdTo").innerHTML=`<span>To</span><b>${esc(S.name.trim()||"Guest")}</b><span>${fmtMob()}</span>`;
+  const head=m.loc?`<div class="wa-loc"><span>📍</span><div><b>Barbeque Nation, ${esc(S.outlet)}</b><small>${esc(m.loc.addr)}</small></div></div>`:
+    m.img?`<div class="wa-img"><img src="${esc(m.img)}" alt="">${m.more?`<span class="wa-more">+${m.more} pages</span>`:""}</div>`:"";
+  $("#waB").innerHTML=`<div class="wa-bub">${head}<div class="wa-txt">${waText(m.body)}</div><div class="wa-ft">Barbeque Nation<span>${waTime()}</span></div></div>`+
+    m.btns.map(([i,l,u])=>`<a class="wa-btn" href="${esc(u)}" target="_blank" rel="noopener"><span>${i}</span>${esc(l)}</a>`).join("");
+  $("#sdTpl").innerHTML=m.live?`<span class="tg ok">Live template</span><code>${m.live}</code><small>Goes out today from the live page. The wording comes from the approved template in Nextel; only the name and link change.</small>`:
+    m.reuse?`<span class="tg nw">Can reuse</span><code>${m.reuse}</code><small>Not on the live page yet. Sending the outlet template works today (its button opens the outlet page with the full menu); a menu-picture template needs Meta approval.</small>`:
+    `<span class="tg nw">New template needed</span><small>Not on the live page yet. Needs a template in Nextel, approved by Meta, and a new type in LMS send_whatsapp_link.</small>`;
+  $("#sdM").value=m.body.replace(/\*/g,"")+"\n"+m.btns.map(x=>x[1]+": "+x[2]).join("\n");
+  sd.showModal();
 });
 $("#sdX").onclick=()=>sd.close();
+sd.addEventListener("click",e=>{if(e.target===sd)sd.close()});
 sd.querySelector(".dwf").onclick=e=>{const b=e.target.closest("[data-ch]");if(!b)return;
   if(b.dataset.ch==="copy"){navigator.clipboard?.writeText($("#sdM").value).catch(()=>{});toast("Message copied")}
   else{sd.close();toast(`Preview only: on the live page this goes to ${fmtMob()} on ${b.dataset.ch}. Nothing was sent.`)}};

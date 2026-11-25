@@ -175,11 +175,54 @@ table.tb2{width:100%;border-collapse:collapse;font-size:13.5px}
 .tb2 td.n,.tb2 th.n{text-align:right;font-variant-numeric:tabular-nums}
 .dwf{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
 /* send preview */
-dialog.sd{border:0;border-radius:16px;padding:0;width:min(520px,calc(100vw - 24px));background:var(--card);color:var(--fg);box-shadow:0 24px 60px rgba(0,0,0,.3)}
-dialog.sd::backdrop{background:rgba(20,22,26,.5)}
-.sd textarea{width:100%;min-height:200px;border:1.5px solid var(--line-2);border-radius:11px;background:var(--card-2);color:var(--fg);font:inherit;font-size:14px;line-height:1.5;padding:12px;resize:vertical;box-sizing:border-box}
-.sd .to{font-size:13.5px;color:var(--muted);margin-bottom:8px}
-.sd .to b{color:var(--fg)}
+/* send to guest: WhatsApp-style phone preview on the left, who / template / send on the right */
+dialog.sd{border:0;border-radius:18px;padding:0;width:min(820px,calc(100vw - 24px));max-height:94dvh;overflow:auto;background:var(--card);color:var(--fg);box-shadow:0 24px 60px rgba(0,0,0,.3)}
+dialog.sd::backdrop{background:rgba(20,22,26,.55)}
+.sdw{display:grid;grid-template-columns:minmax(0,370px) minmax(0,1fr);gap:22px;padding:18px 20px 20px;align-items:start}
+.wap{border-radius:22px;overflow:hidden;border:6px solid #1f2328;box-shadow:0 14px 34px rgba(0,0,0,.22);background:#efe7de}
+.wa-top{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#075e54;color:#fff}
+.wa-top b{display:flex;align-items:center;gap:5px;font-size:14.5px}
+.wa-top b i{font-style:normal;font-size:10px;width:15px;height:15px;border-radius:50%;background:#25d366;color:#fff;display:grid;place-items:center}
+.wa-top small{display:block;font-size:11.5px;opacity:.85}
+.wa-av{width:34px;height:34px;border-radius:50%;background:#fff;display:grid;place-items:center;overflow:hidden;flex:none}
+.wa-av img{width:24px;height:26px;object-fit:contain}
+.wa-chat{min-height:420px;max-height:62dvh;overflow:auto;padding:12px 12px 16px;
+  background-color:#efe7de;background-image:radial-gradient(rgba(0,0,0,.035) 1px,transparent 1.4px);background-size:14px 14px}
+.wa-day{margin:0 auto 10px;width:max-content;font-size:11px;font-weight:600;color:#54656f;background:#fff;border-radius:7px;padding:3px 10px;box-shadow:0 1px 1px rgba(0,0,0,.08)}
+.wa-msg{max-width:92%}
+.wa-bub{background:#fff;color:#111b21;border-radius:0 9px 9px 9px;padding:4px;box-shadow:0 1px 1px rgba(0,0,0,.12);position:relative}
+.wa-bub::before{content:"";position:absolute;left:-7px;top:0;border-top:9px solid #fff;border-left:8px solid transparent}
+.wa-img{position:relative;border-radius:7px;overflow:hidden;background:#d9d2c9}
+.wa-img img{display:block;width:100%;max-height:300px;object-fit:cover}
+.wa-more{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.62);color:#fff;font-size:12.5px;font-weight:700;border-radius:99px;padding:4px 10px}
+.wa-loc{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:7px;background:linear-gradient(135deg,#dfeee6,#cfe3f3);font-size:13px;line-height:1.4}
+.wa-loc>span{font-size:22px}
+.wa-loc small{display:block;color:#54656f;font-size:12px;margin-top:2px}
+.wa-txt{padding:7px 7px 2px;font-size:13.8px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+.wa-ft{display:flex;justify-content:space-between;gap:10px;padding:2px 7px 3px;font-size:11px;color:#8696a0}
+.wa-btn{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:2px;background:#fff;border-radius:9px;padding:10px;font-size:14px;font-weight:600;color:#027eb5;text-decoration:none;box-shadow:0 1px 1px rgba(0,0,0,.12)}
+.wa-btn:hover{background:#f7f7f7}
+.sdr{display:flex;flex-direction:column;gap:14px;min-width:0}
+.sd .to{display:flex;flex-direction:column;gap:2px;font-size:13px;color:var(--muted);padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card-2)}
+.sd .to b{color:var(--fg);font-size:16px}
+.tpl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-size:13px}
+.tpl .tg{font-size:12px;font-weight:800;border-radius:99px;padding:3px 10px}
+.tpl .tg.ok{background:var(--good-soft);color:var(--good)}
+.tpl .tg.nw{background:#fff1dc;color:#9a5b00}
+html[data-theme=dark] .tpl .tg.nw{background:#3a2b12;color:#f0bf55}
+.tpl code{font-size:12.5px;background:var(--bg-2);border-radius:6px;padding:2px 7px}
+.tpl small{flex-basis:100%;color:var(--muted);line-height:1.45;font-size:12.5px;font-weight:500}
+.sdr .dwf{margin-top:0}
+.sdr .dwf .btn.p{flex:1 1 100%;height:46px}
+html[data-theme=dark] .wap{border-color:#000;background:#0b141a}
+html[data-theme=dark] .wa-top{background:#1f2c34}
+html[data-theme=dark] .wa-chat{background-color:#0b141a;background-image:radial-gradient(rgba(255,255,255,.04) 1px,transparent 1.4px)}
+html[data-theme=dark] .wa-day{background:#182229;color:#8696a0}
+html[data-theme=dark] .wa-bub,html[data-theme=dark] .wa-btn{background:#202c33;color:#e9edef}
+html[data-theme=dark] .wa-bub::before{border-top-color:#202c33}
+html[data-theme=dark] .wa-btn{color:#53bdeb}
+html[data-theme=dark] .wa-loc{background:linear-gradient(135deg,#1d3a30,#1b3346);color:#e9edef}
+@media (max-width:720px){.sdw{grid-template-columns:1fr;padding:12px}.wa-chat{min-height:0;max-height:none}}
 .btn{height:42px;border-radius:11px;padding:0 16px;font:inherit;font-weight:800;font-size:14px;cursor:pointer;border:1.5px solid var(--line-2);background:var(--card);color:var(--fg-2)}
 .btn.p{border:0;background:#1faa55;color:#fff}
 /* real outlet content: hero photo, menu pages, photos, facility icons, offer pictures */
@@ -192,7 +235,6 @@ dialog.sd::backdrop{background:rgba(20,22,26,.5)}
 .th:hover img{transform:scale(1.04)}
 .thg.mini{grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:5px;margin:6px 0 12px}
 .thg.mini img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
-.sd small{font-size:12.5px;color:var(--muted);font-weight:600}
 .feat span{display:inline-flex;align-items:center;gap:7px}
 .feat img{width:20px;height:20px;object-fit:contain}
 .dimg{width:64px;height:64px;object-fit:cover;border-radius:8px;flex:none;background:var(--bg-2)}
@@ -268,7 +310,7 @@ dialog.lb::backdrop{background:rgba(10,11,13,.86)}
 <div class="shr"><button class="lk" type="button" id="ofBtn">🎁 Offers to share <b id="ofN"></b></button><button class="lk" type="button" id="hcBtn">💳 Happiness Cards <b id="hcN"></b></button></div>
 <p class="foot">Preview built from the live booking page for Atria Mall, Worli, 18 Nov 2026, 3:50 PM IST. Guest history: one test number read from the live page, plus a made-up sample (98765 43210). Nothing is saved or sent.</p>
 <dialog class="dw" id="dw" aria-labelledby="dwT"><div class="dwh"><div><b id="dwT"></b><small id="dwS"></small></div><button type="button" class="x" id="dwX" aria-label="Close">×</button></div><div class="dwb" id="dwB"></div></dialog>
-<dialog class="sd" id="sd" aria-labelledby="sdT"><div class="dwh"><div><b id="sdT">Send to guest</b><small>Check the message, then send</small></div><button type="button" class="x" id="sdX" aria-label="Close">×</button></div><div class="dwb"><div class="to" id="sdTo"></div><div id="sdA"></div><textarea id="sdM" aria-label="Message"></textarea><div class="dwf"><button class="btn p" type="button" data-ch="WhatsApp">Send on WhatsApp</button><button class="btn" type="button" data-ch="SMS">Send SMS</button><button class="btn" type="button" data-ch="copy">Copy text</button></div></div></dialog>
+<dialog class="sd" id="sd" aria-labelledby="sdT"><div class="dwh"><div><b id="sdT">Send to guest</b><small>This is how it looks on the guest's WhatsApp</small></div><button type="button" class="x" id="sdX" aria-label="Close">×</button></div><div class="sdw"><div class="wap"><div class="wa-top"><span class="wa-av"><img src="data:image/png;base64,LOGO_B64" alt=""></span><div><b>Barbeque Nation <i title="Verified business">✓</i></b><small id="waTo"></small></div></div><div class="wa-chat"><div class="wa-day">Today</div><div class="wa-msg" id="waB"></div></div></div><div class="sdr"><div class="to" id="sdTo"></div><div class="tpl" id="sdTpl"></div><div class="dwf"><button class="btn p" type="button" data-ch="WhatsApp">Send on WhatsApp</button><button class="btn" type="button" data-ch="SMS">Send SMS</button><button class="btn" type="button" data-ch="copy">Copy text</button></div><textarea id="sdM" hidden></textarea></div></div></dialog>
 <dialog class="lb" id="lb" aria-label="Picture viewer"><div class="lbw"><img id="lbImg" alt=""><button type="button" id="lbP" aria-label="Previous">‹</button><button type="button" id="lbN2" aria-label="Next">›</button><button type="button" id="lbX" aria-label="Close">×</button><span id="lbN"></span></div></dialog>
 <dialog class="bt" id="bt" aria-label="Booking confirmed"></dialog>
 </main>
@@ -414,29 +456,52 @@ dw.addEventListener("click",e=>{
 
 /* ---------- send to guest: the agent sees the exact message first ---------- */
 const sd=$("#sd");
-function compose(kind,arg){
-  const hi=`Hi ${S.name.trim()||"there"},\n`,o=OUT[S.outlet],s=slotObj();
-  const table=s?`\nYour table: ${dayLabel()}, ${t12(s.from)} for ${S.adults+S.kids} guest${S.adults+S.kids>1?"s":""}.\n`:"";
-  if(kind==="outlet")return hi+`Here are the details of Barbeque Nation, ${S.outlet}:\n📍 ${o?o.addr:S.outlet}\n${o?`🗺️ ${o.map}\n📞 ${o.phone}\n🕒 Lunch ${o.hours[0]} · Dinner ${o.hours[1]}\n🍽️ Menu & photos: ${o.url}\n`:""}${table}\nSee you soon!`;
-  if(kind==="location")return hi+`Barbeque Nation, ${S.outlet}\n📍 ${o?o.addr:S.outlet}\n${o?`🗺️ Directions: ${o.map}\n`:""}${table}`;
-  if(kind==="menu")return hi+`Here is the menu for Barbeque Nation, ${S.outlet}:\n${o?`🍽️ ${o.url}\n\n${o.menu.length} menu pages are attached.`:"(menu link from CRS)"}${table}`;
-  if(kind==="offer"){const p=promos()[arg];return hi+`An offer for you at Barbeque Nation, ${S.outlet}:\n${p.t}${p.url?`\n${p.url}`:""}`}
-  if(kind==="card"){const c=BK.cards[arg];return hi+`Gift a Barbeque Nation Happiness Card – ${c.n}${c.pax?` (${c.pax} pax)`:""} for ${inr(c.price)}.\n(payment link from CRS)`}
+/* What the guest gets on WhatsApp, drawn like the chat. Live templates (LMS send_whatsapp_link → Nextel):
+   OD = lead_branch_info (outlet photo + button to the outlet page), HC = lead_hc_1 (gift card picture + button
+   to the voucher page). Their exact wording lives in Nextel/Meta; the text here is a stand-in. */
+const WA_OD="https://leadmanagement-lms.s3.ap-south-1.amazonaws.com/whatsappimages/Whatsapp+creative.jpg";
+const WA_HC="https://leadmanagement-lms.s3.ap-south-1.amazonaws.com/whatsappimages/happy_card.jpg";
+function waMsg(kind,arg){
+  const o=OUT[S.outlet],s=slotObj(),nm=S.name.trim().split(" ")[0]||"there",web="https://www.barbequenation.com/";
+  const when=s?`\n\n🗓️ *Your table:* ${dayLabel()}, ${t12(s.from)} · ${S.adults+S.kids} guest${S.adults+S.kids>1?"s":""}`:"";
+  if(kind==="outlet")return {live:"lead_branch_info",img:WA_OD,
+    body:`Hi ${nm} 👋\nThank you for choosing *Barbeque Nation, ${S.outlet}*.\n\n📍 ${o?o.addr:S.outlet}${o?`\n📞 ${o.phone}\n🕒 Lunch ${o.hours[0]} · Dinner ${o.hours[1]}`:""}${when}\n\nTap below for the menu, photos and directions.`,
+    btns:[["↗","View outlet",o?o.url:web]]};
+  if(kind==="menu")return {live:"",reuse:"lead_branch_info",img:o?o.menu[0]:WA_OD,more:o?o.menu.length-1:0,
+    body:`Hi ${nm} 👋\nHere is the menu for *Barbeque Nation, ${S.outlet}* — unlimited grills, starters, mains and desserts.${when}\n\nTap below to see all ${o?o.menu.length:""} menu pages.`,
+    btns:[["📖","View full menu",o?o.url:web]]};
+  if(kind==="location")return {live:"",loc:o||{addr:S.outlet},
+    body:`Hi ${nm} 👋\nHere is how to reach *Barbeque Nation, ${S.outlet}*.${when}`,
+    btns:[["📍","Get directions",o?o.map:web],...(o?[["📞","Call outlet","tel:"+o.phone.replace(/\s/g,"")]]:[])]};
+  if(kind==="offer"){const p=promos()[arg];return {live:"",img:p.img||"",
+    body:`Hi ${nm} 👋\n*${p.t}*${p.d?`\n\n${p.d.slice(0,170)}…`:""}`,btns:[["↗","View offer",p.url||web]]}}
+  if(kind==="card"){const c=BK.cards[arg];return {live:"lead_hc_1",img:WA_HC,
+    body:`Hi ${nm} 👋\nShare the joy of unlimited buffet with a *Barbeque Nation Happiness Card*.\n\n🎁 *${c.n}*${c.pax?` · ${c.pax} guests`:""} · *${inr(c.price)}* all inclusive`,
+    btns:[["🛒","Buy gift card",`${web}vouchers?branch_id=…`]]}}
 }
+/* WhatsApp-style text: *bold*, line breaks */
+const waText=t=>esc(t).replace(/\*([^*\n]+)\*/g,"<b>$1</b>");
+const waTime=()=>new Date().toLocaleTimeString("en-IN",{hour:"numeric",minute:"2-digit"});
 document.addEventListener("click",e=>{
   const b=e.target.closest("[data-send]");if(!b||b.closest("#sd"))return;
   if(!mobOk()){toast("Enter the guest's mobile number first");$("#mob").focus();return}
   if(!S.outlet&&/outlet|menu|location/.test(b.dataset.send)){toast("Select an outlet first");return}
-  const k=b.dataset.send,o=OUT[S.outlet];
+  const k=b.dataset.send,m=waMsg(k,b.dataset.arg);
   $("#sdT").textContent={outlet:"Send outlet details",menu:"Send menu",location:"Send location",offer:"Send offer",card:"Send Happiness Card"}[k];
-  $("#sdTo").innerHTML=`To <b>${esc(S.name.trim()||"guest")}</b> · ${fmtMob()}`;
-  /* what goes with the text: the menu pages, or the outlet photo */
-  $("#sdA").innerHTML=k==="menu"&&o?`<small>Attached: ${o.menu.length} menu pages</small><div class="thg mini">${o.menu.map(u=>`<img src="${esc(u)}" alt="" loading="lazy">`).join("")}</div>`:
-    k==="outlet"&&o?`<small>Attached: outlet photo</small><div class="thg mini"><img src="${esc(o.img)}" alt="" loading="lazy"></div>`:
-    k==="offer"&&promos()[b.dataset.arg]?.img?`<small>Attached: offer picture</small><div class="thg mini"><img src="${esc(promos()[b.dataset.arg].img)}" alt="" loading="lazy"></div>`:"";
-  $("#sdM").value=compose(k,b.dataset.arg);sd.showModal();
+  $("#waTo").textContent=(S.name.trim()||"Guest")+" · "+fmtMob();
+  $("#sdTo").innerHTML=`<span>To</span><b>${esc(S.name.trim()||"Guest")}</b><span>${fmtMob()}</span>`;
+  const head=m.loc?`<div class="wa-loc"><span>📍</span><div><b>Barbeque Nation, ${esc(S.outlet)}</b><small>${esc(m.loc.addr)}</small></div></div>`:
+    m.img?`<div class="wa-img"><img src="${esc(m.img)}" alt="">${m.more?`<span class="wa-more">+${m.more} pages</span>`:""}</div>`:"";
+  $("#waB").innerHTML=`<div class="wa-bub">${head}<div class="wa-txt">${waText(m.body)}</div><div class="wa-ft">Barbeque Nation<span>${waTime()}</span></div></div>`+
+    m.btns.map(([i,l,u])=>`<a class="wa-btn" href="${esc(u)}" target="_blank" rel="noopener"><span>${i}</span>${esc(l)}</a>`).join("");
+  $("#sdTpl").innerHTML=m.live?`<span class="tg ok">Live template</span><code>${m.live}</code><small>Goes out today from the live page. The wording comes from the approved template in Nextel; only the name and link change.</small>`:
+    m.reuse?`<span class="tg nw">Can reuse</span><code>${m.reuse}</code><small>Not on the live page yet. Sending the outlet template works today (its button opens the outlet page with the full menu); a menu-picture template needs Meta approval.</small>`:
+    `<span class="tg nw">New template needed</span><small>Not on the live page yet. Needs a template in Nextel, approved by Meta, and a new type in LMS send_whatsapp_link.</small>`;
+  $("#sdM").value=m.body.replace(/\*/g,"")+"\n"+m.btns.map(x=>x[1]+": "+x[2]).join("\n");
+  sd.showModal();
 });
 $("#sdX").onclick=()=>sd.close();
+sd.addEventListener("click",e=>{if(e.target===sd)sd.close()});
 sd.querySelector(".dwf").onclick=e=>{const b=e.target.closest("[data-ch]");if(!b)return;
   if(b.dataset.ch==="copy"){navigator.clipboard?.writeText($("#sdM").value).catch(()=>{});toast("Message copied")}
   else{sd.close();toast(`Preview only: on the live page this goes to ${fmtMob()} on ${b.dataset.ch}. Nothing was sent.`)}};
