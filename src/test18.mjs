@@ -29,7 +29,7 @@ await p.locator('#dls [data-send]').first().click(); await p.waitForTimeout(300)
 out.sendOpen = await p.evaluate(() => [...document.querySelectorAll('dialog')].filter(d => d.open).map(d => d.innerText.slice(0, 60).replace(/\s+/g, ' ')));
 await p.keyboard.press('Escape'); await p.waitForTimeout(200);
 // guest lookup
-await p.locator('#mob').fill('7973968515'); await p.locator('#mob').dispatchEvent('input'); await p.waitForTimeout(1500);
+await p.locator('#mob').fill(process.env.TEST_MOB || ''); await p.locator('#mob').dispatchEvent('input'); await p.waitForTimeout(1500);
 out.card = await p.evaluate(() => document.body.innerText.match(/\d+ past bookings/)?.[0]);
 for (const w of [1600, 1366, 390]) { await p.setViewportSize({ width: w, height: 900 }); await p.waitForTimeout(150); out['ov' + w] = await p.evaluate(() => document.documentElement.scrollWidth - innerWidth); }
 await p.setViewportSize({ width: 1440, height: 900 });
