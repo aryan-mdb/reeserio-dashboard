@@ -6,11 +6,18 @@ let S=fresh();
    Public outlet info only. This snapshot has it for Atria Mall, Worli; the live page loads it for every outlet. */
 const OX=/*OUTX*/null;
 const OUT={[OX.name]:OX};
-/* Made-up sample guest so the history strip can be tried: 98765 43210. Real numbers load from CRS/LMS. */
-const CUST={"9876543210":{name:"Rahul Sharma",tier:"Silver",coins:120,toNext:"2 visits to Gold",lastCall:"Pr•••a · 12 Nov 2026, 7:40 PM",
-  bookings:[["BN20261102231","Settled","Atria Mall, Worli",4,"2 Nov 2026 · 8:00 PM"],["BN20261009118","Settled","Phoenix Marketcity, Kurla",2,"9 Oct 2026 · 1:00 PM"],["BN20260914402","Cancelled","Atria Mall, Worli",6,"14 Sep 2026 · 9:00 PM"],["BN20260821077","Settled","Korum Mall Thane",3,"21 Aug 2026 · 7:30 PM"]],
+/* Guest history. CUSTH is real data read from the live page (getCustomerByMobileNo_External +
+   getBookingHistoryDetails), keyed by the SHA-256 of the mobile so the number isn't in the page source.
+   CUST is a made-up sample (98765 43210). On the live app this comes from CRS / LMS for every number. */
+const CUSTH=/*CUSTH*/{};
+const bk=(id,st,o,ad,ch,w,meal,items,by,src,notes)=>({id,st,o,ad,ch,w,meal,items,by,src,notes,lead:"",occ:""});
+const CUST={"9876543210":{name:"Rahul Sharma",tier:"Silver",coins:120,earn:8,toNext:"2 visits to Gold",lastCall:"Pr•••a · 12 Nov 2026, 7:40 PM",total:4,
+  bookings:[bk("BN20261102231","Settled","Atria Mall, Worli",4,0,"2 Nov 2026 · 8:00 PM","Dinner","NON-VEG ×4","Pr•••a","Reservation Drop",""),bk("BN20261009118","Settled","Phoenix Marketcity, Kurla",2,0,"9 Oct 2026 · 1:00 PM","Lunch","Couple Deal ×2","Ka•••l","",""),bk("BN20260914402","Cancelled","Atria Mall, Worli",5,1,"14 Sep 2026 · 9:00 PM","Dinner","","Pr•••a","","Guest called to cancel"),bk("BN20260821077","Settled","Korum Mall Thane",3,0,"21 Aug 2026 · 7:30 PM","Dinner","VEG ×1, NON-VEG ×2","Website","","")],
   calls:[["Pr•••a","12 Nov 2026, 7:40 PM","4m 12s","Booking confirmed"],["Ka•••l","1 Nov 2026, 6:05 PM","2m 40s","Asked about deals"]]}};
-const cust=()=>CUST[S.mobile];
+const cust=()=>S.cdata;
+const sha=async s=>{try{const h=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,"0")).join("")}catch{return ""}};
+async function lookup(){const m=S.mobile;S.cdata=null;if(!/^\d{10}$/.test(m))return;const h=await sha(m);if(S.mobile!==m)return;S.cdata=CUSTH[h]||CUST[m]||null;
+  const c=S.cdata;if(c&&!S.name.trim()){S.name=c.name;$("#nm").value=c.name;toast("Name filled from past bookings")}render()}
 
 $("#outlet").innerHTML=`<option value="">Select outlet</option>`+BK.cities.slice().sort((a,b)=>b.l.length-a.l.length).map(c=>`<optgroup label="${esc(c.c)}">${c.l.map(o=>`<option ${o===S.outlet?"selected":""}>${esc(o)}</option>`).join("")}</optgroup>`).join("");
 $("#occ").innerHTML=`<option value="">None</option>`+BK.occasions.filter(o=>o!=="Not mentioned").map(o=>`<option>${esc(o)}</option>`).join("");
@@ -37,8 +44,7 @@ const nearby=()=>{const c=BK.cities.find(c=>c.l.includes(S.outlet));return c?c.l
 
 $("#mob").oninput=e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,10);S.mobile=e.target.value;
   /* known guest: fill the name from past bookings so the agent doesn't type it */
-  const c=cust();if(c&&!S.name.trim()){S.name=c.name;$("#nm").value=c.name;toast("Name filled from past bookings")}
-  if(mobOk()&&!S.name)$("#nm").focus();render()};
+  if(mobOk()&&!S.name)$("#nm").focus();render();lookup()};
 $("#nm").oninput=e=>{S.name=e.target.value;render()};
 $$(".cnt").forEach(c=>c.onclick=e=>{const b=e.target.closest("button");if(!b)return;const k=c.dataset.k;S[k]=Math.max(k==="adults"?1:0,Math.min(99,S[k]+ +b.dataset.d));render()});
 /* a new outlet or date clears the time, and with it any deal the agent picked by hand */
@@ -62,14 +68,16 @@ function drawer(title,sub,tabs,pick,start){
 }
 $("#dwX").onclick=()=>dw.close();
 dw.addEventListener("click",e=>{if(e.target===dw)dw.close()});
-const tone=s=>/settled|confirm/i.test(s)?"g":/cancel/i.test(s)?"r":"o";
+const tone=s=>/not ?confirm/i.test(s)?"o":/settled|arrived|confirm/i.test(s)?"g":/cancel|no.?show/i.test(s)?"r":"o";
 
 function openHistory(){
   const c=cust();
-  drawer(c.name,`${fmtMob()} · ${c.bookings.length} past bookings`,[["b","Bookings"],["c","Call logs"],["s","Call summary"]],k=>
-    k==="b"?c.bookings.map(([id,st,o,g,w])=>`<div class="li"><div class="m"><b>${id}</b><span>${esc(o)} · ${g} guest${g>1?"s":""}</span><span>${w}</span></div><span class="st2 ${tone(st)}">${st}</span></div>`).join(""):
-    k==="c"?c.calls.map(([a,w,d,n])=>`<div class="li"><div class="m"><b>${esc(a)}</b><span>${w} · ${d}</span><span>${esc(n)}</span></div></div>`).join(""):
-    `<div class="kv2"><span>Calls</span><b>${c.calls.length}</b><span>Last call</span><b>${esc(c.lastCall)}</b><span>Bookings</span><b>${c.bookings.length} (${c.bookings.filter(b=>/Settled/.test(b[1])).length} settled)</b><span>Tier</span><b>★ ${c.tier} · ${c.coins} coins · ${c.toNext}</b></div>`);
+  const pax=x=>`${x.ad} adult${x.ad===1?"":"s"}${x.ch?` + ${x.ch} kid${x.ch===1?"":"s"}`:""}`;
+  const cnt=re=>c.bookings.filter(x=>re.test(x.st)).length;
+  drawer(c.name,`${fmtMob()} · ${c.total} past booking${c.total===1?"":"s"}`,[["b","Bookings"],["c","Call logs"],["s","Call summary"]],k=>
+    k==="b"?(c.total>c.bookings.length?`<p class="note" style="margin-top:0">Latest ${c.bookings.length} of ${c.total}.</p>`:"")+c.bookings.map(x=>`<div class="li"><div class="m"><b>${esc(x.id)}</b><span>${esc(x.o)} · ${x.w}${x.meal?` · ${x.meal}`:""}</span><span>${pax(x)}${x.items?` · ${esc(x.items)}`:""}${x.occ?` · 🎉 ${esc(x.occ)}`:""}</span>${x.by||x.src?`<span>By ${esc(x.by||"—")}${x.src?` · ${esc(x.src)}`:""}${x.lead?` · lead: ${esc(x.lead)}`:""}</span>`:""}${x.notes?`<span>📝 ${esc(x.notes)}</span>`:""}</div><span class="st2 ${tone(x.st)}">${esc(x.st)}</span></div>`).join(""):
+    k==="c"?(c.calls.length?c.calls.map(([a,w,d,n])=>`<div class="li"><div class="m"><b>${esc(a)}</b><span>${w} · ${d}</span><span>${esc(n)}</span></div></div>`).join(""):`<p class="note" style="margin-top:0">No call logs for this number in this preview. The live page loads them from call audit.</p>`):
+    `<div class="kv2"><span>Bookings</span><b>${c.total} · in the latest ${c.bookings.length}: ${cnt(/settled|arrived/i)} settled, ${cnt(/cancel/i)} cancelled, ${cnt(/not confirmed/i)} not confirmed</b><span>Calls</span><b>${c.calls.length}</b>${c.lastCall?`<span>Last call</span><b>${esc(c.lastCall)}</b>`:""}<span>Tier</span><b>★ ${esc(c.tier)} · ${c.coins} coins · ${esc(c.toNext)}</b><span>Outlets</span><b>${esc([...new Set(c.bookings.map(x=>x.o))].slice(0,5).join(", "))}</b></div>`);
 }
 /* nearest outlets: by distance when the live block has it, else the rest of the city */
 const nearList=()=>{const o=OUT[S.outlet];return o?o.near.map(x=>({n:x.n,sub:`${x.km} km away`})):nearby().map(n=>({n,sub:"Same city"}))};
@@ -157,7 +165,7 @@ function render(){
   $(".pl.oth").classList.toggle("on",!!S.cdate);$("#othL").textContent=S.cdate?S.cdate.toLocaleDateString("en-IN",{weekday:"short"}):"Other date";$("#othS").textContent=S.cdate?S.cdate.toLocaleDateString("en-IN",{day:"numeric",month:"short"}):"calendar";
 
   // guest strip
-  $("#cust").innerHTML=!mobOk()?"":c?`<div class="cu"><span class="av">${esc(c.name[0])}</span><div class="who"><b>${esc(c.name)}</b> <span>· ${c.bookings.length} past bookings · last call ${esc(c.lastCall)}</span></div><span class="chip t">★ ${c.tier} · ${c.coins} coins</span><span class="chip">⏳ ${c.toNext}</span><button class="lk" type="button" id="hist">Booking history &amp; calls</button></div>`:
+  $("#cust").innerHTML=!mobOk()?"":c?`<div class="cu"><span class="av">${esc(c.name[0])}</span><div class="who"><b>${esc(c.name)}</b> <span>· ${c.total} past booking${c.total===1?"":"s"}${c.bookings[0]?` · last: ${esc(c.bookings[0].o)}, ${esc(c.bookings[0].w.split(" · ")[0])}`:""}${c.lastCall?` · last call ${esc(c.lastCall)}`:""}</span></div><span class="chip t">★ ${esc(c.tier)} · ${c.coins} coins</span>${c.toNext?`<span class="chip">⏳ ${esc(c.toNext)}</span>`:""}<button class="lk" type="button" id="hist">Booking history &amp; calls</button></div>`:
     `<div class="cu new"><span class="av">+</span><div class="who">New guest · no past bookings for this number</div></div>`;
   if($("#hist"))$("#hist").onclick=openHistory;
   ["#sendOut","#sendMenu"].forEach(id=>$(id).title=mobOk()?"":"Enter the guest's mobile number first");
@@ -189,7 +197,7 @@ function render(){
   $("#est").innerHTML=`<h3>Estimate summary <small>${!p?"shows once you pick a time":"updates by itself"}</small></h3>`+
     row("Adult guests",S.adults,fixed?p.amt:0)+row("Child guests (6–9)",S.kids,kidPrice())+
     `<div class="t"><span>${fixed?"Estimated bill":"Bill"}</span><b id="eT">${!p?"—":p.reg?"As per order":inr(tot)}</b></div>`+
-    (c?`<div class="loy">★ ${c.tier} tier · ${c.coins} coins now. Cashback next visit: 8% back as smile coins (payment link, app or table QR), credited after the visit.</div>`:"");
+    (c?`<div class="loy">★ ${c.tier} tier · ${c.coins} coins now. Cashback next visit: ${c.earn||8}% back as smile coins (payment link, app or table QR), credited after the visit.</div>`:"");
   $("#create").disabled=!(mobOk()&&nm&&S.adults>0&&S.outlet&&s&&p);
 }
 
