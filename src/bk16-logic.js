@@ -1,0 +1,161 @@
+const fresh=()=>({mobile:"",name:"",adults:2,kids:0,outlet:BK.outlet.branch_name,day:0,cdate:null,slot:null,pkg:null,manual:false,info:null});
+let S=fresh();
+
+/* Outlet facts the live "Outlet details" page shows (public outlet info). Only Atria Mall, Worli is in this
+   snapshot; other outlets load the same block from CRS on the live page. */
+const OUT={"Atria Mall, Worli":{addr:BK.outlet.address,phone:"080 6405 8059",hours:["12:00 PM – 3:45 PM","6:30 PM – 10:30 PM"],feat:["High chair","Parking","Lift","Alcoholic beverages"]}};
+const MENUS=[["🍖","Food menu"],["🍹","Beverage menu"],["🍸","Cocktails"],["🍺","Beer"],["🍷","Wine"],["🍨","Desserts"]];
+/* Made-up sample guest so the history strip can be tried: 98765 43210. Real numbers load from CRS/LMS. */
+const CUST={"9876543210":{name:"Rahul Sharma",tier:"Silver",coins:120,toNext:"2 visits to Gold",lastCall:"Pr•••a · 12 Nov 2026, 7:40 PM",
+  bookings:[["BN20261102231","Settled","Atria Mall, Worli",4,"2 Nov 2026 · 8:00 PM"],["BN20261009118","Settled","Phoenix Marketcity, Kurla",2,"9 Oct 2026 · 1:00 PM"],["BN20260914402","Cancelled","Atria Mall, Worli",6,"14 Sep 2026 · 9:00 PM"],["BN20260821077","Settled","Korum Mall Thane",3,"21 Aug 2026 · 7:30 PM"]],
+  calls:[["Pr•••a","12 Nov 2026, 7:40 PM","4m 12s","Booking confirmed"],["Ka•••l","1 Nov 2026, 6:05 PM","2m 40s","Asked about deals"]]}};
+const cust=()=>CUST[S.mobile];
+
+$("#outlet").innerHTML=`<option value="">Select outlet</option>`+BK.cities.slice().sort((a,b)=>b.l.length-a.l.length).map(c=>`<optgroup label="${esc(c.c)}">${c.l.map(o=>`<option ${o===S.outlet?"selected":""}>${esc(o)}</option>`).join("")}</optgroup>`).join("");
+$("#occ").innerHTML=`<option value="">None</option>`+BK.occasions.filter(o=>o!=="Not mentioned").map(o=>`<option>${esc(o)}</option>`).join("");
+const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+$("#days").innerHTML=DAYS.map((d,i)=>`<button type="button" class="pl" data-i="${i}">${i===0?"Today":i===1?"Tomorrow":d.toLocaleDateString("en-IN",{weekday:"short"})}<small>${d.getDate()} ${d.toLocaleDateString("en-IN",{month:"short"})}</small></button>`).join("")+
+  `<label class="pl oth" title="Pick any other date"><span id="othL">Other date</span><small id="othS">calendar</small><input type="date" id="oth" min="${iso(DAYS[0])}" aria-label="Pick another date"></label>`;
+
+const dateObj=()=>S.cdate||DAYS[S.day];
+const hasData=()=>S.outlet===BK.outlet.branch_name&&S.day===0&&!S.cdate;
+/* every slot of the day; today's past slots are dropped, sold-out ones stay visible but can't be picked */
+const daySlots=()=>BK.slots.filter(s=>!hasData()||mins(s.from)>=SNAPMIN);
+const slotObj=()=>S.slot&&BK.slots.find(s=>s.p+s.from===S.slot);
+const pkgs=()=>{const s=slotObj();if(!s)return[];const t=mins(s.from);return BK.prices.filter(p=>p.ct==="Adult"&&mins(p.from)<=t&&t<=mins(p.to))};
+const kidPrice=()=>{const s=slotObj();if(!s)return 0;const t=mins(s.from);const k=BK.prices.find(p=>p.ct==="Child"&&mins(p.from)<=t&&t<=mins(p.to));return k?k.amt:0};
+const pkObj=()=>S.pkg==="REG"?{dn:"Regular booking",reg:true}:pkgs().find(p=>p.dn===S.pkg);
+/* best deal = cheapest non-veg buffet the party qualifies for; Student needs an ID so it is never auto-picked */
+const best=()=>pkgs().filter(p=>p.ft==="NON-VEG"&&S.adults>=p.min&&!/Student/.test(p.dn)).sort((a,b)=>a.amt-b.amt)[0];
+function autoPick(){if(!slotObj()){S.pkg=null;return}const cur=pkObj();if(S.manual&&cur&&(cur.reg||S.adults>=cur.min))return;S.manual=false;const b=best();S.pkg=b?b.dn:"REG"}
+const from=x=>{const t=mins(x.from),L=BK.prices.filter(p=>p.ct==="Adult"&&p.ft==="NON-VEG"&&S.adults>=p.min&&!/Student/.test(p.dn)&&mins(p.from)<=t&&t<=mins(p.to)).map(p=>p.amt);return L.length?Math.min(...L):0};
+const mobOk=()=>/^[6-9]\d{9}$/.test(S.mobile);
+const fmtMob=()=>"+91 "+S.mobile.replace(/(\d{5})(\d{5})/,"$1 $2");
+const dayLabel=()=>dateObj().toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"});
+const nearby=()=>{const c=BK.cities.find(c=>c.l.includes(S.outlet));return c?c.l.filter(o=>o!==S.outlet):[]};
+
+$("#mob").oninput=e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,10);S.mobile=e.target.value;
+  /* known guest: fill the name from past bookings so the agent doesn't type it */
+  const c=cust();if(c&&!S.name.trim()){S.name=c.name;$("#nm").value=c.name;toast("Name filled from past bookings")}
+  if(mobOk()&&!S.name)$("#nm").focus();render()};
+$("#nm").oninput=e=>{S.name=e.target.value;render()};
+$$(".cnt").forEach(c=>c.onclick=e=>{const b=e.target.closest("button");if(!b)return;const k=c.dataset.k;S[k]=Math.max(k==="adults"?1:0,Math.min(99,S[k]+ +b.dataset.d));render()});
+/* a new outlet or date clears the time, and with it any deal the agent picked by hand */
+const resetTime=()=>{S.slot=null;S.manual=false};
+$("#outlet").onchange=e=>{S.outlet=e.target.value;resetTime();render()};
+$("#days").onclick=e=>{const b=e.target.closest(".pl[data-i]");if(!b)return;S.day=+b.dataset.i;S.cdate=null;$("#oth").value="";resetTime();render()};
+$("#oth").onchange=e=>{if(!e.target.value)return;const d=new Date(e.target.value+"T12:00");const i=DAYS.findIndex(x=>iso(x)===e.target.value);if(i>=0){S.day=i;S.cdate=null}else S.cdate=d;resetTime();render()};
+$("#slots").onclick=e=>{const b=e.target.closest(".pl");if(!b||b.disabled)return;S.slot=b.dataset.k;render()};
+$("#dls").onchange=e=>{S.pkg=e.target.value;S.manual=true;render()};
+$("#dls").onclick=e=>{const b=e.target.closest(".inf");if(!b)return;e.preventDefault();S.info=S.info===b.dataset.k?null:b.dataset.k;render()};
+$("#exBtn").onclick=()=>{$("#extra").hidden=false;$("#exBtn").hidden=true;$("#occ").focus()};
+$("#new").onclick=()=>{S=fresh();$("#mob").value=$("#nm").value=$("#ins").value=$("#oth").value="";$("#occ").value="";$("#outlet").value=S.outlet;$("#extra").hidden=true;$("#exBtn").hidden=false;render();$("#mob").focus()};
+
+/* ---------- side drawer ---------- */
+const dw=$("#dw");
+function drawer(title,sub,tabs,pick){
+  $("#dwT").textContent=title;$("#dwS").textContent=sub||"";
+  const draw=k=>{$("#dwB").innerHTML=(tabs.length>1?`<div class="tabs" role="tablist">${tabs.map(([key,lab])=>`<button type="button" role="tab" data-t="${key}" class="${key===k?"on":""}" aria-selected="${key===k}">${lab}</button>`).join("")}</div>`:"")+pick(k);
+    $$("#dwB .tabs button").forEach(b=>b.onclick=()=>draw(b.dataset.t))};
+  draw(tabs[0][0]);if(!dw.open)dw.showModal();
+}
+$("#dwX").onclick=()=>dw.close();
+dw.addEventListener("click",e=>{if(e.target===dw)dw.close()});
+const tone=s=>/settled|confirm/i.test(s)?"g":/cancel/i.test(s)?"r":"o";
+
+function openHistory(){
+  const c=cust();
+  drawer(c.name,`${fmtMob()} · ${c.bookings.length} past bookings`,[["b","Bookings"],["c","Call logs"],["s","Call summary"]],k=>
+    k==="b"?c.bookings.map(([id,st,o,g,w])=>`<div class="li"><div class="m"><b>${id}</b><span>${esc(o)} · ${g} guest${g>1?"s":""}</span><span>${w}</span></div><span class="st2 ${tone(st)}">${st}</span></div>`).join(""):
+    k==="c"?c.calls.map(([a,w,d,n])=>`<div class="li"><div class="m"><b>${esc(a)}</b><span>${w} · ${d}</span><span>${esc(n)}</span></div></div>`).join(""):
+    `<div class="kv2"><span>Calls</span><b>${c.calls.length}</b><span>Last call</span><b>${esc(c.lastCall)}</b><span>Bookings</span><b>${c.bookings.length} (${c.bookings.filter(b=>/Settled/.test(b[1])).length} settled)</b><span>Tier</span><b>★ ${c.tier} · ${c.coins} coins · ${c.toNext}</b></div>`);
+}
+function outletBody(){
+  const o=OUT[S.outlet];
+  return `<div class="sec">Location &amp; contact</div>${o?`<div class="kv2"><span>Address</span><b>${esc(o.addr)}</b><span>Phone</span><b>${o.phone}</b><span>Open</span><b>${o.hours.join("<br>")}</b></div><div class="sec">Facilities</div><div class="feat">${o.feat.map(f=>`<span>${f}</span>`).join("")}</div>`:`<p class="note">Address, phone, hours and facilities for ${esc(S.outlet)} load from CRS on the live page; this preview has them for Atria Mall, Worli.</p>`}
+    <div class="sec">Menu</div><div class="menus">${MENUS.map(([i,n])=>`<div><i>${i}</i>${n}</div>`).join("")}</div>
+    <div class="dwf"><button class="btn p" type="button" data-send="outlet">Send outlet details</button><button class="btn" type="button" data-send="menu">Send menu</button></div>
+    <div class="sec">Nearby outlets</div>${nearby().slice(0,8).map(n=>`<div class="li"><div class="m"><b>${esc(n)}</b></div><button class="lk" type="button" data-go="${esc(n)}">Book here</button></div>`).join("")||`<p class="note">No other outlet in this city.</p>`}`;
+}
+$("#oInfo").onclick=()=>{if(!S.outlet){toast("Select an outlet first");return}drawer(S.outlet,"Outlet details",[["o",""]],outletBody)};
+$("#avBtn").onclick=()=>{if(!S.outlet){toast("Select an outlet first");return}
+  drawer("Check availability",`${S.outlet} · ${dayLabel()}`,[["a","Seats per slot"],["n","Next day"],["b","Nearby outlets"]],k=>
+    k==="a"?(hasData()?`<table class="tb2"><tr><th>Slot</th><th class="n">Capacity</th><th class="n">Available</th></tr>${daySlots().map(x=>`<tr><td>${t12(x.from)} – ${t12(x.to)}</td><td class="n">${x.tot}</td><td class="n" style="color:${x.cap?"var(--good)":"var(--red)"};font-weight:700">${x.cap||"Sold out"}</td></tr>`).join("")}</table>`:`<p class="note">Seat counts for this outlet and date load from CRS on the live page; this preview has them for Atria Mall, Worli today.</p>`):
+    k==="n"?`<p class="note" style="margin-top:0">Same outlet, ${DAYS[Math.min(5,(S.cdate?0:S.day)+1)].toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"short"})}.</p><div class="dwf"><button class="btn p" type="button" data-nextday="1">Switch to next day</button></div>`:
+    nearby().slice(0,10).map(n=>`<div class="li"><div class="m"><b>${esc(n)}</b><span>Same city</span></div><button class="lk" type="button" data-go="${esc(n)}">Book here</button></div>`).join("")||`<p class="note">No other outlet in this city.</p>`)};
+const sendBtn=(kind,arg)=>`<button class="lk wa" type="button" data-send="${kind}" data-arg="${esc(arg)}">Send</button>`;
+$("#ofBtn").onclick=()=>drawer("Offers to share",S.outlet||"",[["o",""]],()=>BK.promos.map((p,i)=>`<div class="li"><div class="m"><b>${esc(p.trim())}</b></div>${sendBtn("offer",i)}</div>`).join(""));
+$("#hcBtn").onclick=()=>drawer("Happiness Cards","Gift cards, sold separately from this booking",[["h",""]],()=>BK.cards.map((c,i)=>`<div class="li"><div class="m"><b>${esc(c.n)}</b><span>${c.pax?`${c.pax} pax · `:""}${inr(c.price)} all inclusive</span></div>${sendBtn("card",i)}</div>`).join(""));
+dw.addEventListener("click",e=>{
+  const g=e.target.closest("[data-go]");if(g){S.outlet=g.dataset.go;$("#outlet").value=S.outlet;resetTime();dw.close();render();toast("Outlet changed to "+S.outlet)}
+  if(e.target.closest("[data-nextday]")){S.day=Math.min(5,(S.cdate?0:S.day)+1);S.cdate=null;$("#oth").value="";resetTime();dw.close();render()}
+});
+
+/* ---------- send to guest: the agent sees the exact message first ---------- */
+const sd=$("#sd");
+function compose(kind,arg){
+  const hi=`Hi ${S.name.trim()||"there"},\n`,o=OUT[S.outlet],s=slotObj();
+  if(kind==="outlet")return hi+`Here are the details of Barbeque Nation, ${S.outlet}:\n📍 ${o?o.addr:S.outlet}\n${o?`📞 ${o.phone}\n🕒 ${o.hours.join(", ")}\n`:""}${s?`\nYour table: ${dayLabel()}, ${t12(s.from)} for ${S.adults+S.kids} guest${S.adults+S.kids>1?"s":""}.\n`:""}\nSee you soon!`;
+  if(kind==="menu")return hi+`Here is the menu for Barbeque Nation, ${S.outlet}:\n${MENUS.map(m=>"• "+m[1]).join("\n")}\n\n(menu link from CRS)`;
+  if(kind==="offer")return hi+`An offer for you at Barbeque Nation, ${S.outlet}:\n${BK.promos[arg].trim()}`;
+  if(kind==="card"){const c=BK.cards[arg];return hi+`Gift a Barbeque Nation Happiness Card – ${c.n}${c.pax?` (${c.pax} pax)`:""} for ${inr(c.price)}.\n(payment link from CRS)`}
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-send]");if(!b||b.closest("#sd"))return;
+  if(!mobOk()){toast("Enter the guest's mobile number first");$("#mob").focus();return}
+  if(!S.outlet&&/outlet|menu/.test(b.dataset.send)){toast("Select an outlet first");return}
+  $("#sdT").textContent={outlet:"Send outlet details",menu:"Send menu",offer:"Send offer",card:"Send Happiness Card"}[b.dataset.send];
+  $("#sdTo").innerHTML=`To <b>${esc(S.name.trim()||"guest")}</b> · ${fmtMob()}`;
+  $("#sdM").value=compose(b.dataset.send,b.dataset.arg);sd.showModal();
+});
+$("#sdX").onclick=()=>sd.close();
+sd.querySelector(".dwf").onclick=e=>{const b=e.target.closest("[data-ch]");if(!b)return;
+  if(b.dataset.ch==="copy"){navigator.clipboard?.writeText($("#sdM").value).catch(()=>{});toast("Message copied")}
+  else{sd.close();toast(`Preview only: on the live page this goes to ${fmtMob()} on ${b.dataset.ch}. Nothing was sent.`)}};
+
+function render(){
+  autoPick();
+  const s=slotObj(),p=pkObj(),nm=S.name.trim(),c=cust();
+  $$(".cnt").forEach(c=>c.querySelector("output").textContent=S[c.dataset.k]);
+  $("#mobErr").textContent=S.mobile.length===10&&!mobOk()?"Mobile number should start with 6, 7, 8 or 9":"";
+  $$("#days .pl[data-i]").forEach((b,i)=>{const on=!S.cdate&&i===S.day;b.classList.toggle("on",on);b.setAttribute("aria-pressed",on)});
+  $(".pl.oth").classList.toggle("on",!!S.cdate);$("#othL").textContent=S.cdate?S.cdate.toLocaleDateString("en-IN",{weekday:"short"}):"Other date";$("#othS").textContent=S.cdate?S.cdate.toLocaleDateString("en-IN",{day:"numeric",month:"short"}):"calendar";
+
+  // guest strip
+  $("#cust").innerHTML=!mobOk()?"":c?`<div class="cu"><span class="av">${esc(c.name[0])}</span><div class="who"><b>${esc(c.name)}</b> <span>· ${c.bookings.length} past bookings · last call ${esc(c.lastCall)}</span></div><span class="chip t">★ ${c.tier} · ${c.coins} coins</span><span class="chip">⏳ ${c.toNext}</span><button class="lk" type="button" id="hist">Booking history &amp; calls</button></div>`:
+    `<div class="cu new"><span class="av">+</span><div class="who">New guest · no past bookings for this number</div></div>`;
+  if($("#hist"))$("#hist").onclick=openHistory;
+  ["#sendOut","#sendMenu"].forEach(id=>$(id).title=mobOk()?"":"Enter the guest's mobile number first");
+
+  // time: slot status dot (seats left), price per person for this party; sold out stays visible, can't be picked
+  if(!S.outlet){$("#slots").innerHTML=`<p class="note">Select an outlet to see times.</p>`;$("#tX").innerHTML="";$("#tN").textContent=""}
+  else{
+    const L=daySlots(),G=[["Lunch",L.filter(x=>mins(x.from)<960)],["Dinner",L.filter(x=>mins(x.from)>=960)]].filter(g=>g[1].length);
+    const pill=x=>{const k=x.p+x.from,live=hasData(),sold=live&&x.cap<=0,r=x.cap/x.tot,cls=!live?"":sold?"":r>.4?"s-ok":r>.15?"s-fill":"s-low",few=live&&!sold&&x.cap<=10,pr=from(x);
+      return `<button type="button" class="pl ${cls} ${sold?"so":""} ${S.slot===k?"on":""}" data-k="${k}" aria-pressed="${S.slot===k}" ${sold?"disabled":""} title="${live?(sold?"Sold out":x.cap+" of "+x.tot+" seats left"):""}">${live&&!sold?`<span class="dot"></span>`:""}${t12(x.from)}<small class="${few?"few":""}">${sold?"Sold out":few?`Only ${x.cap} seats`:pr?inr(pr):"&nbsp;"}</small></button>`};
+    $("#slots").innerHTML=L.length?G.map(([n,xs])=>`<div class="tg"><b>${n}</b><div class="pills">${xs.map(pill).join("")}</div></div>`).join(""):`<p class="note">No open times on this day. Pick another date.</p>`;
+    $("#tN").textContent=L.length?`· price per person for ${S.adults} adult${S.adults===1?"":"s"}`:"";
+    /* same hint as the live page: the cheapest buffet of the day and when it runs */
+    const low=BK.prices.filter(q=>q.ct==="Adult").reduce((a,b)=>b.amt<a.amt?b:a);
+    $("#tX").innerHTML=(L.length?`<div class="lowp">Lowest price: <b>${inr(low.amt)}</b> per person between ${t12(low.from)} and ${t12(low.to)}${low.min>1?` (for ${low.min}+ adults)`:""}</div>`:"")+(L.length&&!hasData()?`<p class="note">Seat counts in this preview are for Atria Mall, Worli today; the live page loads them for every outlet and date.</p>`:"");
+  }
+
+  // deals, as on the live page: one radio row each, Regular booking last; "Details" opens the deal's description
+  $("#dS").textContent=s?`for ${t12(s.from)} · best price picked for ${S.adults} adult${S.adults===1?"":"s"}`:"";
+  $("#dls").innerHTML=!s?`<div class="emp">Pick a time to see the deals for it.</div>`:`<div class="dls">${pkgs().map(q=>{const off=S.adults<q.min,on=S.pkg===q.dn,d=BK.desc[q.dn];
+      return `<label class="dr ${on?"on":""} ${off?"off":""}"><input type="radio" name="dl" value="${esc(q.dn)}" ${on?"checked":""} ${off?"disabled":""}><span class="bd"><span class="nm"><span class="veg ${q.ft==="VEG"?"":"nv"}"></span>${esc(q.dn)}${q.rib?`<span class="tag deal">${esc(q.rib)}</span>`:""}</span><span class="dsub ${off?"x":""}">${off?`Needs ${q.min}+ adults`:`Per person · minimum ${q.min} pax${/Student/.test(q.dn)?" · student ID at outlet":""}`}${d?` · <button type="button" class="inf" data-k="${esc(q.dn)}">${S.info===q.dn?"Hide details":"Details"}</button>`:""}</span>${d&&S.info===q.dn?`<span class="ds">${esc(d)}</span>`:""}</span><span class="pr"><b>${inr(q.amt)}</b>${q.orig>q.amt?`<s>${inr(q.orig)}</s>`:""}</span></label>`}).join("")}
+    <label class="dr ${S.pkg==="REG"?"on":""}"><input type="radio" name="dl" value="REG" ${S.pkg==="REG"?"checked":""}><span class="bd"><span class="nm">Regular booking<span class="tag">Amount not fixed</span></span><span class="dsub">Standard menu pricing · pay as per actual order</span></span></label></div>`;
+
+  // the booking read back, gaps in grey
+  const miss=t=>`<span class="miss">${t}</span>`;
+  $("#rd").innerHTML=`${nm?`<b>${esc(nm)}</b>`:miss("Guest name")} · ${mobOk()?fmtMob():miss("mobile")} · ${S.adults} adult${S.adults===1?"":"s"}${S.kids?` + ${S.kids} kid${S.kids===1?"":"s"}`:""}<br>${S.outlet?`<b>${esc(S.outlet)}</b>`:miss("Outlet")} · ${dayLabel()} · ${s?`<b>${t12(s.from)}</b>`:miss("pick a time")}`;
+  const tot=p&&!p.reg?p.amt*S.adults+kidPrice()*S.kids:0;
+  const fixed=p&&!p.reg,row=(k,n,rate)=>`<div class="r"><span>${k}</span><span>${n}${fixed?` × ${inr(rate)} = ${inr(n*rate)}`:""}</span></div>`;
+  $("#est").innerHTML=`<h3>Estimate summary <small>${!p?"shows once you pick a time":"updates by itself"}</small></h3>`+
+    row("Adult guests",S.adults,fixed?p.amt:0)+row("Child guests (6–9)",S.kids,kidPrice())+
+    `<div class="t"><span>${fixed?"Estimated bill":"Bill"}</span><b id="eT">${!p?"—":p.reg?"As per order":inr(tot)}</b></div>`+
+    (c?`<div class="loy">★ ${c.tier} tier · ${c.coins} coins now. Cashback next visit: 8% back as smile coins (payment link, app or table QR), credited after the visit.</div>`:"");
+  $("#create").disabled=!(mobOk()&&nm&&S.adults>0&&S.outlet&&s&&p);
+}
+
+$("#ofN").textContent=BK.promos.length;$("#hcN").textContent=BK.cards.length;
