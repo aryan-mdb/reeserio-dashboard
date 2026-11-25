@@ -52,6 +52,26 @@ select.in{appearance:none;cursor:pointer;padding-right:38px;background:var(--car
 .cu .chip.t{background:#fff4d6;color:#8a5a00}
 html[data-theme=dark] .cu .chip.t{background:#3a2f12;color:#f0bf55}
 .cu.new{color:var(--muted)}
+button.chip{border:0;font:inherit;cursor:pointer;transition:filter .12s,box-shadow .12s}
+button.chip:hover{filter:brightness(.95);box-shadow:0 0 0 2px var(--ember-glow)}
+/* smile coins & tier panel */
+.loyc{display:grid;grid-template-columns:1fr 1.3fr;gap:10px}
+.loyc>div{border-radius:14px;padding:14px}
+.lt{background:linear-gradient(135deg,#fff3d1,#ffe3a3);color:#6b4500}
+.lt-b{display:block;font-size:22px;font-weight:800}
+.lc{background:var(--bg-2)}
+.lc b{display:block;font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+.loyc small{display:block;font-size:12.5px;opacity:.85;margin-top:2px}
+html[data-theme=dark] .lt{background:linear-gradient(135deg,#3a2f12,#4a3a12);color:#f3d48a}
+.lrow{display:flex;justify-content:space-between;gap:12px;margin-top:12px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);font-size:13.5px}
+.lrow span{color:var(--muted)}
+.lnext{margin-top:12px;padding:12px;border-radius:12px;border:1px solid var(--line)}
+.lnh{display:flex;justify-content:space-between;align-items:baseline;font-size:14px}
+.lnh small{color:var(--muted)}
+.lbar{height:8px;border-radius:99px;background:var(--bg-2);overflow:hidden;margin:8px 0 2px}
+.lbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#e8a317,#f2c14e)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.lhow{margin:0;padding-left:20px;font-size:13.5px;line-height:1.7;color:var(--fg-2)}
 @media (max-width:860px){.cu{flex-wrap:wrap}.cu .who{flex-basis:100%;white-space:normal}}
 
 /* soft chips (actions) */
@@ -419,9 +439,9 @@ const OUT={[OX.name]:OX};
 /* Guest history. CUSTH is real data read from the live page (getCustomerByMobileNo_External +
    getBookingHistoryDetails), keyed by the SHA-256 of the mobile so the number isn't in the page source.
    CUST is a made-up sample (98765 43210). On the live app this comes from CRS / LMS for every number. */
-const CUSTH={"824eeb58e3656e49d01b1aa734348b0eb9423a1602f7cdfac6072fc5dfbc9606":{"name":"Reeserio Test","since":"Barbeque Nation-24 Parganas","tier":"Silver","coins":0,"earn":8,"toNext":"2 visit to GOLD","total":13,"lastCall":"","bookings":[{"id":"MN20261101010","st":"Not Confirmed","o":"Sector 5, Nerul","ad":2,"ch":1,"w":"20 Nov 2026 · 2:30 PM","meal":"Lunch","items":"Kid (6-9 years) ×1, Student (10-21 yrs) ×2","occ":"","notes":"test","by":"AryanTest","src":"Viewoffer Enquiries","lead":"Table Booked","made":"19 Nov 2026 · 2:50 PM"},{"id":"KE20261100344","st":"Not Confirmed","o":"Korum Mall Thane","ad":2,"ch":0,"w":"6 Nov 2026 · 1:00 PM","meal":"Lunch","items":"","occ":"","notes":"Reeserio payment test - safe to cancel","by":"AryanTest","src":"","lead":"","made":"5 Nov 2026 · 12:56 PM"},{"id":"BB20261100264","st":"Not Confirmed","o":"Bhartiya Mall of Bengaluru","ad":1,"ch":0,"w":"5 Nov 2026 · 12:00 PM","meal":"Lunch","items":"VEG / NON-VEG ×1","occ":"","notes":"","by":"Drupal","src":"","lead":"","made":"4 Nov 2026 · 12:21 PM"},{"id":"MB20261100143","st":"Cancelled","o":"Sector 11, Belapur","ad":10,"ch":1,"w":"5 Nov 2026 · 1:00 PM","meal":"Lunch","items":"Kid (6-9 years) ×1, Sizzling 6@696 ×10","occ":"","notes":"test","by":"AryanTest","src":"","lead":"","made":"3 Nov 2026 · 1:12 PM"},{"id":"BB20261002171","st":"Cancelled","o":"Bhartiya Mall of Bengaluru","ad":2,"ch":0,"w":"2 Nov 2026 · 7:00 PM","meal":"Dinner","items":"VEG ×2","occ":"","notes":"","by":"Drupal","src":"","lead":"","made":"30 Oct 2026 · 1:17 PM"},{"id":"MB20261001464","st":"Cancelled","o":"Sector 11, Belapur","ad":1,"ch":1,"w":"25 Oct 2026 · 12:30 PM","meal":"Lunch","items":"","occ":"","notes":"test","by":"AryanTest","src":"","lead":"","made":"21 Oct 2026 · 2:54 PM"},{"id":"MK20261001923","st":"Cancelled","o":"Metro Junction Mall, Kalyan","ad":1,"ch":1,"w":"26 Oct 2026 · 2:30 PM","meal":"Lunch","items":"","occ":"","notes":"test","by":"AryanTest","src":"","lead":"","made":"21 Oct 2026 · 2:33 PM"},{"id":"MW20261001429","st":"Cancelled","o":"Atria Mall, Worli","ad":1,"ch":1,"w":"20 Oct 2026 · 6:30 PM","meal":"Dinner","items":"Kid (6-9 years) ×1, VEG / NON-VEG ×1","occ":"","notes":"test","by":"AryanTest","src":"","lead":"","made":"19 Oct 2026 · 12:37 PM"},{"id":"MF20261000812","st":"Not Confirmed","o":"Fun Republic Lokhandwala Mumbai","ad":2,"ch":1,"w":"16 Oct 2026 · 7:00 PM","meal":"Dinner","items":"","occ":"","notes":"test","by":"AryanTest","src":"","lead":"","made":"16 Oct 2026 · 1:14 PM"},{"id":"NW20261000830","st":"Cancelled","o":"Thane, R Mall, Ghodbunder Rd","ad":1,"ch":1,"w":"16 Oct 2026 · 1:30 PM","meal":"Lunch","items":"","occ":"","notes":"test","by":"AryanTest","src":"","lead":"","made":"16 Oct 2026 · 1:01 PM"}],"calls":[]}};
+const CUSTH={"824eeb58e3656e49d01b1aa734348b0eb9423a1602f7cdfac6072fc5dfbc9606":{"name":"Reeserio Test","since":"Barbeque Nation-24 Parganas","tier":"Silver","coins":0,"earn":8,"toNext":"2 visit to GOLD","total":13,"nextTier":"Gold","visits":0,"need":2,"expiring":"","lastCall":"","bookings":[{"id":"MN20261101010","st":"Not Confirmed","o":"Sector 5, Nerul","ad":2,"ch":1,"w":"20 Nov 2026 · 2:30 PM","meal":"Lunch","items":"Kid (6-9 years) ×1, Student (10-21 yrs) ×2","occ":"","notes":"test","by":"AryanTest","src":"Viewoffer Enquiries","lead":"Table Booked","made":"19 Nov 2026 · 2:50 PM"},{"id":"KE20261100344","st":"Not Confirmed","o":"Korum Mall Thane","ad":2,"ch":0,"w":"6 Nov 2026 · 1:00 PM","meal":"Lunch","items":"","occ":"","notes":"Reeserio payment test - safe to cancel","by":"AryanTest","src":"","lead":"","made":"5 Nov 2026 · 12:56 PM"},{"id":"BB20261100264","st":"Not Confirmed","o":"Bhartiya Mall of Bengaluru","ad":1,"ch":0,"w":"5 Nov 2026 · 12:00 PM","meal":"Lunch","items":"VEG / NON-VEG ×1","occ":"","notes":"","by":"Drupal","src":"","lead":"","made":"4 Nov 2026 · 12:21 PM"},{"id":"MB20261100143","st":"Cancelled","o":"Sector 11, Belapur","ad":10,"ch":1,"w":"5 Nov 2026 · 1:00 PM","meal":"Lunch","items":"Kid (6-9 years) ×1, Sizzling 6@696 ×10","occ":"","notes":"test","by":"AryanTest","src":"","lead":"","made":"3 Nov 2026 · 1:12 PM"},{"id":"BB20261002171","st":"Cancelled","o":"Bhartiya Mall of Bengaluru","ad":2,"ch":0,"w":"2 Nov 2026 · 7:00 PM","meal":"Dinner","items":"VEG ×2","occ":"","notes":"","by":"Drupal","src":"","lead":"","made":"30 Oct 2026 · 1:17 PM"},{"id":"MB20261001464","st":"Cancelled","o":"Sector 11, Belapur","ad":1,"ch":1,"w":"25 Oct 2026 · 12:30 PM","meal":"Lunch","items":"","occ":"","notes":"test","by":"AryanTest","src":"","lead":"","made":"21 Oct 2026 · 2:54 PM"},{"id":"MK20261001923","st":"Cancelled","o":"Metro Junction Mall, Kalyan","ad":1,"ch":1,"w":"26 Oct 2026 · 2:30 PM","meal":"Lunch","items":"","occ":"","notes":"test","by":"AryanTest","src":"","lead":"","made":"21 Oct 2026 · 2:33 PM"},{"id":"MW20261001429","st":"Cancelled","o":"Atria Mall, Worli","ad":1,"ch":1,"w":"20 Oct 2026 · 6:30 PM","meal":"Dinner","items":"Kid (6-9 years) ×1, VEG / NON-VEG ×1","occ":"","notes":"test","by":"AryanTest","src":"","lead":"","made":"19 Oct 2026 · 12:37 PM"},{"id":"MF20261000812","st":"Not Confirmed","o":"Fun Republic Lokhandwala Mumbai","ad":2,"ch":1,"w":"16 Oct 2026 · 7:00 PM","meal":"Dinner","items":"","occ":"","notes":"test","by":"AryanTest","src":"","lead":"","made":"16 Oct 2026 · 1:14 PM"},{"id":"NW20261000830","st":"Cancelled","o":"Thane, R Mall, Ghodbunder Rd","ad":1,"ch":1,"w":"16 Oct 2026 · 1:30 PM","meal":"Lunch","items":"","occ":"","notes":"test","by":"AryanTest","src":"","lead":"","made":"16 Oct 2026 · 1:01 PM"}],"calls":[]}};
 const bk=(id,st,o,ad,ch,w,meal,items,by,src,notes)=>({id,st,o,ad,ch,w,meal,items,by,src,notes,lead:"",occ:""});
-const CUST={"9876543210":{name:"Rahul Sharma",tier:"Silver",coins:120,earn:8,toNext:"2 visits to Gold",lastCall:"Pr•••a · 12 Nov 2026, 7:40 PM",total:4,
+const CUST={"9876543210":{name:"Rahul Sharma",tier:"Silver",coins:120,earn:8,toNext:"2 visits to Gold",nextTier:"Gold",visits:1,need:2,expiring:"",lastCall:"Pr•••a · 12 Nov 2026, 7:40 PM",total:4,
   bookings:[bk("BN20261102231","Settled","Atria Mall, Worli",4,0,"2 Nov 2026 · 8:00 PM","Dinner","NON-VEG ×4","Pr•••a","Reservation Drop",""),bk("BN20261009118","Settled","Phoenix Marketcity, Kurla",2,0,"9 Oct 2026 · 1:00 PM","Lunch","Couple Deal ×2","Ka•••l","",""),bk("BN20260914402","Cancelled","Atria Mall, Worli",5,1,"14 Sep 2026 · 9:00 PM","Dinner","","Pr•••a","","Guest called to cancel"),bk("BN20260821077","Settled","Korum Mall Thane",3,0,"21 Aug 2026 · 7:30 PM","Dinner","VEG ×1, NON-VEG ×2","Website","","")],
   calls:[["Pr•••a","12 Nov 2026, 7:40 PM","4m 12s","Booking confirmed"],["Ka•••l","1 Nov 2026, 6:05 PM","2m 40s","Asked about deals"]]}};
 const cust=()=>S.cdata;
@@ -633,7 +653,7 @@ function render(){
   $(".dp.oth").classList.toggle("on",!!S.cdate);$("#othL").textContent=S.cdate?S.cdate.toLocaleDateString("en-IN",{weekday:"short"}):"Other date";$("#othS").textContent=S.cdate?S.cdate.toLocaleDateString("en-IN",{day:"numeric",month:"short"}):"calendar";
 
   // guest strip
-  $("#cust").innerHTML=!mobOk()?"":c?`<div class="cu"><span class="av">${esc(c.name[0])}</span><div class="who"><b>${esc(c.name)}</b> <span>· ${c.total} past booking${c.total===1?"":"s"}${c.bookings[0]?` · last: ${esc(c.bookings[0].o)}, ${esc(c.bookings[0].w.split(" · ")[0])}`:""}</span></div><span class="chip t">★ ${esc(c.tier)} · ${c.coins} coins</span>${c.toNext?`<span class="chip">⏳ ${esc(c.toNext)}</span>`:""}<button class="lk" type="button" id="hist">Booking history &amp; calls</button></div>`:
+  $("#cust").innerHTML=!mobOk()?"":c?`<div class="cu"><span class="av">${esc(c.name[0])}</span><div class="who"><b>${esc(c.name)}</b> <span>· ${c.total} past booking${c.total===1?"":"s"}${c.bookings[0]?` · last: ${esc(c.bookings[0].o)}, ${esc(c.bookings[0].w.split(" · ")[0])}`:""}</span></div><button type="button" class="chip t" data-loy="1" title="Smile coins and tier">★ ${esc(c.tier)} · ${c.coins} coins</button>${c.toNext?`<button type="button" class="chip" data-loy="1" title="Progress to the next tier">⏳ ${esc(c.toNext)}</button>`:""}<button class="lk" type="button" id="hist">Booking history &amp; calls</button></div>`:
     `<div class="cu new"><span class="av">+</span><div class="who">New guest · no past bookings for this number</div></div>`;
   if($("#hist"))$("#hist").onclick=openHistory;
   ["#sendOut","#sendMenu"].forEach(id=>$(id).title=mobOk()?"":"Enter the guest's mobile number first");
@@ -678,6 +698,29 @@ function render(){
     (c?`<div class="loy">★ ${esc(c.tier)} · ${c.coins} coins · next visit ${c.earn||8}% back as smile coins</div>`:"");
   $("#create").disabled=!(mobOk()&&nm&&S.adults>0&&S.outlet&&s&&p);
 }
+
+/* Smile coins & tier: what the guest has, what they earn, how far the next tier is (live: getCustomerByMobileNo_External
+   loyalty_points — tier, earn rate, available points, next tier, visits needed). Coins redeem 1:1 on the bill, as the
+   live page's "N smile coins · can redeem ₹N" line reads. "Up to 12%" is from the live Smile Please promotion. */
+function openLoyalty(){
+  const c=cust();if(!c)return;
+  const smile=promos().findIndex(p=>/smile/i.test(p.t)),cur=curOffer();
+  const pct=c.need?Math.round(100*c.visits/(c.visits+c.need)):100;
+  drawer("Smile coins & tier",`${c.name} · ${fmtMob()}`,[["l",""]],()=>`
+    <div class="loyc">
+      <div class="lt"><span class="lt-b">★ ${esc(c.tier)}</span><small>current tier</small></div>
+      <div class="lc"><b>${c.coins.toLocaleString("en-IN")}</b><small>smile coins · can redeem ${inr(c.coins)}${cur?` on this ${inr(cur.tot)} bill`:""}</small></div>
+    </div>
+    <div class="lrow"><span>Earns</span><b>${c.earn||8}% of the bill back as smile coins</b></div>
+    ${c.nextTier?`<div class="lnext"><div class="lnh"><b>${c.need} visit${c.need===1?"":"s"} to ${esc(c.nextTier)}</b><small>${c.visits} done</small></div><div class="lbar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${Math.max(4,pct)}%"></i></div><small class="note">${esc(c.tier)} → ${esc(c.nextTier)}: higher tiers earn more cashback, up to 12%.</small></div>`:""}
+    ${c.expiring?`<p class="note">⚠️ ${esc(c.expiring)}</p>`:""}
+    <div class="sec">How the guest earns</div>
+    <ol class="lhow"><li>Dine at any Barbeque Nation outlet.</li><li>Pay through the payment link, the app or the table QR.</li><li>Coins are credited after the visit and can be used on the next bill.</li></ol>
+    <div class="sec">Tell the guest</div>
+    <p class="note" style="margin-top:0">"You have <b>${c.coins}</b> smile coins${c.nextTier?` and are <b>${c.need} visit${c.need===1?"":"s"}</b> away from ${esc(c.nextTier)}`:""}. This visit earns ${c.earn||8}% back."</p>
+    ${smile>=0?`<div class="dwf"><button class="btn p" type="button" data-send="offer" data-arg="${smile}">${WAI}Send Smile coins offer</button></div>`:""}`);
+}
+document.addEventListener("click",e=>{if(e.target.closest("[data-loy]"))openLoyalty()});
 
 /* hints: pick the cheapest time, switch to the best offer, open the day's buffet prices */
 document.addEventListener("click",e=>{

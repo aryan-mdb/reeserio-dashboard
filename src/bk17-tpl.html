@@ -52,6 +52,26 @@ select.in{appearance:none;cursor:pointer;padding-right:38px;background:var(--car
 .cu .chip.t{background:#fff4d6;color:#8a5a00}
 html[data-theme=dark] .cu .chip.t{background:#3a2f12;color:#f0bf55}
 .cu.new{color:var(--muted)}
+button.chip{border:0;font:inherit;cursor:pointer;transition:filter .12s,box-shadow .12s}
+button.chip:hover{filter:brightness(.95);box-shadow:0 0 0 2px var(--ember-glow)}
+/* smile coins & tier panel */
+.loyc{display:grid;grid-template-columns:1fr 1.3fr;gap:10px}
+.loyc>div{border-radius:14px;padding:14px}
+.lt{background:linear-gradient(135deg,#fff3d1,#ffe3a3);color:#6b4500}
+.lt-b{display:block;font-size:22px;font-weight:800}
+.lc{background:var(--bg-2)}
+.lc b{display:block;font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+.loyc small{display:block;font-size:12.5px;opacity:.85;margin-top:2px}
+html[data-theme=dark] .lt{background:linear-gradient(135deg,#3a2f12,#4a3a12);color:#f3d48a}
+.lrow{display:flex;justify-content:space-between;gap:12px;margin-top:12px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);font-size:13.5px}
+.lrow span{color:var(--muted)}
+.lnext{margin-top:12px;padding:12px;border-radius:12px;border:1px solid var(--line)}
+.lnh{display:flex;justify-content:space-between;align-items:baseline;font-size:14px}
+.lnh small{color:var(--muted)}
+.lbar{height:8px;border-radius:99px;background:var(--bg-2);overflow:hidden;margin:8px 0 2px}
+.lbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#e8a317,#f2c14e)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.lhow{margin:0;padding-left:20px;font-size:13.5px;line-height:1.7;color:var(--fg-2)}
 @media (max-width:860px){.cu{flex-wrap:wrap}.cu .who{flex-basis:100%;white-space:normal}}
 
 /* soft chips (actions) */

@@ -11,7 +11,7 @@ const OUT={[OX.name]:OX};
    CUST is a made-up sample (98765 43210). On the live app this comes from CRS / LMS for every number. */
 const CUSTH=/*CUSTH*/{};
 const bk=(id,st,o,ad,ch,w,meal,items,by,src,notes)=>({id,st,o,ad,ch,w,meal,items,by,src,notes,lead:"",occ:""});
-const CUST={"9876543210":{name:"Rahul Sharma",tier:"Silver",coins:120,earn:8,toNext:"2 visits to Gold",lastCall:"Pr•••a · 12 Nov 2026, 7:40 PM",total:4,
+const CUST={"9876543210":{name:"Rahul Sharma",tier:"Silver",coins:120,earn:8,toNext:"2 visits to Gold",nextTier:"Gold",visits:1,need:2,expiring:"",lastCall:"Pr•••a · 12 Nov 2026, 7:40 PM",total:4,
   bookings:[bk("BN20261102231","Settled","Atria Mall, Worli",4,0,"2 Nov 2026 · 8:00 PM","Dinner","NON-VEG ×4","Pr•••a","Reservation Drop",""),bk("BN20261009118","Settled","Phoenix Marketcity, Kurla",2,0,"9 Oct 2026 · 1:00 PM","Lunch","Couple Deal ×2","Ka•••l","",""),bk("BN20260914402","Cancelled","Atria Mall, Worli",5,1,"14 Sep 2026 · 9:00 PM","Dinner","","Pr•••a","","Guest called to cancel"),bk("BN20260821077","Settled","Korum Mall Thane",3,0,"21 Aug 2026 · 7:30 PM","Dinner","VEG ×1, NON-VEG ×2","Website","","")],
   calls:[["Pr•••a","12 Nov 2026, 7:40 PM","4m 12s","Booking confirmed"],["Ka•••l","1 Nov 2026, 6:05 PM","2m 40s","Asked about deals"]]}};
 const cust=()=>S.cdata;
@@ -223,7 +223,7 @@ function render(){
   $(".pl.oth").classList.toggle("on",!!S.cdate);$("#othL").textContent=S.cdate?S.cdate.toLocaleDateString("en-IN",{weekday:"short"}):"Other date";$("#othS").textContent=S.cdate?S.cdate.toLocaleDateString("en-IN",{day:"numeric",month:"short"}):"calendar";
 
   // guest strip
-  $("#cust").innerHTML=!mobOk()?"":c?`<div class="cu"><span class="av">${esc(c.name[0])}</span><div class="who"><b>${esc(c.name)}</b> <span>· ${c.total} past booking${c.total===1?"":"s"}${c.bookings[0]?` · last: ${esc(c.bookings[0].o)}, ${esc(c.bookings[0].w.split(" · ")[0])}`:""}</span></div><span class="chip t">★ ${esc(c.tier)} · ${c.coins} coins</span>${c.toNext?`<span class="chip">⏳ ${esc(c.toNext)}</span>`:""}<button class="lk" type="button" id="hist">Booking history &amp; calls</button></div>`:
+  $("#cust").innerHTML=!mobOk()?"":c?`<div class="cu"><span class="av">${esc(c.name[0])}</span><div class="who"><b>${esc(c.name)}</b> <span>· ${c.total} past booking${c.total===1?"":"s"}${c.bookings[0]?` · last: ${esc(c.bookings[0].o)}, ${esc(c.bookings[0].w.split(" · ")[0])}`:""}</span></div><button type="button" class="chip t" data-loy="1" title="Smile coins and tier">★ ${esc(c.tier)} · ${c.coins} coins</button>${c.toNext?`<button type="button" class="chip" data-loy="1" title="Progress to the next tier">⏳ ${esc(c.toNext)}</button>`:""}<button class="lk" type="button" id="hist">Booking history &amp; calls</button></div>`:
     `<div class="cu new"><span class="av">+</span><div class="who">New guest · no past bookings for this number</div></div>`;
   if($("#hist"))$("#hist").onclick=openHistory;
   ["#sendOut","#sendMenu"].forEach(id=>$(id).title=mobOk()?"":"Enter the guest's mobile number first");
@@ -268,6 +268,29 @@ function render(){
     (c?`<div class="loy">★ ${esc(c.tier)} · ${c.coins} coins · next visit ${c.earn||8}% back as smile coins</div>`:"");
   $("#create").disabled=!(mobOk()&&nm&&S.adults>0&&S.outlet&&s&&p);
 }
+
+/* Smile coins & tier: what the guest has, what they earn, how far the next tier is (live: getCustomerByMobileNo_External
+   loyalty_points — tier, earn rate, available points, next tier, visits needed). Coins redeem 1:1 on the bill, as the
+   live page's "N smile coins · can redeem ₹N" line reads. "Up to 12%" is from the live Smile Please promotion. */
+function openLoyalty(){
+  const c=cust();if(!c)return;
+  const smile=promos().findIndex(p=>/smile/i.test(p.t)),cur=curOffer();
+  const pct=c.need?Math.round(100*c.visits/(c.visits+c.need)):100;
+  drawer("Smile coins & tier",`${c.name} · ${fmtMob()}`,[["l",""]],()=>`
+    <div class="loyc">
+      <div class="lt"><span class="lt-b">★ ${esc(c.tier)}</span><small>current tier</small></div>
+      <div class="lc"><b>${c.coins.toLocaleString("en-IN")}</b><small>smile coins · can redeem ${inr(c.coins)}${cur?` on this ${inr(cur.tot)} bill`:""}</small></div>
+    </div>
+    <div class="lrow"><span>Earns</span><b>${c.earn||8}% of the bill back as smile coins</b></div>
+    ${c.nextTier?`<div class="lnext"><div class="lnh"><b>${c.need} visit${c.need===1?"":"s"} to ${esc(c.nextTier)}</b><small>${c.visits} done</small></div><div class="lbar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${Math.max(4,pct)}%"></i></div><small class="note">${esc(c.tier)} → ${esc(c.nextTier)}: higher tiers earn more cashback, up to 12%.</small></div>`:""}
+    ${c.expiring?`<p class="note">⚠️ ${esc(c.expiring)}</p>`:""}
+    <div class="sec">How the guest earns</div>
+    <ol class="lhow"><li>Dine at any Barbeque Nation outlet.</li><li>Pay through the payment link, the app or the table QR.</li><li>Coins are credited after the visit and can be used on the next bill.</li></ol>
+    <div class="sec">Tell the guest</div>
+    <p class="note" style="margin-top:0">"You have <b>${c.coins}</b> smile coins${c.nextTier?` and are <b>${c.need} visit${c.need===1?"":"s"}</b> away from ${esc(c.nextTier)}`:""}. This visit earns ${c.earn||8}% back."</p>
+    ${smile>=0?`<div class="dwf"><button class="btn p" type="button" data-send="offer" data-arg="${smile}">${WAI}Send Smile coins offer</button></div>`:""}`);
+}
+document.addEventListener("click",e=>{if(e.target.closest("[data-loy]"))openLoyalty()});
 
 /* hints: pick the cheapest time, switch to the best offer, open the day's buffet prices */
 document.addEventListener("click",e=>{

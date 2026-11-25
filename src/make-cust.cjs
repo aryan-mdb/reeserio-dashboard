@@ -21,6 +21,8 @@ const bookings = (h.list || []).map(x => ({
 const block = {
   name: c.customerName, since: c.companyName || '', tier: title(tier.tier_name || 'Silver'), coins: (lp.data || {}).available_points || 0,
   earn: Math.round(+tier.earn_rate || 0), toNext: tier.next_tier_message || '', total: +h.total_elements || bookings.length,
+  nextTier: title(tier.next_tier || ''), visits: +tier.current_visits || 0, need: +tier.visits_required_for_next_tier || 0,
+  expiring: tier.smiles_expiring_message || '',
   lastCall: '', bookings, calls: [],
 };
 const key = crypto.createHash('sha256').update(mob).digest('hex');
