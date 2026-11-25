@@ -42,11 +42,11 @@ const vegAt=t=>{const P=adultAt(t),v=P.filter(p=>p.dn==="VEG"||/VEG \/ NON-VEG/.
 function offers(){
   const s=slotObj();if(!s)return [];
   const t=mins(s.from),N=S.adults,K=S.kids,kp=kidPrice(),base=regAt(t,"NON-VEG"),L=[];
-  L.push({k:"REG",name:"Regular booking",tag:"Pay as per order",sub:`Non-veg buffet ₹${base.toLocaleString("en-IN")}/person`,pp:base,save:0,ok:true,reg:true});
+  L.push({k:"REG",ft:"NON-VEG",min:1,name:"Regular booking",tag:"Pay as per order",sub:`Non-veg buffet ₹${base.toLocaleString("en-IN")}/person`,pp:base,save:0,ok:true,reg:true});
   for(const q of adultAt(t).filter(p=>p.dn!=="NON-VEG"&&p.dn!=="VEG")){const ok=N>=q.min;
-    L.push({k:q.dn,name:q.dn,tag:q.rib,sub:`Buffet deal · ₹${q.amt.toLocaleString("en-IN")}/person${q.min>1?` · min ${q.min}`:""}${/Student/.test(q.dn)?" · student ID at outlet":""}`,pp:q.amt,save:Math.max(0,(base-q.amt)*N),ok,why:ok?"":`Needs ${q.min-N} more guest${q.min-N>1?"s":""}`,student:/Student/.test(q.dn),ft:q.ft,desc:BK.desc[q.dn]})}
+    L.push({k:q.dn,min:q.min,name:q.dn,tag:q.rib,sub:`Buffet deal · ₹${q.amt.toLocaleString("en-IN")}/person${q.min>1?` · min ${q.min}`:""}${/Student/.test(q.dn)?" · student ID at outlet":""}`,pp:q.amt,save:Math.max(0,(base-q.amt)*N),ok,why:ok?"":`Needs ${q.min-N} more guest${q.min-N>1?"s":""}`,student:/Student/.test(q.dn),ft:q.ft,desc:BK.desc[q.dn]})}
   /* CRS agent coupons work only with Regular booking, in the band of the regular price */
-  BK.coupons.forEach((c,i)=>{if(base>=c.minP&&base<=c.maxP)L.push({k:"CPN:"+i,name:c.n,tag:"Agent coupon",sub:`₹${c.amt} off/person · with Regular booking`,pp:base-c.amt,save:c.amt*N,ok:true,coupon:true})});
+  BK.coupons.forEach((c,i)=>{if(base>=c.minP&&base<=c.maxP)L.push({k:"CPN:"+i,ft:"NON-VEG",min:1,name:c.n,tag:"Agent coupon",sub:`₹${c.amt} off/person · with Regular booking`,pp:base-c.amt,save:c.amt*N,ok:true,coupon:true})});
   L.forEach(o=>{o.pre=o.pp*N+kp*K;o.tot=Math.round(o.pre*GST)});
   return L.sort((a,b)=>(b.ok-a.ok)||(a.tot-b.tot)||(a.reg-b.reg));
 }
@@ -175,6 +175,17 @@ function waMsg(kind,arg){
   if(kind==="outlet")return {live:"lead_branch_info",img:WA_OD,
     body:`Hi ${nm} 👋\nThank you for choosing *Barbeque Nation, ${S.outlet}*.\n\n📍 ${o?o.addr:S.outlet}${o?`\n📞 ${o.phone}\n🕒 Lunch ${o.hours[0]} · Dinner ${o.hours[1]}`:""}${when}\n\nTap below for the menu, photos and directions.`,
     btns:[["↗","View outlet",o?o.url:web]]};
+  /* an offer with its full details, or a buffet's menu — the menu sent is the buffet of the offer picked */
+  if(kind==="deal"||kind==="bmenu"||(kind==="menu"&&curOffer()&&hasMenu())){
+    const k=kind==="menu"?curOffer().k:arg,of=offerByKey(k),t=bufOf(of),isOffer=kind==="deal"&&of&&of.pp!==undefined;
+    const party=`${S.adults} adult${S.adults===1?"":"s"}${S.kids?` + ${S.kids} kid${S.kids===1?"":"s"}`:""}`;
+    const menu=hasMenu()?`\n\n🍽️ *${bufName(t)}* · ${menuCount(t)} dishes, unlimited${t==="nv"?" (includes the full veg spread)":""}\n${menuText(t)}`:"";
+    const deal=isOffer?`\n\n🎁 *${of.name}*${of.tag&&!of.reg?` (${of.tag})`:""}${s?`\n🗓️ ${dayLabel()}, ${t12(s.from)}`:""}\n👥 ${party}\n💰 ${inr(of.pp)}/person${of.save?` (regular ${inr(of.pp+of.save/S.adults)})`:""} → ${inr(of.pre)} + 5% GST = *${inr(of.tot)}*${of.save?`\n✅ You save *${inr(Math.round(of.save*GST))}*`:""}${of.min>1?`\nℹ️ Minimum ${of.min} guests`:""}${of.coupon?`\nℹ️ With a regular booking`:""}${of.student?`\nℹ️ Student ID needed at the outlet`:""}`:"";
+    return {live:"",img:o?o.menu[0]:WA_OD,more:0,
+      body:isOffer?`Hi ${nm} 👋\nHere is your offer at *Barbeque Nation, ${S.outlet}*.${deal}${menu}\n\n${BMENU.note}`:
+        `Hi ${nm} 👋\nHere is the *${bufName(t)}* menu at *Barbeque Nation, ${S.outlet}*${kind==="menu"&&of.name&&!of.reg?` for your *${of.name}*`:""}.${when}${menu}\n\n${BMENU.note}`,
+      btns:[["📖","View full menu",o?o.url:web]]};
+  }
   if(kind==="menu")return {live:"",reuse:"lead_branch_info",img:o?o.menu[0]:WA_OD,more:o?o.menu.length-1:0,
     body:`Hi ${nm} 👋\nHere is the menu for *Barbeque Nation, ${S.outlet}* — unlimited grills, starters, mains and desserts.${when}\n\nTap below to see all ${o?o.menu.length:""} menu pages.`,
     btns:[["📖","View full menu",o?o.url:web]]};
@@ -195,7 +206,7 @@ document.addEventListener("click",e=>{
   if(!mobOk()){toast("Enter the guest's mobile number first");$("#mob").focus();return}
   if(!S.outlet&&/outlet|menu|location/.test(b.dataset.send)){toast("Select an outlet first");return}
   const k=b.dataset.send,m=waMsg(k,b.dataset.arg);
-  $("#sdT").textContent={outlet:"Send outlet details",menu:"Send menu",location:"Send location",offer:"Send offer",card:"Send Happiness Card"}[k];
+  $("#sdT").textContent={deal:"Send offer",bmenu:"Send buffet menu",outlet:"Send outlet details",menu:"Send menu",location:"Send location",offer:"Send offer",card:"Send Happiness Card"}[k];
   $("#waTo").textContent=(S.name.trim()||"Guest")+" · "+fmtMob();
   $("#sdTo").innerHTML=`<span>To</span><b>${esc(S.name.trim()||"Guest")}</b><span>${fmtMob()}</span>`;
   const head=m.loc?`<div class="wa-loc"><span>📍</span><div><b>Barbeque Nation, ${esc(S.outlet)}</b><small>${esc(m.loc.addr)}</small></div></div>`:
@@ -256,7 +267,7 @@ function render(){
   else $("#insight").innerHTML=b&&reg?`<div class="ins ok"><span>✨</span><div><b>Best for ${per}: ${esc(b.name)}</b><small>Guest pays <b>${inr(b.tot)}</b>${b.save?` · saves <b class="sv">${inr(Math.round(b.save*GST))}</b> on ${inr(reg.tot)}`:""} · incl. 5% GST</small>${cur&&cur.k!==b.k?`<button type="button" class="lk" data-use="${esc(b.k)}">Use best offer</button>`:""}</div></div>`:"";
   $("#dS").textContent=s?`${t12(s.from)} · ${per}`:"";
   $("#dls").innerHTML=!s?`<div class="emp">Pick a time to see the offers for it.</div>`:`<div class="ofl">${O.map(o=>{const on=S.pkg===o.k;
-    return `<label class="of ${on?"on":""} ${o.ok?"":"off"}"><input type="radio" name="dl" value="${esc(o.k)}" ${on?"checked":""} ${o.ok?"":"disabled"}><span class="bd"><span class="nm">${esc(o.name)}${b&&o.k===b.k?`<span class="tag best">Best</span>`:o.tag?`<span class="tag ${o.coupon?"cp":""}">${esc(o.tag)}</span>`:""}</span><span class="dsub ${o.ok?"":"x"}">${o.ok?esc(o.sub):o.why}${o.desc?` · <button type="button" class="inf" data-k="${esc(o.k)}">${S.info===o.k?"Hide":"Details"}</button>`:""}</span>${o.desc&&S.info===o.k?`<span class="ds">${esc(o.desc)}</span>`:""}</span><span class="pr"><b>${inr(o.tot)}</b>${o.save&&o.ok?`<small class="sv">save ${inr(Math.round(o.save*GST))}</small>`:o.reg?`<small>est.</small>`:""}</span></label>`}).join("")}</div><p class="fine">Totals for the whole party incl. 5% GST · final bill may vary · <button type="button" class="inf" data-prices="1">Buffet prices</button></p>`;
+    return `<label class="of ${on?"on":""} ${o.ok?"":"off"}"><input type="radio" name="dl" value="${esc(o.k)}" ${on?"checked":""} ${o.ok?"":"disabled"}><span class="bd"><span class="nm">${esc(o.name)}${b&&o.k===b.k?`<span class="tag best">Best</span>`:o.tag?`<span class="tag ${o.coupon?"cp":""}">${esc(o.tag)}</span>`:""}</span><span class="dsub ${o.ok?"":"x"}">${o.ok?esc(o.sub):o.why}${o.desc?` · <button type="button" class="inf" data-k="${esc(o.k)}">${S.info===o.k?"Hide":"Details"}</button>`:""}</span>${o.desc&&S.info===o.k?`<span class="ds">${esc(o.desc)}</span>`:""}${o.ok?`<span class="calc">${inr(o.pp)} × ${S.adults} adult${S.adults===1?"":"s"}${S.kids?` + ${inr(kidPrice())} × ${S.kids} kid${S.kids===1?"":"s"}`:""} = ${inr(o.pre)} + GST</span><span class="oa"><button type="button" class="ob" data-bmenu="${esc(o.k)}">📖 ${bufOf(o)==="veg"?"Veg":"Non-veg"} menu</button><button type="button" class="ob" data-send="deal" data-arg="${esc(o.k)}">${WAI}Send offer</button></span>`:""}</span><span class="pr"><b>${inr(o.tot)}</b>${o.save&&o.ok?`<small class="sv">save ${inr(Math.round(o.save*GST))}</small>`:o.reg?`<small>est.</small>`:""}</span></label>`}).join("")}</div><p class="fine">Totals for the whole party incl. 5% GST · final bill may vary · <button type="button" class="inf" data-prices="1">Buffet prices</button></p>`;
 
   // the booking read back, gaps in grey
   const miss=t=>`<span class="miss">${t}</span>`;
@@ -292,6 +303,43 @@ function openLoyalty(){
 }
 document.addEventListener("click",e=>{if(e.target.closest("[data-loy]"))openLoyalty()});
 
+/* ---------- buffet menu per offer ----------
+   Read off Atria Mall's printed buffet menu (menu page 1 on the live Outlet Details page, Oct 2026). The veg buffet
+   is every veg dish; the non-veg buffet (and every non-veg deal, Regular booking and coupon) is the full veg spread
+   plus the non-veg dishes, as the live buffet description says. Other outlets load their menu on the live page. */
+const BMENU={outlet:"Atria Mall, Worli",page:0,note:"Items are subject to change as per availability.",sections:[
+  ["Starters",["Tandoori Paneer Tikka","Cheesy Broccoli & Mushroom","Hot & Sweet Chilli Pineapple","Tandoori Aloo","Veg Shami Kebab","Cajun Spice Potato","Crispy Corn","Hariyali Grill Veg"],["Achari Chicken Tikka","Chilli Garlic Prawns","Hariyali Fish","Mirch Masala Tangdi","Chicken Seekh Kebab"]],
+  ["Main course",["Paneer Lababdar","Veg Biryani","Kadhai Veg","Jeera Aloo","Dal Makhani","Veg Hunan Sauce","Singapurian Noodles","Steam Rice"],["Chicken Biryani","Shikari Murgh","Mutton Burani","Fish in Hot Basil Sauce","Egg Fried Rice"]],
+  ["Live counter",["Papadi Chat","Pani Puri","Dahi Puri"],[]],
+  ["Soups",["Cream of Tomato Soup"],["Hot & Sour Chicken Soup"]],
+  ["Salads",["Russian Salad","Pasta Salad","Kachumber Salad","Corn Pepper Salad","Greek Salad","Veg Garden Salad"],[]],
+  ["Accompaniments & dips",["Vegetable Raita","Fry Papad","Roasted Papad","Lemon Wedges","Green Chutney","Garlic Mayo","Mango Mint","Garlic Chutney"],[]],
+  ["Western desserts",["Chocolate Brownie","Fruits Cube","Orange Pastry","Chocolate Pastry","Coconut Chocolate Ball","2 varieties of fresh cut fruit","Baked Mahi"],[]],
+  ["Indian hot desserts",["Moong Dal Halwa","Gulab Jamun","Balushahi","Kesar Phirnee","Payasam"],[]],
+  ["Kulfi & ice-cream",["Malai Pan Mastana","Malai Aam Masti","Chocolate Kulfi","Malai Kesar Shaan","Coconut Kulfi","Strawberry Kulfi","2 varieties of ice-cream"],[]]]};
+/* which buffet an offer is: a VEG-only buffet, or non-veg (= the full spread) */
+const bufOf=o=>!o?"nv":o.k==="VEG"||o.ft==="VEG"?"veg":"nv";
+const bufName=t=>t==="veg"?"Veg buffet":"Non-veg buffet";
+const menuFor=t=>BMENU.sections.map(([n,v,nv])=>({n,items:[...v.map(x=>[x,"v"]),...(t==="veg"?[]:nv.map(x=>[x,"n"]))]})).filter(s=>s.items.length);
+const menuCount=t=>menuFor(t).reduce((a,s)=>a+s.items.length,0);
+const hasMenu=()=>S.outlet===BMENU.outlet;
+/* the offer the agent is looking at: an offer key, or VEG / NON-VEG for the plain buffets */
+const offerByKey=k=>k==="VEG"||k==="NON-VEG"?{k,name:bufName(k==="VEG"?"veg":"nv"),ft:k}:offers().find(o=>o.k===k);
+function openBuffetMenu(key){
+  const o=offerByKey(key),t=bufOf(o),M=menuFor(t),nvN=M.reduce((a,s)=>a+s.items.filter(i=>i[1]==="n").length,0);
+  if(!hasMenu()){drawer("Buffet menu",S.outlet,[["m",""]],()=>`<p class="note">The buffet menu for ${esc(S.outlet)} loads from CRS on the live page; this preview has Atria Mall, Worli's.</p>`);return}
+  drawer(`${bufName(t)} menu`,`${o&&o.k!=="VEG"&&o.k!=="NON-VEG"?esc(o.name)+" · ":""}${S.outlet}`,[["m",""]],()=>`
+    <div class="bmh"><span class="bmc"><b>${menuCount(t)}</b> dishes</span>${t==="nv"?`<span class="bmc"><i class="vd n"></i><b>${nvN}</b> non-veg</span><span class="bmc"><i class="vd"></i><b>${menuCount(t)-nvN}</b> veg</span>`:`<span class="bmc"><i class="vd"></i>all veg</span>`}<span class="bmc">Unlimited</span></div>
+    ${t==="nv"?`<p class="note" style="margin-top:8px">The non-veg buffet includes the complete veg buffet.</p>`:""}
+    ${M.map(s=>`<div class="sec">${esc(s.n)} <small>${s.items.length}</small></div><div class="bml">${s.items.map(([x,k])=>`<span><i class="vd ${k==="n"?"n":""}"></i>${esc(x)}</span>`).join("")}</div>`).join("")}
+    <p class="note">${esc(BMENU.note)} Taxes as applicable.</p>
+    <div class="dwf"><button class="btn p" type="button" data-send="bmenu" data-arg="${esc(key)}">${WAI}Send this menu</button><button class="btn" type="button" data-lb="menu" data-i="${BMENU.page}">Printed menu</button></div>`);
+}
+/* the menu in a message: one line per course, so it reads well on a phone */
+const menuText=t=>menuFor(t).map(s=>`*${s.n}:* ${s.items.map(i=>i[0]).join(", ")}`).join("\n");
+document.addEventListener("click",e=>{const m=e.target.closest("[data-bmenu]");if(m){e.preventDefault();e.stopPropagation();openBuffetMenu(m.dataset.bmenu)}},true);
+
+document.addEventListener("click",e=>{if(e.target.closest(".of [data-send]"))e.preventDefault()},true);
 /* hints: pick the cheapest time, switch to the best offer, open the day's buffet prices */
 document.addEventListener("click",e=>{
   const pk=e.target.closest("[data-pick]");if(pk){S.slot=pk.dataset.pick;render();return}
@@ -302,7 +350,7 @@ function openPrices(){
   const s=slotObj(),kp=kidPrice(),N=S.adults;
   drawer("Buffet prices",`${S.outlet} · ${dayLabel()}`,s?[["s",t12(s.from)],["d","Whole day"]]:[["d",""]],k=>{
     if(k==="s"){const t=mins(s.from),rows=[["Veg",vegAt(t)],["Non-veg",regAt(t,"NON-VEG")],...adultAt(t).filter(p=>/Student/.test(p.dn)).map(p=>[p.dn,p.amt])].filter(r=>r[1]);
-      return `<table class="tb2"><tr><th>Buffet</th><th class="n">Per person</th><th class="n">With GST</th><th class="n">For ${N}</th></tr>${rows.map(([n,v])=>`<tr><td>${esc(n)}</td><td class="n">${inr(v)}</td><td class="n">${inr(Math.round(v*GST))}</td><td class="n"><b>${inr(Math.round(v*N*GST))}</b></td></tr>`).join("")}${kp?`<tr><td>Kid (6–9)</td><td class="n">${inr(kp)}</td><td class="n">${inr(Math.round(kp*GST))}</td><td class="n">—</td></tr>`:""}</table><p class="note">Deals and coupons are in the offers list. Final bill may vary.</p>`}
+      return `<table class="tb2"><tr><th>Buffet</th><th class="n">Per person</th><th class="n">With GST</th><th class="n">For ${N}</th></tr>${rows.map(([n,v])=>`<tr><td>${esc(n)}${n==="Veg"||n==="Non-veg"?` <button type="button" class="inf" data-bmenu="${n==="Veg"?"VEG":"NON-VEG"}">menu</button>`:""}</td><td class="n">${inr(v)}</td><td class="n">${inr(Math.round(v*GST))}</td><td class="n"><b>${inr(Math.round(v*N*GST))}</b></td></tr>`).join("")}${kp?`<tr><td>Kid (6–9)</td><td class="n">${inr(kp)}</td><td class="n">${inr(Math.round(kp*GST))}</td><td class="n">—</td></tr>`:""}</table><p class="note">Deals and coupons are in the offers list. Final bill may vary.</p>`}
     const R=ranges(),cr=R.find(r=>r.cheap);
     return (cr?`<div class="ins"><span>⚡</span><div><b>Cheapest time: ${t12(cr.from)} – ${t12(cr.to)}</b><small>${cr.meal} · Veg ${inr(cr.veg)} · Non-veg ${inr(cr.nv)} per person, before GST · ${N} adults (veg) ${inr(cr.veg*N)} · ${inr(Math.round(cr.veg*N*GST))} incl. GST</small></div></div>`:"")+
       ["Lunch","Dinner"].map(m=>{const X=R.filter(r=>r.meal===m);return X.length?`<div class="sec">${m}</div>`+X.map(r=>`<div class="li"><div class="m"><b>${t12(r.from)} – ${t12(r.to)} ${r.cheap?`<span class="st2 g" style="display:inline">Cheapest</span>`:""}</b><span>${r.slots.length?`Slots: ${r.slots.map(x=>t12(x.from)).join(", ")}`:"No open slots"}</span></div><div class="pr2"><span>Veg <b>${inr(r.veg)}</b></span><span>Non-veg <b>${inr(r.nv)}</b></span></div></div>`).join(""):""}).join("");
