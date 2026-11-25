@@ -8,12 +8,10 @@ const OX=/*OUTX*/null;
 const OUT={[OX.name]:OX};
 /* Guest history. CUSTH is real data read from the live page (getCustomerByMobileNo_External +
    getBookingHistoryDetails), keyed by the SHA-256 of the mobile so the number isn't in the page source.
-   CUST is a made-up sample (98765 43210). On the live app this comes from CRS / LMS for every number. */
+   On the live app this comes from CRS / LMS for every number. */
 const CUSTH=/*CUSTH*/{};
 const bk=(id,st,o,ad,ch,w,meal,items,by,src,notes)=>({id,st,o,ad,ch,w,meal,items,by,src,notes,lead:"",occ:""});
-const CUST={"9876543210":{name:"Rahul Sharma",tier:"Silver",coins:120,earn:8,toNext:"2 visits to Gold",nextTier:"Gold",visits:1,need:2,expiring:"",lastCall:"Pr•••a · 12 Nov 2026, 7:40 PM",total:4,
-  bookings:[bk("BN20261102231","Settled","Atria Mall, Worli",4,0,"2 Nov 2026 · 8:00 PM","Dinner","NON-VEG ×4","Pr•••a","Reservation Drop",""),bk("BN20261009118","Settled","Phoenix Marketcity, Kurla",2,0,"9 Oct 2026 · 1:00 PM","Lunch","Couple Deal ×2","Ka•••l","",""),bk("BN20260914402","Cancelled","Atria Mall, Worli",5,1,"14 Sep 2026 · 9:00 PM","Dinner","","Pr•••a","","Guest called to cancel"),bk("BN20260821077","Settled","Korum Mall Thane",3,0,"21 Aug 2026 · 7:30 PM","Dinner","VEG ×1, NON-VEG ×2","Website","","")],
-  calls:[["Pr•••a","12 Nov 2026, 7:40 PM","4m 12s","Booking confirmed"],["Ka•••l","1 Nov 2026, 6:05 PM","2m 40s","Asked about deals"]]}};
+const CUST={};
 const cust=()=>S.cdata;
 const sha=async s=>{try{const h=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,"0")).join("")}catch{return ""}};
 async function lookup(){const m=S.mobile;S.cdata=null;if(!/^\d{10}$/.test(m))return;const h=await sha(m);if(S.mobile!==m)return;S.cdata=CUSTH[h]||CUST[m]||null;
@@ -42,13 +40,13 @@ const vegAt=t=>{const P=adultAt(t),v=P.filter(p=>p.dn==="VEG"||/VEG \/ NON-VEG/.
 function offers(){
   const s=slotObj();if(!s)return [];
   const t=mins(s.from),N=S.adults,K=S.kids,kp=kidPrice(),base=regAt(t,"NON-VEG"),L=[];
-  L.push({k:"REG",ft:"NON-VEG",min:1,name:"Regular booking",tag:"Pay as per order",sub:`Non-veg buffet ₹${base.toLocaleString("en-IN")}/person`,pp:base,save:0,ok:true,reg:true});
+  L.push({k:"REG",ft:"NON-VEG",min:1,name:"Regular booking",tag:"AMOUNT NOT FIXED",sub:"Standard menu pricing · pay as per actual order",pp:base,save:0,ok:true,reg:true});
   for(const q of adultAt(t).filter(p=>p.dn!=="NON-VEG"&&p.dn!=="VEG")){const ok=N>=q.min;
     L.push({k:q.dn,min:q.min,name:q.dn,tag:q.rib,sub:`Buffet deal · ₹${q.amt.toLocaleString("en-IN")}/person${q.min>1?` · min ${q.min}`:""}${/Student/.test(q.dn)?" · student ID at outlet":""}`,pp:q.amt,save:Math.max(0,(base-q.amt)*N),ok,why:ok?"":`Needs ${q.min-N} more guest${q.min-N>1?"s":""}`,student:/Student/.test(q.dn),ft:q.ft,desc:BK.desc[q.dn]})}
   /* CRS agent coupons work only with Regular booking, in the band of the regular price */
   BK.coupons.forEach((c,i)=>{if(base>=c.minP&&base<=c.maxP)L.push({k:"CPN:"+i,ft:"NON-VEG",min:1,name:c.n,tag:"Agent coupon",sub:`₹${c.amt} off/person · with Regular booking`,pp:base-c.amt,save:c.amt*N,ok:true,coupon:true})});
   L.forEach(o=>{o.pre=o.pp*N+kp*K;o.tot=Math.round(o.pre*GST)});
-  return L.sort((a,b)=>(b.ok-a.ok)||(a.tot-b.tot)||(a.reg-b.reg));
+  return L.sort((a,b)=>(b.ok-a.ok)||(a.tot-b.tot)||(!!a.reg-!!b.reg));
 }
 /* the best pick: cheapest eligible, never Student (needs an ID at the outlet) */
 const bestOffer=()=>offers().find(o=>o.ok&&!o.student);
@@ -64,12 +62,15 @@ function ranges(){
     /* lunch runs into the 4–6 PM band (as on the live page); a band "has seats" when an open slot starts in it */
     .sort((x,y)=>mins(x.from)-mins(y.from)).map(r=>{const t=mins(r.from),sl=daySlots().filter(s=>mins(s.from)>=mins(r.from)&&mins(s.from)<=mins(r.to));return {...r,veg:vegAt(t),nv:regAt(t,"NON-VEG"),meal:t<1080?"Lunch":"Dinner",slots:sl,open:sl.filter(s=>!(hasData()&&s.cap<=0))}})
     .filter(r=>r.veg||r.nv);
-  const pp=r=>r.veg||r.nv,low=Math.min(...bands.map(pp)),lowOpen=Math.min(...bands.filter(r=>r.open.length).map(pp));
+  /* the band's lowest price any guest can get: veg, non-veg or an all-guest deal such as Prime Time Deal (not Student,
+     not a min-pax deal). Some bands (12–1, 3–4 PM) have only the Prime Time Deal, so veg alone would show too high */
+  bands.forEach(r=>{const A=adultAt(mins(r.from)).filter(p=>(p.min||1)<=1&&!/Student/i.test(p.dn)).map(p=>p.amt);r.lo=Math.min(...[r.veg,r.nv,...A].filter(Boolean))});
+  const pp=r=>r.lo,low=Math.min(...bands.map(pp)),lowOpen=Math.min(...bands.filter(r=>r.open.length).map(pp));
   bands.forEach(r=>{r.cheap=pp(r)===low;r.cheapOpen=r.open.length>0&&pp(r)===lowOpen});
   return bands;
 }
 /* a meal's hint, from the bands that still have open slots: "Cheapest" when it is the day's lowest, else "From" */
-const mealHint=meal=>{const R=ranges(),M=R.filter(r=>r.meal===meal&&r.open.length);if(!M.length)return null;const pp=r=>r.veg||r.nv,lo=Math.min(...M.map(pp)),r=M.find(x=>pp(x)===lo);return {lo,cheapest:R.filter(x=>x.open.length).every(x=>pp(x)>=lo),r}};
+const mealHint=meal=>{const R=ranges(),M=R.filter(r=>r.meal===meal&&r.open.length);if(!M.length)return null;const pp=r=>r.lo,lo=Math.min(...M.map(pp)),r=M.find(x=>pp(x)===lo);return {lo,cheapest:R.filter(x=>x.open.length).every(x=>pp(x)>=lo),r}};
 const mobOk=()=>/^[6-9]\d{9}$/.test(S.mobile);
 const fmtMob=()=>"+91 "+S.mobile.replace(/(\d{5})(\d{5})/,"$1 $2");
 const dayLabel=()=>dateObj().toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"});
@@ -260,14 +261,14 @@ function render(){
   else if(!s){
     /* the day's cheapest band; if it has no open slot left, say so and point to the cheapest band that does */
     const R=ranges(),cr=R.find(r=>r.cheap),co=R.find(r=>r.cheapOpen),dl=S.cdate||S.day?"on "+dayLabel():"today";
-    const line=r=>`Veg ${inr(r.veg)} · Non-veg ${inr(r.nv)} per person · ${per} ≈ <b>${inr(Math.round(r.veg*S.adults*GST))}</b> (veg, incl. GST)`;
+    const line=r=>`From ${inr(r.lo)}/person (veg ${inr(r.veg)} · non-veg ${inr(r.nv)}) · ${per} from <b>${inr(Math.round(r.lo*S.adults*GST))}</b> incl. GST`;
     const pick=r=>r&&r.open[0]?`<button type="button" class="lk" data-pick="${r.open[0].p+r.open[0].from}">Pick ${t12(r.open[0].from)}</button>`:"";
     $("#insight").innerHTML=!cr?"":cr.open.length?`<div class="ins"><span>⚡</span><div><b>Cheapest time ${dl}: ${t12(cr.from)} – ${t12(cr.to)}</b><small>${line(cr)}</small>${pick(cr)}</div></div>`:
-      `<div class="ins"><span>⚡</span><div><b>Cheapest ${dl} was ${t12(cr.from)} – ${t12(cr.to)} (${inr(cr.veg)} veg)</b><small>No open slot left in it.${co?` Cheapest open now: <b>${t12(co.from)} – ${t12(co.to)}</b> · ${line(co)}`:""}</small>${pick(co)}</div></div>`;}
+      `<div class="ins"><span>⚡</span><div><b>Cheapest ${dl} was ${t12(cr.from)} – ${t12(cr.to)} (from ${inr(cr.lo)}/person)</b><small>No open slot left in it.${co?` Cheapest open now: <b>${t12(co.from)} – ${t12(co.to)}</b> · ${line(co)}`:""}</small>${pick(co)}</div></div>`;}
   else $("#insight").innerHTML=b&&reg?`<div class="ins ok"><span>✨</span><div><b>Best for ${per}: ${esc(b.name)}</b><small>Guest pays <b>${inr(b.tot)}</b>${b.save?` · saves <b class="sv">${inr(Math.round(b.save*GST))}</b> on ${inr(reg.tot)}`:""} · incl. 5% GST</small>${cur&&cur.k!==b.k?`<button type="button" class="lk" data-use="${esc(b.k)}">Use best offer</button>`:""}</div></div>`:"";
   $("#dS").textContent=s?`${t12(s.from)} · ${per}`:"";
-  $("#dls").innerHTML=!s?`<div class="emp">Pick a time to see the offers for it.</div>`:`<div class="ofl">${O.map(o=>{const on=S.pkg===o.k;
-    return `<label class="of ${on?"on":""} ${o.ok?"":"off"}"><input type="radio" name="dl" value="${esc(o.k)}" ${on?"checked":""} ${o.ok?"":"disabled"}><span class="bd"><span class="nm">${esc(o.name)}${b&&o.k===b.k?`<span class="tag best">Best</span>`:o.tag?`<span class="tag ${o.coupon?"cp":""}">${esc(o.tag)}</span>`:""}</span><span class="dsub ${o.ok?"":"x"}">${o.ok?esc(o.sub):o.why}${o.desc?` · <button type="button" class="inf" data-k="${esc(o.k)}">${S.info===o.k?"Hide":"Details"}</button>`:""}</span>${o.desc&&S.info===o.k?`<span class="ds">${esc(o.desc)}</span>`:""}${o.ok?`<span class="calc">${inr(o.pp)} × ${S.adults} adult${S.adults===1?"":"s"}${S.kids?` + ${inr(kidPrice())} × ${S.kids} kid${S.kids===1?"":"s"}`:""} = ${inr(o.pre)} + GST</span><span class="oa"><button type="button" class="ob" data-bmenu="${esc(o.k)}">📖 Menu</button><button type="button" class="ob" data-send="deal" data-arg="${esc(o.k)}">${WAI}Send offer</button></span>`:""}</span><span class="pr"><b>${inr(o.tot)}</b>${o.save&&o.ok?`<small class="sv">save ${inr(Math.round(o.save*GST))}</small>`:o.reg?`<small>est.</small>`:""}</span></label>`}).join("")}</div><p class="fine">Totals for the whole party incl. 5% GST · final bill may vary · <button type="button" class="inf" data-prices="1">Buffet prices</button></p>`;
+  $("#dls").innerHTML=!s?`<div class="emp">Pick a time to see the offers for it.</div>`:`<div class="ofl">${[...O.filter(o=>!o.reg),...O.filter(o=>o.reg)].map(o=>{const on=S.pkg===o.k;
+    return `<label class="of ${on?"on":""} ${o.ok?"":"off"}"><input type="radio" name="dl" value="${esc(o.k)}" ${on?"checked":""} ${o.ok?"":"disabled"}><span class="bd"><span class="nm">${esc(o.name)}${b&&o.k===b.k?`<span class="tag best">Best</span>`:o.tag?`<span class="tag ${o.coupon?"cp":""}">${esc(o.tag)}</span>`:""}</span><span class="dsub ${o.ok?"":"x"}">${o.ok?esc(o.sub):o.why}${o.desc?` · <button type="button" class="inf" data-k="${esc(o.k)}">${S.info===o.k?"Hide":"Details"}</button>`:""}</span>${o.desc&&S.info===o.k?`<span class="ds">${esc(o.desc)}</span>`:""}${o.ok&&!o.reg?`<span class="calc">${inr(o.pp)} × ${S.adults} adult${S.adults===1?"":"s"}${S.kids?` + ${inr(kidPrice())} × ${S.kids} kid${S.kids===1?"":"s"}`:""} = ${inr(o.pre)} + GST</span><span class="oa"><button type="button" class="ob" data-bmenu="${esc(o.k)}">📖 Menu</button><button type="button" class="ob" data-send="deal" data-arg="${esc(o.k)}">${WAI}Send offer</button></span>`:""}</span>${o.reg?"":`<span class="pr"><b>${inr(o.tot)}</b>${o.save&&o.ok?`<small class="sv">save ${inr(Math.round(o.save*GST))}</small>`:""}</span>`}</label>`}).join("")}</div><p class="fine">Totals for the whole party incl. 5% GST · final bill may vary · <button type="button" class="inf" data-prices="1">Buffet prices</button></p>`;
 
   // the booking read back, gaps in grey
   const miss=t=>`<span class="miss">${t}</span>`;
@@ -275,7 +276,7 @@ function render(){
   // estimate: per person × guests, kids, GST, total, saving
   const kp=kidPrice();
   $("#est").innerHTML=!cur?`<div class="er"><span>Estimate</span><span class="miss">after a time is picked</span></div>`:
-    `<div class="er"><span>${S.adults} × ${esc(cur.reg?"Non-veg":cur.name)}</span><span>${inr(cur.pp*S.adults)}</span></div>${S.kids?`<div class="er"><span>${S.kids} × Kid (6–9)</span><span>${inr(kp*S.kids)}</span></div>`:""}<div class="er"><span>GST 5%</span><span>${inr(cur.tot-cur.pre)}</span></div><div class="et"><span>${cur.reg?"Estimated bill":"Guest pays"}</span><b id="eT">${inr(cur.tot)}</b></div>${cur.save?`<div class="es">Saves ${inr(Math.round(cur.save*GST))} on the regular price</div>`:cur.reg?`<div class="es mute">Regular booking: final bill as per order</div>`:""}`+
+    (cur.reg?`<div class="er"><span>Regular booking</span><span>Amount not fixed</span></div><div class="es mute">The guest orders from the menu and pays as per actual order</div>`:`<div class="er"><span>${S.adults} × ${esc(cur.name)}</span><span>${inr(cur.pp*S.adults)}</span></div>${S.kids?`<div class="er"><span>${S.kids} × Kid (6–9)</span><span>${inr(kp*S.kids)}</span></div>`:""}<div class="er"><span>GST 5%</span><span>${inr(cur.tot-cur.pre)}</span></div><div class="et"><span>${cur.reg?"Estimated bill":"Guest pays"}</span><b id="eT">${inr(cur.tot)}</b></div>${cur.save?`<div class="es">Saves ${inr(Math.round(cur.save*GST))} on the regular price</div>`:""}`)+
     (c?`<div class="loy">★ ${esc(c.tier)} · ${c.coins} coins · next visit ${c.earn||8}% back as smile coins</div>`:"");
   $("#create").disabled=!(mobOk()&&nm&&S.adults>0&&S.outlet&&s&&p);
 }

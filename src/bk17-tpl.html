@@ -231,34 +231,34 @@ html[data-theme=dark] .loy{background:#2e2610;color:#f0bf55}
     <section class="sec2">
       <div class="sh3"><h2>Guest</h2><small>Number first: a known guest fills in by itself</small></div>
       <div class="g1">
-        <div><label class="lbl" for="mob">Mobile number</label><div class="ph"><span>+91</span><input class="in" id="mob" inputmode="numeric" maxlength="10" placeholder="10-digit mobile" autocomplete="off"></div></div>
-        <div><label class="lbl" for="nm">Guest name</label><input class="in" id="nm" placeholder="Full name" autocomplete="off"></div>
-        <div><span class="lbl">Adults</span><div class="cnt" data-k="adults"><button type="button" data-d="-1" aria-label="Fewer adults">−</button><output>2</output><button type="button" data-d="1" aria-label="More adults">+</button></div></div>
-        <div><span class="lbl">Kids 6–9</span><div class="cnt" data-k="kids"><button type="button" data-d="-1" aria-label="Fewer kids">−</button><output>0</output><button type="button" data-d="1" aria-label="More kids">+</button></div></div>
+        <div><label class="lbl" for="mob">Mobile Number</label><div class="ph"><span>+91</span><input class="in" id="mob" inputmode="numeric" maxlength="10" placeholder="Enter mobile number" autocomplete="off"></div></div>
+        <div><label class="lbl" for="nm">Name</label><input class="in" id="nm" placeholder="Enter guest name" autocomplete="off"></div>
+        <div><span class="lbl">Adult</span><div class="cnt" data-k="adults"><button type="button" data-d="-1" aria-label="Fewer adults">−</button><output>2</output><button type="button" data-d="1" aria-label="More adults">+</button></div></div>
+        <div><span class="lbl">Kids 6-9 yrs</span><div class="cnt" data-k="kids"><button type="button" data-d="-1" aria-label="Fewer kids">−</button><output>0</output><button type="button" data-d="1" aria-label="More kids">+</button></div></div>
       </div>
       <div class="err" id="mobErr"></div><div id="cust"></div>
     </section>
 
     <section class="sec2">
-      <div class="sh3"><h2>Outlet &amp; date</h2></div>
+      <div class="sh3"><h2>Outlet, Date and Time</h2></div>
       <div class="orow"><select class="in" id="outlet" aria-label="Outlet"></select></div>
       <div class="acts"><span class="agrp">
-          <button class="lk" type="button" id="oInfo">ⓘ Outlet info</button>
+          <button class="lk" type="button" id="oInfo">ⓘ Outlet Details</button>
           <button class="lk" type="button" id="oMenu">📖 Menu</button>
         </span><span class="agrp">
-          <button class="lk" type="button" id="sendOut" data-send="outlet">WAICON Send outlet</button>
+          <button class="lk" type="button" id="sendOut" data-send="outlet">WAICON Send Outlet Details</button>
           <button class="lk" type="button" id="sendMenu" data-send="menu">WAICON Send menu</button>
         </span><span class="agrp">
-          <button class="lk" type="button" id="ofBtn">🎁 Offers <b class="cn" id="ofN"></b></button>
-          <button class="lk" type="button" id="hcBtn">💳 Cards <b class="cn" id="hcN"></b></button>
+          <button class="lk" type="button" id="ofBtn">🎁 Outlet Offers <b class="cn" id="ofN"></b></button>
+          <button class="lk" type="button" id="hcBtn">💳 Happiness Card <b class="cn" id="hcN"></b></button>
         </span></div>
       <div class="days" id="days"></div>
     </section>
 
     <section class="sec2">
-      <div class="sh3"><h2>Time</h2><small id="tN"></small><span class="rt leg"><span><i style="background:#2fa36b"></i>Available</span><span><i style="background:#e8a317"></i>Filling</span><span><i style="background:#e35d6a"></i>Almost full</span></span></div>
+      <div class="sh3"><h2>Time Slots</h2><small id="tN"></small><span class="rt leg"><span><i style="background:#2fa36b"></i>Available</span><span><i style="background:#e8a317"></i>Filling</span><span><i style="background:#e35d6a"></i>Almost full</span></span></div>
       <div id="slots"></div><div id="tX"></div>
-      <div class="acts" style="margin-top:12px"><button class="lk" type="button" id="avBtn">🪑 Seats, next day &amp; nearby</button><button class="lk" type="button" data-prices="1">₹ Buffet prices</button><button class="more" id="exBtn" type="button">+ Occasion or note for outlet</button></div>
+      <div class="acts" style="margin-top:12px"><button class="lk" type="button" id="avBtn">🪑 Check Availability</button><button class="lk" type="button" data-prices="1">₹ Buffet prices</button><button class="more" id="exBtn" type="button">+ Select Occasion · Instruction to outlet</button></div>
       <div class="extra" id="extra" hidden>
         <div><label class="lbl" for="occ">Occasion <span class="op">(optional)</span></label><select class="in" id="occ"></select></div>
         <div><label class="lbl" for="ins">Note for outlet <span class="op">(optional)</span></label><input class="in" id="ins" placeholder="e.g. window seat" autocomplete="off"></div>
@@ -275,5 +275,5 @@ html[data-theme=dark] .loy{background:#2e2610;color:#f0bf55}
     <button class="go" id="create" type="button" disabled>Create booking</button>
   </aside>
 </div>
-<p class="foot">Preview built from the live booking page for Atria Mall, Worli, 18 Nov 2026, 3:50 PM IST. Guest history: one test number read from the live page, plus a made-up sample (98765 43210). Nothing is saved or sent.</p>
+<p class="foot">Prices, deals, coupons, slots and Happiness Cards from the live booking page for Atria Mall, Worli, 25 Nov 2026, 3:03 PM IST. Guest history: the test number read from the live page. Nothing is saved or sent.</p>
 <!--REUSEDLG-->

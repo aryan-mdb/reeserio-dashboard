@@ -7,7 +7,8 @@ const ref = fs.readFileSync('../ghpages/booking-10.html', 'utf8').replace(/\r\n/
 const cut = ref.indexOf('<style>\n/* Booking v10');
 if (cut < 0) throw new Error('reference body marker not found');
 const prefix = ref.slice(0, cut).replace('<title>Reeserio Booking 10</title>', `<title>Reeserio Booking ${n}</title>`);
-const BK = ref.match(/const BK=(\{.*?\}), FU=/s)[1];
+// BKFILE: booking data rebuilt from today's live responses (make-bk25.cjs); else the copy inside booking-10
+const BK = process.env.BKFILE ? fs.readFileSync(process.env.BKFILE, 'utf8') : ref.match(/const BK=(\{.*?\}), FU=/s)[1];
 const FU = ref.match(/, FU=(\{.*?\});/)[1];
 const LOGO = ref.match(/data:image\/png;base64,([A-Za-z0-9+/=]+)/)[1];
 JSON.parse(BK); JSON.parse(FU);

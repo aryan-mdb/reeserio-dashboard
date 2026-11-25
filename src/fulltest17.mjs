@@ -13,7 +13,7 @@ for (const [w, h, scheme] of [[1600, 1000, 'light'], [1600, 1000, 'dark'], [390,
   // unknown number
   await p.fill('#mob', '9123456780'); console.log('  unknown guest strip:', await txt('#cust'));
   // sample known guest: name filled
-  await p.fill('#mob', ''); await p.fill('#mob', '9876543210'); await p.waitForTimeout(100);
+  await p.fill('#mob', ''); await p.fill('#mob', process.env.TEST_MOB || ''); await p.waitForTimeout(1500);
   console.log('  known guest strip:', await txt('#cust'), '| name', await p.inputValue('#nm'));
   await p.click('#hist'); await p.waitForTimeout(150); console.log('  history:', await txt('#dwT'), '|', await dwText());
   await p.click('#dwB .tabs button[data-t=c]'); console.log('  calls:', await dwText());

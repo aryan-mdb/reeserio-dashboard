@@ -36,10 +36,11 @@ js = js.replace(/const \$=s=>document\.querySelector\(s\), \$\$=s=>\[\.\.\.docum
 if (!js.includes('const _st={}')) throw new Error('stub not placed');
 // the snapshot data booking-11…17 use (build11.cjs takes it from booking-10), counted from the live copy's day
 const ref = fs.readFileSync('../ghpages/booking-10.html', 'utf8').replace(/\r\n/g, '\n');
-const BK = ref.match(/const BK=(\{.*?\}), FU=/s)[1].replace('"snap":"2026-11-18T15:50"', '"snap":"2026-11-25T10:00"');
+// today's live data (make-bk25.cjs from liveapi.mjs's read-only capture)
+const BK = fs.readFileSync('bk25.json', 'utf8');
 const FU = ref.match(/, FU=(\{.*?\});/)[1];
 js = js.replace('/*BOOK*/null', () => BK).replace('/*FU*/null', () => FU);
-if (js.includes('/*BOOK*/null') || !BK.includes('2026-11-25T10:00')) throw new Error('data not placed');
+if (js.includes('/*BOOK*/null')) throw new Error('data not placed');
 const bridge = fs.readFileSync('bridge18.js', 'utf8');
 (async () => {
   const b = await chromium.launch({ channel: 'chrome', headless: true });
