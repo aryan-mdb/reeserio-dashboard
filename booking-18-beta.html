@@ -10685,7 +10685,7 @@ const pkgs=()=>{const s=slotObj();return s?adultAt(mins(s.from)):[]};
 const kidPrice=()=>{const s=slotObj();if(!s)return 0;const t=mins(s.from);const k=BK.prices.find(p=>p.ct==="Child"&&mins(p.from)<=t&&t<=mins(p.to));return k?k.amt:0};
 /* regular per-person price at a time: the NON-VEG / VEG buffet, else the struck-out price of any deal running then */
 const regAt=(t,ft)=>{const P=adultAt(t),r=P.find(p=>p.dn===ft);return r?r.amt:Math.max(0,...P.filter(p=>p.ft===ft||ft==="NON-VEG").map(p=>p.orig))};
-const vegAt=t=>{const P=adultAt(t),v=P.filter(p=>p.dn==="VEG"||/VEG \/ NON-VEG/.test(p.dn)).map(p=>p.amt);return v.length?Math.min(...v):0};
+const vegAt=t=>{const P=adultAt(t),v=P.filter(p=>p.dn==="VEG"||/veg \/ non-veg/i.test(p.dn)).map(p=>p.amt);return v.length?Math.min(...v):0};
 /* every way this party can be billed at the picked time, cheapest first; ineligible ones last with the reason */
 function offers(){
   const s=slotObj();if(!s)return [];
@@ -10828,13 +10828,15 @@ function waMsg(kind,arg){
     btns:[["↗","View outlet",o?o.url:web]]};
   /* an offer with its full details, or a buffet's menu — the menu sent is the buffet of the offer picked */
   if(kind==="deal"||kind==="bmenu"||(kind==="menu"&&curOffer()&&hasMenu())){
-    const k=kind==="menu"?curOffer().k:arg,of=offerByKey(k),t=bufOf(of),isOffer=kind==="deal"&&of&&of.pp!==undefined;
+    const k=kind==="menu"?curOffer().k:arg,of=offerByKey(k),t=bufOf(of),isOffer=(kind==="deal"||kind==="bmenu")&&of&&of.pp!==undefined&&!of.reg;
+    /* Regular booking has no fixed amount: the menu goes with the standard buffet prices instead of a total */
+    const regLine=of&&of.reg&&s?`\n\n💰 Regular booking · standard buffet prices at ${t12(s.from)}: Veg ${inr(vegAt(mins(s.from)))} · Non-veg ${inr(regAt(mins(s.from),"NON-VEG"))} per person + 5% GST · pay as per actual order`:"";
     const party=`${S.adults} adult${S.adults===1?"":"s"}${S.kids?` + ${S.kids} kid${S.kids===1?"":"s"}`:""}`;
     const menu=hasMenu()?`\n\n🍽️ *${bufName(t)}* · ${menuCount(t)} dishes, unlimited${t==="nv"?" (includes the full veg spread)":""}\n${menuText(t)}`:"";
     const deal=isOffer?`\n\n🎁 *${of.name}*${of.tag&&!of.reg?` (${of.tag})`:""}${s?`\n🗓️ ${dayLabel()}, ${t12(s.from)}`:""}\n👥 ${party}\n💰 ${inr(of.pp)}/person${of.save?` (regular ${inr(of.pp+of.save/S.adults)})`:""} → ${inr(of.pre)} + 5% GST = *${inr(of.tot)}*${of.save?`\n✅ You save *${inr(Math.round(of.save*GST))}*`:""}${of.min>1?`\nℹ️ Minimum ${of.min} guests`:""}${of.coupon?`\nℹ️ With a regular booking`:""}${of.student?`\nℹ️ Student ID needed at the outlet`:""}`:"";
     return {live:"",img:o?o.menu[0]:WA_OD,more:0,
       body:isOffer?`Hi ${nm} 👋\nHere is your offer at *Barbeque Nation, ${S.outlet}*.${deal}${menu}\n\n${BMENU.note}`:
-        `Hi ${nm} 👋\nHere is the *${bufName(t)}* menu at *Barbeque Nation, ${S.outlet}*${kind==="menu"&&of.name&&!of.reg?` for your *${of.name}*`:""}.${when}${menu}\n\n${BMENU.note}`,
+        `Hi ${nm} 👋\nHere is the *${bufName(t)}* menu at *Barbeque Nation, ${S.outlet}*${kind==="menu"&&of.name&&!of.reg?` for your *${of.name}*`:""}.${when}${regLine}${menu}\n\n${BMENU.note}`,
       btns:[["📖","View full menu",o?o.url:web]]};
   }
   if(kind==="menu")return {live:"",reuse:"lead_branch_info",img:o?o.menu[0]:WA_OD,more:o?o.menu.length-1:0,
@@ -10976,15 +10978,56 @@ const menuCount=t=>menuFor(t).reduce((a,s)=>a+s.items.length,0);
 const hasMenu=()=>S.outlet===BMENU.outlet;
 /* the offer the agent is looking at: an offer key, or VEG / NON-VEG for the plain buffets */
 const offerByKey=k=>k==="VEG"||k==="NON-VEG"?{k,name:bufName(k==="VEG"?"veg":"nv"),ft:k}:offers().find(o=>o.k===k);
+/* Menu & price: one tab per offer for the picked time. Each tab shows that offer's price (per person, the regular
+   price it beats, the party's sum with kids and GST, the saving), its price through the day, and the food it
+   includes (veg deals: the veg buffet; every other deal, coupon and Regular booking: the full non-veg buffet).
+   A buffet is unlimited, so dishes carry no price of their own: the price is per person. */
+const MP={card:"border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:10px 0",row:"display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:2px 0",tag:"display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:2px 7px;margin-left:6px"};
+function dealBands(o){
+  /* this offer's price in each time band of the day (live getPrice_internalByDate rows for the same name) */
+  const N=S.adults,K=S.kids,dn=!o||o.reg||o.coupon||o.k==="NON-VEG"?"NON-VEG":o.k==="VEG"?"VEG":o.name;
+  const kidAt=t=>{const k=BK.prices.find(p=>p.ct==="Child"&&mins(p.from)<=t&&t<=mins(p.to));return k?k.amt:0};
+  return BK.prices.filter(p=>p.ct==="Adult"&&p.dn===dn).map(p=>{const t=mins(p.from);let pp=p.amt;
+    if(o&&o.coupon){const c=BK.coupons[+o.k.split(":")[1]];if(!c||pp<c.minP||pp>c.maxP)return null;pp-=c.amt}
+    return {from:p.from,to:p.to,pp,orig:p.orig,tot:Math.round((pp*N+kidAt(t)*K)*GST)}}).filter(Boolean).sort((a,b)=>mins(a.from)-mins(b.from));
+}
+function priceCard(o){
+  const s=slotObj(),N=S.adults,K=S.kids,kp=kidPrice(),reg=offers().find(x=>x.reg);
+  if(!s)return `<div style="${MP.card}"><b>Pick a time</b><div class="note" style="margin:4px 0 0">The exact price depends on the time; see it by time below.</div></div>`;
+  if(o.k==="VEG"||o.k==="NON-VEG"){const pp=o.k==="VEG"?vegAt(mins(s.from)):regAt(mins(s.from),"NON-VEG");o={...o,pp,pre:pp*N+kp*K,tot:Math.round((pp*N+kp*K)*GST),ok:true,save:0}}
+  if(o.reg){const v=vegAt(mins(s.from)),n=regAt(mins(s.from),"NON-VEG");
+    return `<div style="${MP.card}"><div><b style="font-size:16px">Regular booking</b><span style="${MP.tag}background:#f1f3f5;color:#555">AMOUNT NOT FIXED</span></div><div class="note" style="margin:4px 0 8px">The guest orders at the outlet and pays as per actual order. Standard buffet prices at ${t12(s.from)}:</div>
+      ${v?`<div style="${MP.row}"><span>Veg buffet</span><b>${inr(v)}/person</b></div>`:""}${n?`<div style="${MP.row}"><span>Non-veg buffet</span><b>${inr(n)}/person</b></div>`:""}${kp?`<div style="${MP.row}"><span>Kid (6–9) buffet</span><b>${inr(kp)}/kid</b></div>`:""}<div class="note" style="margin:6px 0 0">Plus 5% GST.</div></div>`}
+  const base=reg?reg.pp:o.pp,strike=o.pp<base?`<s style="color:var(--muted);font-size:13px;margin-left:6px">${inr(base)}</s>`:"";
+  return `<div style="${MP.card}${o.ok?"":";opacity:.75"}"><div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b style="font-size:16px">${esc(o.name)}</b>${o.tag&&!o.reg?`<span style="${MP.tag}background:rgba(255,98,0,.1);color:#c2410c">${esc(o.tag)}</span>`:""}${o.min>1?`<span style="${MP.tag}background:#fff7ed;color:#9a3412">MIN ${o.min}</span>`:""}</div><div><b style="font-size:20px;color:var(--good)">${inr(o.pp)}</b><small style="color:var(--muted)">/person</small>${strike}</div></div>
+    ${o.ok?"":`<div style="color:var(--red);font-size:13px;margin-top:4px">${esc(o.why||"Not for this party")}</div>`}
+    <div style="border-top:1px dashed var(--line);margin:10px 0 6px"></div>
+    <div style="${MP.row}"><span>${N} adult${N===1?"":"s"} × ${inr(o.pp)}</span><span>${inr(o.pp*N)}</span></div>${K?`<div style="${MP.row}"><span>${K} kid${K===1?"":"s"} (6–9) × ${inr(kp)}</span><span>${inr(kp*K)}</span></div>`:""}
+    <div style="${MP.row}"><span>GST 5%</span><span>${inr(o.tot-o.pre)}</span></div>
+    <div style="${MP.row};font-size:15px;padding-top:6px"><b>${o.ok?"Guest pays":"Would pay"}</b><b>${inr(o.tot)}</b></div>
+    ${o.save?`<div style="font-size:13px;font-weight:700;color:var(--good);text-align:right">Saves ${inr(Math.round(o.save*GST))} on the regular price</div>`:""}
+    ${o.student?`<div class="note" style="margin:6px 0 0">Student ID (10–21 years) to be shown at the outlet.</div>`:""}${o.coupon?`<div class="note" style="margin:6px 0 0">CRS agent coupon · applies on the non-veg buffet with Regular booking.</div>`:""}</div>`;
+}
+function bandTable(o){
+  const B=dealBands(o),s=slotObj(),cur=s&&mins(s.from);if(!B.length)return "";
+  return `<div class="sec">Price by time · ${dayLabel()} <small>for ${S.adults} adult${S.adults===1?"":"s"}${S.kids?` + ${S.kids} kid${S.kids===1?"":"s"}`:""}, incl. GST</small></div><table class="tb2"><tr><th>Time</th><th class="n">Per person</th><th class="n">Party total</th></tr>${B.map(b=>{const on=cur!=null&&mins(b.from)<=cur&&cur<=mins(b.to);return `<tr${on?` style="background:var(--ember-soft);font-weight:700"`:""}><td>${t12(b.from)} – ${t12(b.to)}${on?" · picked":""}</td><td class="n">${inr(b.pp)}${b.orig>b.pp?` <s style="color:var(--muted);font-weight:400">${inr(b.orig)}</s>`:""}</td><td class="n">${inr(b.tot)}</td></tr>`}).join("")}</table>`;
+}
 function openBuffetMenu(key){
-  const o=offerByKey(key),t=bufOf(o),M=menuFor(t),nvN=M.reduce((a,s)=>a+s.items.filter(i=>i[1]==="n").length,0);
   if(!hasMenu()){drawer("Buffet menu",S.outlet,[["m",""]],()=>`<p class="note">The buffet menu for ${esc(S.outlet)} loads from CRS on the live page; this preview has Atria Mall, Worli's.</p>`);return}
-  drawer(`${o&&o.k!=="VEG"&&o.k!=="NON-VEG"?o.name+" · Menu":bufName(t)+" menu"}`,`${bufName(t)} · ${S.outlet}`,[["m",""]],()=>`
-    <div class="bmh"><span class="bmc"><b>${menuCount(t)}</b> dishes</span>${t==="nv"?`<span class="bmc"><i class="vd n"></i><b>${nvN}</b> non-veg</span><span class="bmc"><i class="vd"></i><b>${menuCount(t)-nvN}</b> veg</span>`:`<span class="bmc"><i class="vd"></i>all veg</span>`}<span class="bmc">Unlimited</span></div>
+  const s=slotObj(),O=s?[...offers().filter(o=>!o.reg),...offers().filter(o=>o.reg)]:[];
+  // tabs: every offer for the picked time, else the two buffets
+  const tabs=O.length?O.map(o=>[o.k,o.name.replace(/ \/ Person$/,"")]):[["NON-VEG","Non-veg buffet"],["VEG","Veg buffet"]];
+  const start=tabs.some(t=>t[0]===key)?key:key==="VEG"?(O.find(o=>o.ft==="VEG")||{}).k||tabs[0][0]:tabs[0][0];
+  const per=`${S.adults} adult${S.adults===1?"":"s"}${S.kids?` + ${S.kids} kid${S.kids===1?"":"s"}`:""}`;
+  drawer("Menu & price",`${S.outlet} · ${dayLabel()}${s?" · "+t12(s.from):""} · ${per}`,tabs,k=>{
+    const o=offerByKey(k)||{k,name:k},t=bufOf(o),M=menuFor(t),nvN=M.reduce((a,x)=>a+x.items.filter(i=>i[1]==="n").length,0);
+    return priceCard(o)+bandTable(o)+`
+    <div class="sec">What's included · ${bufName(t)}</div>
+    <div class="bmh"><span class="bmc"><b>${menuCount(t)}</b> dishes</span>${t==="nv"?`<span class="bmc"><i class="vd n"></i><b>${nvN}</b> non-veg</span><span class="bmc"><i class="vd"></i><b>${menuCount(t)-nvN}</b> veg</span>`:`<span class="bmc"><i class="vd"></i>all veg</span>`}<span class="bmc">Unlimited</span>${S.kids?`<span class="bmc">Kids 6–9: kids buffet</span>`:""}</div>
     ${t==="nv"?`<p class="note" style="margin-top:8px">The non-veg buffet includes the complete veg buffet.</p>`:""}
-    ${M.map(s=>`<div class="sec">${esc(s.n)} <small>${s.items.length}</small></div><div class="bml">${s.items.map(([x,k])=>`<span><i class="vd ${k==="n"?"n":""}"></i>${esc(x)}</span>`).join("")}</div>`).join("")}
-    <p class="note">${esc(BMENU.note)} Taxes as applicable.</p>
-    <div class="dwf"><button class="btn p" type="button" data-send="bmenu" data-arg="${esc(key)}">${WAI}Send this menu</button><button class="btn" type="button" data-lb="menu" data-i="${BMENU.page}">Printed menu</button></div>`);
+    ${M.map(x=>`<div class="sec">${esc(x.n)} <small>${x.items.length}</small></div><div class="bml">${x.items.map(([d,q])=>`<span><i class="vd ${q==="n"?"n":""}"></i>${esc(d)}</span>`).join("")}</div>`).join("")}
+    <p class="note">${esc(BMENU.note)} Unlimited buffet: one price per person, no price per dish. Taxes as applicable.</p>
+    <div class="dwf"><button class="btn p" type="button" data-send="bmenu" data-arg="${esc(k)}">${WAI}Send this menu &amp; price</button>${o.reg||o.k==="VEG"||o.k==="NON-VEG"?"":`<button class="btn" type="button" data-use="${esc(k)}">Use this offer</button>`}<button class="btn" type="button" data-lb="menu" data-i="${BMENU.page}">Printed menu</button></div>`},start);
 }
 /* the menu in a message: one line per course, so it reads well on a phone */
 const menuText=t=>menuFor(t).map(s=>`*${s.n}:* ${s.items.map(i=>i[0]).join(", ")}`).join("\n");
@@ -10994,7 +11037,7 @@ document.addEventListener("click",e=>{if(e.target.closest(".of [data-send]"))e.p
 /* hints: pick the cheapest time, switch to the best offer, open the day's buffet prices */
 document.addEventListener("click",e=>{
   const pk=e.target.closest("[data-pick]");if(pk){S.slot=pk.dataset.pick;render();return}
-  const us=e.target.closest("[data-use]");if(us){S.pkg=us.dataset.use;S.manual=true;render();return}
+  const us=e.target.closest("[data-use]");if(us){S.pkg=us.dataset.use;S.manual=true;render();if(us.closest("#dw")){dw.close();const o=curOffer();if(o)toast(`${o.name} picked`)}return}
   const pr=e.target.closest("[data-prices]");if(pr){e.preventDefault();openPrices()}
 });
 function openPrices(){
