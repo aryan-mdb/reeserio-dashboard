@@ -23,7 +23,6 @@ const tokens = `:is(.n18,.n18d){--bg:#f6f6f6;--bg-2:#efefef;--card:#fff;--card-2
 @media (max-width:900px){.n18 .n18g{grid-template-columns:1fr}}
 .n18d dialog{font-size:14px}`;
 const scoped = tokens + '\n' + scope(css17, '.n18,.n18d');
-const section = `<div class="n18" aria-label="Price and offers"><div class="n18h"><b>Price &amp; offers</b><small id="dS"></small><span class="nw">NEW</span></div><div class="n18g"><div><div id="insight"></div><div id="dls"></div></div><div class="n18e"><h3>Estimate summary</h3><div class="est" id="est"></div><button class="go" id="create" type="button" disabled>Create booking</button></div></div></div>`;
 // popups (drawer, send preview, picture viewer, booking ticket, toast) from booking-17
 const a = v17.indexOf('<dialog class="dw"'), z = v17.indexOf('<div class="toast" id="toast" role="status"></div>') + '<div class="toast" id="toast" role="status"></div>'.length;
 const dialogs = v17.slice(a, z).replace('</main>', '').replace(/<\/div><\/div>\s*(?=<div class="toast")/, '').split('LOGO_B64').join(LOGO);
@@ -44,9 +43,22 @@ const bridge = fs.readFileSync('bridge18.js', 'utf8');
   const b = await chromium.launch({ channel: 'chrome', headless: true });
   const p = await b.newPage();
   await p.setContent(`<!doctype html><html><head><meta charset="utf-8"></head>${body}</html>`, { waitUntil: 'domcontentloaded' });
-  const html = await p.evaluate(({ section, dialogs }) => {
+  const html = await p.evaluate(({ dialogs }) => {
     const d = document.getElementById('DEALS_SLOT'); if (!d) throw new Error('no DEALS_SLOT');
-    d.innerHTML = section; d.removeAttribute('id');
+    /* keep the live deals area as it is (grid, Exclusive Offers, estimate card); only its deal cards and the
+       estimate lines are swapped for booking-17's, drawn in the same live markup by bridge18.js */
+    const list = d.querySelector('.col-12.lg\\:col-7 .flex.flex-column.gap-2');
+    const excl = list && list.querySelector(':scope > .w-full');
+    if (!list || !excl) throw new Error('live deals list not found');
+    [...list.children].forEach(c => { if (c !== excl) c.remove(); });
+    list.insertAdjacentHTML('afterbegin', '<div id="insight"></div><div id="dls"></div>');
+    const card = d.querySelector('.col-12.lg\\:col-5 .surface-card');
+    if (!card) throw new Error('live estimate card not found');
+    const cbtn = [...card.querySelectorAll('button')].find(x => /Calculate Estimate/.test(x.textContent));
+    [...card.children].slice(1).forEach(c => { if (c !== cbtn) c.remove(); });
+    cbtn.insertAdjacentHTML('beforebegin', '<div id="est"></div>');
+    cbtn.id = 'create'; cbtn.type = 'button'; cbtn.disabled = true; cbtn.textContent = 'Create booking';
+    d.removeAttribute('id');
     // give the live inputs the ids booking-17's logic listens on
     const byPh = ph => document.querySelector(`input[placeholder="${ph}"]`);
     const set = (el, id) => { if (el) el.id = id; };
@@ -54,7 +66,7 @@ const bridge = fs.readFileSync('bridge18.js', 'utf8');
     const m = document.getElementById('mob'); if (m) { m.setAttribute('maxlength', '10'); m.setAttribute('inputmode', 'numeric'); }
     const w = document.createElement('div'); w.className = 'n18d'; w.innerHTML = dialogs; document.body.appendChild(w);
     return document.body.outerHTML;
-  }, { section, dialogs });
+  }, { dialogs });
   await b.close();
   const page = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow">
