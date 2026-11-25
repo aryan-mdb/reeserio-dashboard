@@ -5,7 +5,7 @@ const b = await chromium.launch({ channel: 'chrome' });
 const errs = [], out = {};
 const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
 p.on('pageerror', e => errs.push(e.message));
-await p.goto('file:///' + dir + '/booking-18.html'); await p.waitForTimeout(800);
+await p.goto('file:///' + dir + '/' + (process.env.PAGE || 'booking-18.html')); await p.waitForTimeout(800);
 const best = async () => (await p.locator('#insight').innerText()).replace(/\s+/g, ' ');
 out.start = await best();
 // pick a different card

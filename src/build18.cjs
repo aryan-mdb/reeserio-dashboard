@@ -3,7 +3,9 @@
 const fs = require('fs');
 const { chromium } = require('playwright-core');
 const scope = require('./scope-css.cjs');
-const S = '../snap/';
+// `node build18.cjs` = classic page (booking-18.html); `node build18.cjs beta` = the live Beta page (booking-18-beta.html)
+const BETA = process.argv[2] === 'beta';
+const S = BETA ? '../snapb/' : '../snap/';
 // the live CSS, with its fonts and pictures served from ghpages/b18 (the live server blocks other sites' font loads)
 const snapCss = fs.readFileSync(S + 'snap.css', 'utf8').replace(/url\("https:\/\/reeserio\.bnhl\.in\/(?:main\/)?media\/([^"?]+)(\?[^"]*)?"\)/g, (m, f) => `url("b18/${f}")`);
 const body = fs.readFileSync(S + 'snap-body.html', 'utf8');
@@ -43,8 +45,27 @@ const bridge = fs.readFileSync('bridge18.js', 'utf8');
   const b = await chromium.launch({ channel: 'chrome', headless: true });
   const p = await b.newPage();
   await p.setContent(`<!doctype html><html><head><meta charset="utf-8"></head>${body}</html>`, { waitUntil: 'domcontentloaded' });
-  const html = await p.evaluate(({ dialogs }) => {
+  const html = await p.evaluate(({ dialogs, BETA }) => {
     const d = document.getElementById('DEALS_SLOT'); if (!d) throw new Error('no DEALS_SLOT');
+    // the page switch, as on live: classic "Try new (Beta)" <-> beta "Switch to old"
+    const sw = (t, href) => { const l = [...document.querySelectorAll('body *')].find(e => e.children.length === 0 && e.textContent.trim() === t) || [...document.querySelectorAll('button,a')].find(e => e.textContent.trim().endsWith(t)); const btn = l && (l.closest('button,a') || l); if (!btn) throw new Error('no ' + t); btn.setAttribute('onclick', `location.href='${href}'`); btn.style.cursor = 'pointer'; };
+    if (BETA) {
+      sw('Switch to old', 'booking-18.html');
+      /* beta: keep the step header of "Booking type & offers"; the deal cards and the CRS coupon block (its only
+         coupon, 85rs off, is not offered) give way to the new list; the estimate keeps its title and chips */
+      const list = d.querySelector('.flex.flex-column.gap-2'), hdr = list && list.querySelector(':scope > .step-header');
+      if (!hdr) throw new Error('beta deals list not found');
+      [...list.children].forEach(c => { if (c !== hdr) c.remove(); });
+      hdr.insertAdjacentHTML('afterend', '<div id="insight"></div><div id="dls"></div>');
+      const card = d.parentElement.querySelector('.est-card');
+      if (!card) throw new Error('beta estimate card not found');
+      card.querySelectorAll('.r-empty,.calc-hint').forEach(e => e.remove());
+      const cbtn = card.querySelector('.calc-btn');
+      cbtn.insertAdjacentHTML('beforebegin', '<div id="est"></div>');
+      cbtn.id = 'create'; cbtn.type = 'button'; cbtn.disabled = true; cbtn.innerHTML = '<i class="pi pi-check-circle"></i> Create booking';
+      d.removeAttribute('id');
+    } else {
+    sw('Try new (Beta)', 'booking-18-beta.html');
     /* keep the live deals area as it is (grid, Exclusive Offers, estimate card); only its deal cards and the
        estimate lines are swapped for booking-17's, drawn in the same live markup by bridge18.js */
     const list = d.querySelector('.col-12.lg\\:col-7 .flex.flex-column.gap-2');
@@ -59,6 +80,7 @@ const bridge = fs.readFileSync('bridge18.js', 'utf8');
     cbtn.insertAdjacentHTML('beforebegin', '<div id="est"></div>');
     cbtn.id = 'create'; cbtn.type = 'button'; cbtn.disabled = true; cbtn.textContent = 'Create booking';
     d.removeAttribute('id');
+    }
     // give the live inputs the ids booking-17's logic listens on
     const byPh = ph => document.querySelector(`input[placeholder="${ph}"]`);
     const set = (el, id) => { if (el) el.id = id; };
@@ -66,16 +88,17 @@ const bridge = fs.readFileSync('bridge18.js', 'utf8');
     const m = document.getElementById('mob'); if (m) { m.setAttribute('maxlength', '10'); m.setAttribute('inputmode', 'numeric'); }
     const w = document.createElement('div'); w.className = 'n18d'; w.innerHTML = dialogs; document.body.appendChild(w);
     return document.body.outerHTML;
-  }, { dialogs });
+  }, { dialogs, BETA });
   await b.close();
   const page = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow">
-<title>Reeserio Booking 18</title>
+<title>Reeserio Booking 18${BETA ? ' Beta' : ''}</title>
 <style>${snapCss}</style>
 <style id="n18css">${scoped}</style>
 </head>
 ${html.replace('</body>', () => `<script>${js}</script>\n<script>${bridge}</script>\n</body>`)}
 </html>`;
-  fs.writeFileSync('../ghpages/booking-18.html', page);
-  console.log('booking-18.html', page.length);
+  const outName = BETA ? 'booking-18-beta.html' : 'booking-18.html';
+  fs.writeFileSync('../ghpages/' + outName, page);
+  console.log(outName, page.length);
 })();

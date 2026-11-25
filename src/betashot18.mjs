@@ -1,0 +1,27 @@
+// booking-18-beta: screenshots with the test guest (top + deals), and the old/beta switch links
+import { chromium } from 'playwright-core';
+const [dir, shots] = process.argv.slice(2);
+const b = await chromium.launch({ channel: 'chrome' });
+const errs = [];
+const p = await b.newPage({ viewport: { width: 1600, height: 1000 } });
+p.on('pageerror', e => errs.push(e.message));
+await p.goto('file:///' + dir + '/booking-18-beta.html'); await p.waitForTimeout(800);
+await p.locator('#mob').fill(process.env.TEST_MOB || ''); await p.locator('#mob').dispatchEvent('input'); await p.waitForTimeout(4500);
+await p.screenshot({ path: shots + '/b18b-top.png' });
+const out = {};
+out.steps = await p.$$eval('.journey-step', e => e.map(x => x.className.replace(/ng-\S+/g, '').trim() + ' :: ' + x.innerText.replace(/\s+/g, ' ')));
+out.rv = await p.locator('.rv-bar-sub').innerText();
+out.cta = await p.locator('.rv-bar-cta').isDisabled();
+out.profile = (await p.locator('app-customer-profile').innerText()).replace(/\s+/g, ' ').slice(0, 160);
+const g = p.locator('#dls').locator('xpath=ancestor::div[contains(@class,"grid")][1]');
+await g.scrollIntoViewIfNeeded(); await g.screenshot({ path: shots + '/b18b-deals.png' });
+await p.locator('.cp-tabs button', { hasText: 'Call logs' }).click(); await p.waitForTimeout(300);
+out.hist = await p.evaluate(() => [...document.querySelectorAll('dialog')].filter(d => d.open).map(d => d.innerText.slice(0, 40).replace(/\s+/g, ' ')));
+await p.keyboard.press('Escape');
+await p.getByText('Switch to old').first().click(); await p.waitForTimeout(800);
+out.afterSwitch = p.url().split('/').pop();
+await p.getByText('Try new (Beta)').first().click(); await p.waitForTimeout(800);
+out.afterTry = p.url().split('/').pop();
+out.errs = errs;
+console.log(JSON.stringify(out, null, 1));
+await b.close();
