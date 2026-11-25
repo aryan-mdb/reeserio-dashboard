@@ -1,10 +1,11 @@
 const fresh=()=>({mobile:"",name:"",adults:2,kids:0,outlet:BK.outlet.branch_name,day:0,cdate:null,slot:null,pkg:null,manual:false,info:null});
 let S=fresh();
 
-/* Outlet facts the live "Outlet details" page shows (public outlet info). Only Atria Mall, Worli is in this
-   snapshot; other outlets load the same block from CRS on the live page. */
-const OUT={"Atria Mall, Worli":{addr:BK.outlet.address,phone:"080 6405 8059",hours:["12:00 PM – 3:45 PM","6:30 PM – 10:30 PM"],feat:["High chair","Parking","Lift","Alcoholic beverages"]}};
-const MENUS=[["🍖","Food menu"],["🍹","Beverage menu"],["🍸","Cocktails"],["🍺","Beer"],["🍷","Wine"],["🍨","Desserts"]];
+/* Outlet block from the live Outlet Details page (branch-by-branchid, get-active-deals, promotions,
+   get-all-nearby-branches): photos, menu pages, facilities, hours, links, online deals, offers, nearest outlets.
+   Public outlet info only. This snapshot has it for Atria Mall, Worli; the live page loads it for every outlet. */
+const OX=/*OUTX*/null;
+const OUT={[OX.name]:OX};
 /* Made-up sample guest so the history strip can be tried: 98765 43210. Real numbers load from CRS/LMS. */
 const CUST={"9876543210":{name:"Rahul Sharma",tier:"Silver",coins:120,toNext:"2 visits to Gold",lastCall:"Pr•••a · 12 Nov 2026, 7:40 PM",
   bookings:[["BN20261102231","Settled","Atria Mall, Worli",4,"2 Nov 2026 · 8:00 PM"],["BN20261009118","Settled","Phoenix Marketcity, Kurla",2,"9 Oct 2026 · 1:00 PM"],["BN20260914402","Cancelled","Atria Mall, Worli",6,"14 Sep 2026 · 9:00 PM"],["BN20260821077","Settled","Korum Mall Thane",3,"21 Aug 2026 · 7:30 PM"]],
@@ -53,11 +54,11 @@ $("#new").onclick=()=>{S=fresh();$("#mob").value=$("#nm").value=$("#ins").value=
 
 /* ---------- side drawer ---------- */
 const dw=$("#dw");
-function drawer(title,sub,tabs,pick){
+function drawer(title,sub,tabs,pick,start){
   $("#dwT").textContent=title;$("#dwS").textContent=sub||"";
   const draw=k=>{$("#dwB").innerHTML=(tabs.length>1?`<div class="tabs" role="tablist">${tabs.map(([key,lab])=>`<button type="button" role="tab" data-t="${key}" class="${key===k?"on":""}" aria-selected="${key===k}">${lab}</button>`).join("")}</div>`:"")+pick(k);
-    $$("#dwB .tabs button").forEach(b=>b.onclick=()=>draw(b.dataset.t))};
-  draw(tabs[0][0]);if(!dw.open)dw.showModal();
+    $$("#dwB .tabs button").forEach(b=>b.onclick=()=>draw(b.dataset.t));$("#dwB").scrollTop=0;dw.scrollTop=0};
+  drawer.draw=draw;draw(start||tabs[0][0]);if(!dw.open)dw.showModal();
 }
 $("#dwX").onclick=()=>dw.close();
 dw.addEventListener("click",e=>{if(e.target===dw)dw.close()});
@@ -70,43 +71,77 @@ function openHistory(){
     k==="c"?c.calls.map(([a,w,d,n])=>`<div class="li"><div class="m"><b>${esc(a)}</b><span>${w} · ${d}</span><span>${esc(n)}</span></div></div>`).join(""):
     `<div class="kv2"><span>Calls</span><b>${c.calls.length}</b><span>Last call</span><b>${esc(c.lastCall)}</b><span>Bookings</span><b>${c.bookings.length} (${c.bookings.filter(b=>/Settled/.test(b[1])).length} settled)</b><span>Tier</span><b>★ ${c.tier} · ${c.coins} coins · ${c.toNext}</b></div>`);
 }
-function outletBody(){
+/* nearest outlets: by distance when the live block has it, else the rest of the city */
+const nearList=()=>{const o=OUT[S.outlet];return o?o.near.map(x=>({n:x.n,sub:`${x.km} km away`})):nearby().map(n=>({n,sub:"Same city"}))};
+const nearRows=k=>nearList().slice(0,k).map(x=>`<div class="li"><div class="m"><b>${esc(x.n)}</b><span>${esc(x.sub)}</span></div><button class="lk" type="button" data-go="${esc(x.n)}">Book here</button></div>`).join("")||`<p class="note">No other outlet in this city.</p>`;
+const thumbs=(list,kind)=>`<div class="thg ${kind}">${list.map((u,i)=>`<button type="button" class="th" data-lb="${kind}" data-i="${i}" aria-label="Open ${kind} ${i+1}"><img src="${esc(u)}" alt="" loading="lazy"></button>`).join("")}</div>`;
+function outletBody(k){
   const o=OUT[S.outlet];
-  return `<div class="sec">Location &amp; contact</div>${o?`<div class="kv2"><span>Address</span><b>${esc(o.addr)}</b><span>Phone</span><b>${o.phone}</b><span>Open</span><b>${o.hours.join("<br>")}</b></div><div class="sec">Facilities</div><div class="feat">${o.feat.map(f=>`<span>${f}</span>`).join("")}</div>`:`<p class="note">Address, phone, hours and facilities for ${esc(S.outlet)} load from CRS on the live page; this preview has them for Atria Mall, Worli.</p>`}
-    <div class="sec">Menu</div><div class="menus">${MENUS.map(([i,n])=>`<div><i>${i}</i>${n}</div>`).join("")}</div>
-    <div class="dwf"><button class="btn p" type="button" data-send="outlet">Send outlet details</button><button class="btn" type="button" data-send="menu">Send menu</button></div>
-    <div class="sec">Nearby outlets</div>${nearby().slice(0,8).map(n=>`<div class="li"><div class="m"><b>${esc(n)}</b></div><button class="lk" type="button" data-go="${esc(n)}">Book here</button></div>`).join("")||`<p class="note">No other outlet in this city.</p>`}`;
+  if(!o)return `<p class="note">Photos, menu, address, phone, hours and facilities for ${esc(S.outlet)} load from CRS on the live page; this preview has them for Atria Mall, Worli.</p><div class="dwf"><button class="btn p" type="button" data-send="outlet">Send outlet details</button><button class="btn" type="button" data-send="menu">Send menu</button></div><div class="sec">Nearby outlets</div>${nearRows(8)}`;
+  if(k==="m")return `<p class="note" style="margin-top:0">${o.menu.length} menu pages · tap one to open it full size.</p>${thumbs(o.menu,"menu")}<div class="dwf"><button class="btn p" type="button" data-send="menu">Send menu to guest</button></div>`;
+  if(k==="d")return `<p class="note" style="margin-top:0">${o.deals.length} online deals for this outlet on the website &amp; app.</p>`+o.deals.slice(0,S.allDeals?999:12).map(x=>`<div class="li">${x.img?`<img class="dimg" src="${esc(x.img)}" alt="" loading="lazy">`:""}<div class="m"><b>${esc(x.t)}</b> ${x.rib?`<span class="st2 o" style="display:inline">${esc(x.rib)}</span>`:""}<span>${esc(x.d)}</span><span>Min ${x.min} guest${x.min>1?"s":""} · ${esc(x.time)}</span></div></div>`).join("")+(o.deals.length>12&&!S.allDeals?`<div class="dwf"><button class="btn" type="button" data-alldeals="1">Show all ${o.deals.length} deals</button></div>`:"");
+  if(k==="n")return nearRows(10);
+  return `<img class="hero" src="${esc(o.img)}" alt="${esc(o.name)}">
+    <div class="kv2" style="margin-top:14px"><span>Address</span><b>${esc(o.addr)}<br><a href="${esc(o.map)}" target="_blank" rel="noopener">Open in Google Maps ↗</a></b><span>Phone</span><b><a href="tel:${esc(o.phone.replace(/\s/g,""))}">${esc(o.phone)}</a></b><span>Lunch</span><b>${esc(o.hours[0])}</b><span>Dinner</span><b>${esc(o.hours[1])}</b><span>Outlet page</span><b><a href="${esc(o.url)}" target="_blank" rel="noopener">${esc(o.url.replace(/^https?:\/\//,""))} ↗</a></b></div>
+    <div class="dwf"><button class="btn p" type="button" data-send="outlet">Send outlet details</button><button class="btn" type="button" data-send="menu">Send menu</button><button class="btn" type="button" data-send="location">Send location</button></div>
+    <div class="sec">Facilities</div><div class="feat">${o.feat.map(f=>`<span><img src="${esc(f.img)}" alt="" loading="lazy">${esc(f.n)}</span>`).join("")}</div>
+    <div class="sec">Menu <button class="inf" type="button" data-tab="m">see all ${o.menu.length} pages</button></div>${thumbs(o.menu.slice(0,6),"menu")}
+    <div class="sec">Photos</div>${thumbs(o.gallery,"photo")}
+    ${o.about?`<div class="sec">About this outlet</div><p class="note" style="margin:0;line-height:1.5">${esc(o.about)}…</p>`:""}`;
 }
-$("#oInfo").onclick=()=>{if(!S.outlet){toast("Select an outlet first");return}drawer(S.outlet,"Outlet details",[["o",""]],outletBody)};
+let dwTab=null;
+function openOutlet(tab){if(!S.outlet){toast("Select an outlet first");return}S.allDeals=false;
+  drawer(S.outlet,OUT[S.outlet]?`${OUT[S.outlet].landmark||""} · ${OUT[S.outlet].menu.length} menu pages · ${OUT[S.outlet].deals.length} online deals`:"Outlet details",OUT[S.outlet]?[["o","Details"],["m","Menu"],["d","Online deals"],["n","Nearby"]]:[["o",""]],outletBody,tab)}
+$("#oInfo").onclick=()=>openOutlet();
+$("#oMenu").onclick=()=>openOutlet(OUT[S.outlet]?"m":undefined);
+
+/* full-size viewer for menu pages and outlet photos, with previous / next */
+const lb=$("#lb");let lbList=[],lbI=0;
+const lbShow=()=>{$("#lbImg").src=lbList[lbI];$("#lbN").textContent=`${lbI+1} / ${lbList.length}`};
+$("#lbP").onclick=()=>{lbI=(lbI-1+lbList.length)%lbList.length;lbShow()};$("#lbN2").onclick=()=>{lbI=(lbI+1)%lbList.length;lbShow()};
+$("#lbX").onclick=()=>lb.close();lb.addEventListener("click",e=>{if(e.target===lb)lb.close()});
+lb.addEventListener("keydown",e=>{if(e.key==="ArrowLeft")$("#lbP").click();if(e.key==="ArrowRight")$("#lbN2").click()});
 $("#avBtn").onclick=()=>{if(!S.outlet){toast("Select an outlet first");return}
   drawer("Check availability",`${S.outlet} · ${dayLabel()}`,[["a","Seats per slot"],["n","Next day"],["b","Nearby outlets"]],k=>
     k==="a"?(hasData()?`<table class="tb2"><tr><th>Slot</th><th class="n">Capacity</th><th class="n">Available</th></tr>${daySlots().map(x=>`<tr><td>${t12(x.from)} – ${t12(x.to)}</td><td class="n">${x.tot}</td><td class="n" style="color:${x.cap?"var(--good)":"var(--red)"};font-weight:700">${x.cap||"Sold out"}</td></tr>`).join("")}</table>`:`<p class="note">Seat counts for this outlet and date load from CRS on the live page; this preview has them for Atria Mall, Worli today.</p>`):
     k==="n"?`<p class="note" style="margin-top:0">Same outlet, ${DAYS[Math.min(5,(S.cdate?0:S.day)+1)].toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"short"})}.</p><div class="dwf"><button class="btn p" type="button" data-nextday="1">Switch to next day</button></div>`:
-    nearby().slice(0,10).map(n=>`<div class="li"><div class="m"><b>${esc(n)}</b><span>Same city</span></div><button class="lk" type="button" data-go="${esc(n)}">Book here</button></div>`).join("")||`<p class="note">No other outlet in this city.</p>`)};
+    nearRows(10))};
 const sendBtn=(kind,arg)=>`<button class="lk wa" type="button" data-send="${kind}" data-arg="${esc(arg)}">Send</button>`;
-$("#ofBtn").onclick=()=>drawer("Offers to share",S.outlet||"",[["o",""]],()=>BK.promos.map((p,i)=>`<div class="li"><div class="m"><b>${esc(p.trim())}</b></div>${sendBtn("offer",i)}</div>`).join(""));
+/* offers: the live promotions (picture, text, link) for the outlet in the snapshot, else the titles */
+const promos=()=>OUT[S.outlet]?OUT[S.outlet].promos:BK.promos.map(t=>({t:t.trim()}));
+$("#ofBtn").onclick=()=>drawer("Offers to share",S.outlet||"",[["o",""]],()=>promos().map((p,i)=>`<div class="li">${p.img?`<img class="dimg" src="${esc(p.img)}" alt="" loading="lazy">`:""}<div class="m"><b>${esc(p.t)}</b>${p.d?`<span>${esc(p.d.slice(0,140))}…</span>`:""}${p.url?`<span><a href="${esc(p.url)}" target="_blank" rel="noopener">Open offer page ↗</a></span>`:""}</div>${sendBtn("offer",i)}</div>`).join(""));
 $("#hcBtn").onclick=()=>drawer("Happiness Cards","Gift cards, sold separately from this booking",[["h",""]],()=>BK.cards.map((c,i)=>`<div class="li"><div class="m"><b>${esc(c.n)}</b><span>${c.pax?`${c.pax} pax · `:""}${inr(c.price)} all inclusive</span></div>${sendBtn("card",i)}</div>`).join(""));
 dw.addEventListener("click",e=>{
   const g=e.target.closest("[data-go]");if(g){S.outlet=g.dataset.go;$("#outlet").value=S.outlet;resetTime();dw.close();render();toast("Outlet changed to "+S.outlet)}
   if(e.target.closest("[data-nextday]")){S.day=Math.min(5,(S.cdate?0:S.day)+1);S.cdate=null;$("#oth").value="";resetTime();dw.close();render()}
+  const t=e.target.closest("[data-tab]");if(t)drawer.draw(t.dataset.tab);
+  if(e.target.closest("[data-alldeals]")){S.allDeals=true;drawer.draw("d")}
+  const l=e.target.closest("[data-lb]");if(l){const o=OUT[S.outlet];lbList=l.dataset.lb==="menu"?o.menu:o.gallery;lbI=+l.dataset.i;lbShow();lb.showModal()}
 });
 
 /* ---------- send to guest: the agent sees the exact message first ---------- */
 const sd=$("#sd");
 function compose(kind,arg){
   const hi=`Hi ${S.name.trim()||"there"},\n`,o=OUT[S.outlet],s=slotObj();
-  if(kind==="outlet")return hi+`Here are the details of Barbeque Nation, ${S.outlet}:\n📍 ${o?o.addr:S.outlet}\n${o?`📞 ${o.phone}\n🕒 ${o.hours.join(", ")}\n`:""}${s?`\nYour table: ${dayLabel()}, ${t12(s.from)} for ${S.adults+S.kids} guest${S.adults+S.kids>1?"s":""}.\n`:""}\nSee you soon!`;
-  if(kind==="menu")return hi+`Here is the menu for Barbeque Nation, ${S.outlet}:\n${MENUS.map(m=>"• "+m[1]).join("\n")}\n\n(menu link from CRS)`;
-  if(kind==="offer")return hi+`An offer for you at Barbeque Nation, ${S.outlet}:\n${BK.promos[arg].trim()}`;
+  const table=s?`\nYour table: ${dayLabel()}, ${t12(s.from)} for ${S.adults+S.kids} guest${S.adults+S.kids>1?"s":""}.\n`:"";
+  if(kind==="outlet")return hi+`Here are the details of Barbeque Nation, ${S.outlet}:\n📍 ${o?o.addr:S.outlet}\n${o?`🗺️ ${o.map}\n📞 ${o.phone}\n🕒 Lunch ${o.hours[0]} · Dinner ${o.hours[1]}\n🍽️ Menu & photos: ${o.url}\n`:""}${table}\nSee you soon!`;
+  if(kind==="location")return hi+`Barbeque Nation, ${S.outlet}\n📍 ${o?o.addr:S.outlet}\n${o?`🗺️ Directions: ${o.map}\n`:""}${table}`;
+  if(kind==="menu")return hi+`Here is the menu for Barbeque Nation, ${S.outlet}:\n${o?`🍽️ ${o.url}\n\n${o.menu.length} menu pages are attached.`:"(menu link from CRS)"}${table}`;
+  if(kind==="offer"){const p=promos()[arg];return hi+`An offer for you at Barbeque Nation, ${S.outlet}:\n${p.t}${p.url?`\n${p.url}`:""}`}
   if(kind==="card"){const c=BK.cards[arg];return hi+`Gift a Barbeque Nation Happiness Card – ${c.n}${c.pax?` (${c.pax} pax)`:""} for ${inr(c.price)}.\n(payment link from CRS)`}
 }
 document.addEventListener("click",e=>{
   const b=e.target.closest("[data-send]");if(!b||b.closest("#sd"))return;
   if(!mobOk()){toast("Enter the guest's mobile number first");$("#mob").focus();return}
-  if(!S.outlet&&/outlet|menu/.test(b.dataset.send)){toast("Select an outlet first");return}
-  $("#sdT").textContent={outlet:"Send outlet details",menu:"Send menu",offer:"Send offer",card:"Send Happiness Card"}[b.dataset.send];
+  if(!S.outlet&&/outlet|menu|location/.test(b.dataset.send)){toast("Select an outlet first");return}
+  const k=b.dataset.send,o=OUT[S.outlet];
+  $("#sdT").textContent={outlet:"Send outlet details",menu:"Send menu",location:"Send location",offer:"Send offer",card:"Send Happiness Card"}[k];
   $("#sdTo").innerHTML=`To <b>${esc(S.name.trim()||"guest")}</b> · ${fmtMob()}`;
-  $("#sdM").value=compose(b.dataset.send,b.dataset.arg);sd.showModal();
+  /* what goes with the text: the menu pages, or the outlet photo */
+  $("#sdA").innerHTML=k==="menu"&&o?`<small>Attached: ${o.menu.length} menu pages</small><div class="thg mini">${o.menu.map(u=>`<img src="${esc(u)}" alt="" loading="lazy">`).join("")}</div>`:
+    k==="outlet"&&o?`<small>Attached: outlet photo</small><div class="thg mini"><img src="${esc(o.img)}" alt="" loading="lazy"></div>`:
+    k==="offer"&&promos()[b.dataset.arg]?.img?`<small>Attached: offer picture</small><div class="thg mini"><img src="${esc(promos()[b.dataset.arg].img)}" alt="" loading="lazy"></div>`:"";
+  $("#sdM").value=compose(k,b.dataset.arg);sd.showModal();
 });
 $("#sdX").onclick=()=>sd.close();
 sd.querySelector(".dwf").onclick=e=>{const b=e.target.closest("[data-ch]");if(!b)return;
